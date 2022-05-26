@@ -226,9 +226,6 @@ Private Sub cmdOK_Click()
 End Sub
 
 Private Sub Form_Load()
-  'Botsareus 6/11/2013 Play music
-  mciSendString "Open " & Chr(34) & App.path & "\DB THEME GOLD.mp3" & Chr(34) & " Alias Mellow", "", 0, 0
-  mciSendString "play Mellow from 1 to 60000", "", 0, 0
   strings Me
   SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
   Text1.text = ""
@@ -270,9 +267,4 @@ Private Sub Form_Load()
   Text1.text = Text1.text + "THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED "
   Text1.text = Text1.text + "WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF "
   Text1.text = Text1.text + "MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
-End Sub
-
-Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
-  'Botsareus 6/11/2013 Stop playing music
-  mciSendString "close Mellow", "", 0, 0
 End Sub

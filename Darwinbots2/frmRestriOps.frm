@@ -273,28 +273,11 @@ Private Sub btnOK_Click()
 Dim t As Integer
 'save based on state
 Select Case res_state
-Case 0
- TmpOpts.Specie(optionsform.CurrSpec).kill_mb = chkMBKillChlr.value * True
- TmpOpts.Specie(optionsform.CurrSpec).dq_kill = chkDQKillChlr.value * True
-Case 1
- TmpOpts.Specie(optionsform.CurrSpec).kill_mb = chkMBKillNChlr.value * True
- TmpOpts.Specie(optionsform.CurrSpec).dq_kill = chkDQKillNChlr.value * True
-Case 2
- x_res_kill_mb = chkMBKillNChlr.value * True
- x_res_other = chkNoChlr.value + BlockSpec.value * 2 + DisableVisionCheck.value * 4 + _
-    DisableDNACheck.value * 8 + DisableReproductionCheck.value * 16 + _
-    VirusImmuneCheck.value * 32 + DisableMovementSysvarsCheck.value * 64
- x_res_kill_mb_veg = chkMBKillChlr.value * True
- x_res_other_veg = BlockSpecVeg.value + DisableVisionCheckVeg.value * 2 + _
-    DisableDNACheckVeg.value * 4 + DisableReproductionCheckChlr.value * 8 + _
-    VirusImmuneCheckVeg.value * 16 + DisableMovementSysvarsCheckVeg.value * 32
 Case 3
   'overwrite current simulation with given rules
   For t = 1 To MaxRobs
     If rob(t).exist Then
       If rob(t).Veg Then
-       rob(t).multibot_time = IIf(chkMBKillChlr.value * True, 210, 0)
-       rob(t).dq = chkDQKillChlr.value
        '
        rob(t).Fixed = BlockSpecVeg.value * True
        If rob(t).Fixed Then
@@ -306,11 +289,9 @@ Case 3
        rob(t).DisableDNA = DisableDNACheckVeg.value * True
        rob(t).CantReproduce = DisableReproductionCheckChlr.value * True
        rob(t).VirusImmune = VirusImmuneCheckVeg.value * True
-       If x_restartmode = 0 Then rob(t).Mutables.Mutations = MutEnabledCheckVeg.value = 0
+        rob(t).Mutables.Mutations = MutEnabledCheckVeg.value = 0
        rob(t).DisableMovementSysvars = DisableMovementSysvarsCheckVeg.value * True
       Else
-       rob(t).multibot_time = IIf(chkMBKillNChlr.value * True, 210, 0)
-       If rob(t).dq < 2 Then rob(t).dq = chkDQKillNChlr.value
        '
        rob(t).NoChlr = chkNoChlr.value * True
        rob(t).Fixed = BlockSpec.value * True
@@ -323,22 +304,11 @@ Case 3
        rob(t).DisableDNA = DisableDNACheck.value * True
        rob(t).CantReproduce = DisableReproductionCheck.value * True
        rob(t).VirusImmune = VirusImmuneCheck.value * True
-       If x_restartmode = 0 Then rob(t).Mutables.Mutations = MutEnabledCheck.value = 0
+       rob(t).Mutables.Mutations = MutEnabledCheck.value = 0
        rob(t).DisableMovementSysvars = DisableMovementSysvarsCheck.value * True
       End If
     End If
   Next
-Case 4
- y_res_kill_mb = chkMBKillNChlr.value * True
- y_res_other = chkNoChlr.value + BlockSpec.value * 2 + DisableVisionCheck.value * 4 + _
-    DisableDNACheck.value * 8 + DisableReproductionCheck.value * 16 + _
-    VirusImmuneCheck.value * 32 + DisableMovementSysvarsCheck.value * 64
- y_res_kill_mb_veg = chkMBKillChlr.value * True
- y_res_other_veg = BlockSpecVeg.value + DisableVisionCheckVeg.value * 2 + _
-    DisableDNACheckVeg.value * 4 + DisableReproductionCheckChlr.value * 8 + _
-    VirusImmuneCheckVeg.value * 16 + DisableMovementSysvarsCheckVeg.value * 32
- y_res_kill_dq = chkDQKillNChlr.value * True
- y_res_kill_dq_veg = chkDQKillChlr.value * True
 End Select
 Unload Me
 End Sub
@@ -358,13 +328,9 @@ chkDQKillChlr.Visible = True
 chkDQKillNChlr.Visible = True
 btnLoad.Visible = False
 btnSave.Visible = False
-If x_restartmode = 0 Then
     MutEnabledCheck.Visible = True
     MutEnabledCheckVeg.Visible = True
-Else
-    MutEnabledCheck.Visible = False
-    MutEnabledCheckVeg.Visible = False
-End If
+
 'step2 reconfigure
 Select Case res_state
 Case 0 'just kills for veg
@@ -372,16 +338,12 @@ Case 0 'just kills for veg
     ffmPChlr.Visible = False
     Caption = "Restriction Options: " & TmpOpts.Specie(optionsform.CurrSpec).Name
     '
-    chkMBKillChlr.value = TmpOpts.Specie(optionsform.CurrSpec).kill_mb * True
-    chkDQKillChlr.value = TmpOpts.Specie(optionsform.CurrSpec).dq_kill * True
-    '
+   '
 Case 1 'just kills for Nveg
     ffmChlr.Visible = False
     ffmP.Visible = False
     Caption = "Restriction Options: " & TmpOpts.Specie(optionsform.CurrSpec).Name
     '
-    chkMBKillNChlr.value = TmpOpts.Specie(optionsform.CurrSpec).kill_mb * True
-    chkDQKillNChlr.value = TmpOpts.Specie(optionsform.CurrSpec).dq_kill * True
     '
 Case 2 'league
     MutEnabledCheck.Visible = False
@@ -391,9 +353,9 @@ Case 2 'league
     chkDQKillNChlr.Visible = False
     Caption = "League Restriction Options"
     '
-    chkMBKillNChlr.value = x_res_kill_mb * True
+    chkMBKillNChlr.value = False
     '
-        holdother = x_res_other
+        holdother = 0
     '
         lastmod = holdother Mod 2
     chkNoChlr.value = lastmod
@@ -416,9 +378,9 @@ Case 2 'league
         lastmod = holdother Mod 2
     DisableMovementSysvarsCheck.value = lastmod
     '
-    chkMBKillChlr.value = x_res_kill_mb_veg * True
+    chkMBKillChlr.value = False
     '
-        holdother = x_res_other_veg
+        holdother = 0
     '
         lastmod = holdother Mod 2
     BlockSpecVeg.value = lastmod
@@ -447,9 +409,9 @@ Case 4
     '
     Caption = "Evolution Restriction Options"
     '
-    chkMBKillNChlr.value = y_res_kill_mb * True
+    chkMBKillNChlr.value = False
     '
-        holdother = y_res_other
+        holdother = 0
     '
         lastmod = holdother Mod 2
     chkNoChlr.value = lastmod
@@ -472,9 +434,9 @@ Case 4
         lastmod = holdother Mod 2
     DisableMovementSysvarsCheck.value = lastmod
     '
-    chkMBKillChlr.value = y_res_kill_mb_veg * True
+    chkMBKillChlr.value = False
     '
-        holdother = y_res_other_veg
+        holdother = 0
     '
         lastmod = holdother Mod 2
     BlockSpecVeg.value = lastmod
@@ -494,9 +456,9 @@ Case 4
         lastmod = holdother Mod 2
     DisableMovementSysvarsCheckVeg.value = lastmod
     '
-    chkDQKillNChlr.value = y_res_kill_dq * True
+    chkDQKillNChlr.value = False
     '
-    chkDQKillChlr.value = y_res_kill_dq_veg * True
+    chkDQKillChlr.value = False
 End Select
 End Sub
 

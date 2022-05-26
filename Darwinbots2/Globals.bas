@@ -23,7 +23,6 @@ Public chseedstartnew As Boolean
 Public chseedloadsim As Boolean
 Public UseSafeMode As Boolean
 Public UseEpiGene As Boolean
-Public UseIntRnd As Boolean
 Public GraphUp As Boolean
 Public HideDB As Boolean
 Public intFindBestV2 As Integer
@@ -60,50 +59,8 @@ Public autosaved As Boolean
 
 'Botsareus 1/5/2014 Copy of Obstacle array
 Public xObstacle() As Obstacle
-
-
-'Variables below prefixed x_ are used for league and evolution, y_ are used only for evolution
-'Variables prefixed _res_ are used for restriction overwrites
-Public x_res_kill_chlr As Byte
-Public x_res_kill_mb As Boolean
-Public x_res_other As Byte
-'
-Public y_res_kill_chlr As Byte
-Public y_res_kill_mb As Boolean
-Public y_res_kill_dq As Boolean
-Public y_res_other As Byte
-'
-Public x_res_kill_mb_veg As Boolean
-Public x_res_other_veg As Byte
-'
-Public y_res_kill_mb_veg As Boolean
-Public y_res_kill_dq_veg As Boolean
-Public y_res_other_veg As Byte
-
-'Botsareus 1/31/2014 Restart modes
-Public x_restartmode As Byte
-Public x_filenumber As Integer
-Public leagueSourceDir As String
-Public UseStepladder As Boolean
-Public x_fudge As Byte
-Public FudgeEyes As Boolean
-Public FudgeAll As Boolean
-
-Public Disqualify As Byte
-
 Public StartChlr As Integer 'Botsareus 2/12/2014 Start repopulating robots with chloroplasts
-
 Public ModeChangeCycles As Long 'Botsareus 2/14/2014 Used to calculate time difference and mode change for survival
-
-Public y_robdir As String
-Public y_graphs As Boolean
-Public y_normsize As Boolean
-Public y_hidePredCycl As Integer
-Public y_LFOR As Single
-Public y_Stgwins As Integer
-Public y_zblen As Integer
-
-Public y_eco_im As Byte
 
 'actual evolution globals
 
@@ -346,7 +303,7 @@ FName = extractname(SimOpts.Specie(r).Name)
 
 checkvegstatus = False
 
-If SimOpts.Specie(r).Veg = True And SimOpts.Specie(r).Native Then
+If SimOpts.Specie(r).Veg = True Then
 
     'see if any active robots have chloroplasts
       For t = 1 To MaxRobs
@@ -417,10 +374,6 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
   
   If SimOpts.Specie(r).Name <> "" And SimOpts.Specie(r).path <> "Invalid Path" Then
     a = RobScriptLoad(respath(SimOpts.Specie(r).path) + "\" + SimOpts.Specie(r).Name)
-    If a < 0 Then
-      SimOpts.Specie(r).Native = False
-      GoTo getout
-    End If
     
     'Check to see if we were able to load the bot.  If we can't, the path may be wrong, the sim may have
     'come from another machine with a different install path.  Set the species path to an empty string to
@@ -450,14 +403,6 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
     rob(a).generation = 0
     rob(a).SonNumber = 0
     rob(a).parent = 0
-'    rob(a).mem(468) = 32000 Botsareus 10/5/2015 why set memory right before an erase call?
-'    rob(a).mem(AimSys) = Random(1, 1256) / 200
-'    rob(a).mem(SetAim) = rob(a).aim * 200
-'    rob(a).mem(480) = 32000
-'    rob(a).mem(481) = 32000
-'    rob(a).mem(482) = 32000
-'    rob(a).mem(483) = 32000
-'    rob(a).aim = Rnd(PI)
     Erase rob(a).mem
     'If rob(a).Veg Then rob(a).Feed = 8
     If rob(a).Fixed Then rob(a).mem(216) = 1
@@ -489,8 +434,6 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
     rob(a).mem(GenesSys) = rob(a).genenum
     
     'Botsareus 10/8/2015 New kill restrictions
-    rob(a).multibot_time = IIf(SimOpts.Specie(r).kill_mb, 210, 0)
-    rob(a).dq = IIf(SimOpts.Specie(r).dq_kill, 1, 0)
     rob(a).NoChlr = SimOpts.Specie(r).NoChlr 'Botsareus 11/1/2015 Bug fix
     
     

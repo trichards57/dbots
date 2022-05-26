@@ -83,7 +83,6 @@ Private Sub ExecuteDNA(ByVal n As Integer)
   With rob(n)
   a = 1
   rob(n).condnum = 0 ' EricL 4/6/2006 reset the COND statement counter to 0
-  rob(n).dbgstring = "" 'Botsareus 4/5/2016 Safer way to debug DNA
   While Not (.dna(a).tipo = 10 And .dna(a).value = 1) And a <= 32000 And a < UBound(.dna) 'Botsareus 6/16/2012 Added upper bounds check (This seems like overkill but I had situations where 'end' command did not exisit)
     tipo = .dna(a).tipo
     Select Case tipo
@@ -355,10 +354,6 @@ If n < 13 Then rob(currbot).nrg = rob(currbot).nrg - (SimOpts.Costs(ADCMDCOST) *
       DNAsin
     Case 12
       DNAcos
-    Case 13
-      DNAdebugint at_position     'Botsareus 1/31/2013 the new debugint command
-    Case 14
-      DNAdebugbool at_position   'Botsareus 1/31/2013 the new debugbool command
   End Select
 End Sub
 
@@ -390,8 +385,8 @@ Private Sub findang()
   Dim e As Single  'angle to target
   b = PopIntStack ' * Form1.yDivisor
   a = PopIntStack ' * Form1.xDivisor
-  c = rob(currbot).pos.X / Form1.xDivisor
-  d = rob(currbot).pos.Y / Form1.yDivisor
+  c = rob(currbot).pos.x / Form1.xDivisor
+  d = rob(currbot).pos.y / Form1.yDivisor
   e = angnorm(angle(c, d, a, b)) * 200
   PushIntStack e
 End Sub
@@ -405,8 +400,8 @@ Private Sub finddist()
   Dim e As Single  'distance to target
   b = PopIntStack * Form1.yDivisor
   a = PopIntStack * Form1.xDivisor
-  c = rob(currbot).pos.X
-  d = rob(currbot).pos.Y
+  c = rob(currbot).pos.x
+  d = rob(currbot).pos.y
   e = Sqr(((c - a) ^ 2 + (d - b) ^ 2))
   If Abs(e) > 2000000000# Then
     e = Sgn(e) * 2000000000#
@@ -537,28 +532,6 @@ Private Sub DNApyth()
 End Sub
 
 
-Private Sub DNAdebugint(at_position As Integer)   'Botsareus 1/31/2013 The new debugint command 'Botsareus 4/5/2016 Cleaner architecture
-
-    Dim a As Single
-    a = PopIntStack
-    
-    rob(currbot).dbgstring = rob(currbot).dbgstring & vbCrLf & a & " at position " & at_position
-    
-    PushIntStack a
-    
-End Sub
-
-
-Private Sub DNAdebugbool(at_position As Integer)    'Botsareus 1/31/2013 The new debugbool command
-
-    Dim a As Boolean
-    a = PopBoolStack
-    
-    rob(currbot).dbgstring = rob(currbot).dbgstring & vbCrLf & a & " at position " & at_position
-    
-    PushBoolStack a
-    
-End Sub
 
 '''''''''''''''''''''''''''''''''''''''''
 '''''''''''''''''''''''''''''''''''''''''

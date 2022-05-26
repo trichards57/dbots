@@ -121,32 +121,32 @@ Begin VB.Form optionsform
       TabCaption(2)   =   "Physics and Costs"
       TabPicture(2)   =   "OptionsForm.frx":0038
       Tab(2).ControlEnabled=   0   'False
-      Tab(2).Control(0)=   "Frame20"
-      Tab(2).Control(1)=   "Frame21"
+      Tab(2).Control(0)=   "Frame21"
+      Tab(2).Control(1)=   "Frame20"
       Tab(2).ControlCount=   2
       TabCaption(3)   =   "Mutations"
       TabPicture(3)   =   "OptionsForm.frx":0054
       Tab(3).ControlEnabled=   0   'False
-      Tab(3).Control(0)=   "DisableMutationsCheck"
+      Tab(3).Control(0)=   "Frame13"
       Tab(3).Control(1)=   "Frame14"
-      Tab(3).Control(2)=   "Frame13"
+      Tab(3).Control(2)=   "DisableMutationsCheck"
       Tab(3).ControlCount=   3
       TabCaption(4)   =   "Restart and League"
       TabPicture(4)   =   "OptionsForm.frx":0070
       Tab(4).ControlEnabled=   0   'False
-      Tab(4).Control(0)=   "btnSetSB"
-      Tab(4).Control(1)=   "btnSetF2"
-      Tab(4).Control(2)=   "btnSetF1"
-      Tab(4).Control(3)=   "Frame7"
-      Tab(4).Control(4)=   "Restart"
-      Tab(4).Control(5)=   "Label19"
+      Tab(4).Control(0)=   "Label19"
+      Tab(4).Control(1)=   "Restart"
+      Tab(4).Control(2)=   "Frame7"
+      Tab(4).Control(3)=   "btnSetF1"
+      Tab(4).Control(4)=   "btnSetF2"
+      Tab(4).Control(5)=   "btnSetSB"
       Tab(4).ControlCount=   6
       TabCaption(5)   =   "Internet"
       TabPicture(5)   =   "OptionsForm.frx":008C
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "Simulazione"
+      Tab(5).Control(0)=   "Label41"
       Tab(5).Control(1)=   "Label42"
-      Tab(5).Control(2)=   "Label41"
+      Tab(5).Control(2)=   "Simulazione"
       Tab(5).ControlCount=   3
       Begin VB.CommandButton btnSetSB 
          Caption         =   "Set SB settings"
@@ -2521,13 +2521,13 @@ Dim multx As Long
 Dim multy As Long
 
 'Windows declarations
-Private Declare Function SetCapture Lib "user32" (ByVal hWnd As Long) As Long
+Private Declare Function SetCapture Lib "user32" (ByVal hwnd As Long) As Long
 Private Declare Function ClipCursor Lib "user32" (lpRect As Any) As Long
 Private Declare Function ReleaseCapture Lib "user32" () As Long
-Private Declare Function GetWindowRect Lib "user32" (ByVal hWnd As Long, lpRect As RECT) As Long
+Private Declare Function GetWindowRect Lib "user32" (ByVal hwnd As Long, lpRect As RECT) As Long
 Private Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
-Private Declare Function GetDC Lib "user32" (ByVal hWnd As Long) As Long
-Private Declare Function ReleaseDC Lib "user32" (ByVal hWnd As Long, ByVal hdc As Long) As Long
+Private Declare Function GetDC Lib "user32" (ByVal hwnd As Long) As Long
+Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As Long, ByVal hdc As Long) As Long
 Private Declare Function SelectObject Lib "gdi32" (ByVal hdc As Long, ByVal hObject As Long) As Long
 Private Declare Function DeleteObject Lib "gdi32" (ByVal hObject As Long) As Long
 Private Declare Function GetStockObject Lib "gdi32" (ByVal nIndex As Long) As Long
@@ -2536,8 +2536,8 @@ Private Declare Function SetROP2 Lib "gdi32" (ByVal hdc As Long, ByVal nDrawMode
 Private Declare Function Rectangle Lib "gdi32" (ByVal hdc As Long, ByVal x1 As Long, ByVal y1 As Long, ByVal x2 As Long, ByVal y2 As Long) As Long
 
 Private Type POINTAPI
-    X As Long
-    Y As Long
+    x As Long
+    y As Long
 End Type
 
 Private Type RECT
@@ -2609,7 +2609,6 @@ pass = False
     
     TmpOpts.CorpseEnabled = False    ' No Corpses
     TmpOpts.DayNight = False         ' Sun never sets
-    TmpOpts.SunOnRnd = True          ' There is weather
     TmpOpts.FieldWidth = 9237
     TmpOpts.FieldHeight = 6928
     TmpOpts.FieldSize = 1
@@ -2633,7 +2632,6 @@ pass = False
       TmpOpts.Specie(t).DisableMovementSysvars = False
       TmpOpts.Specie(t).VirusImmune = False
       TmpOpts.Specie(t).qty = 5
-      TmpOpts.Specie(t).Native = True
     Next t
         
     TmpOpts.FixedBotRadii = False
@@ -2725,20 +2723,6 @@ Private Sub LightText_GotFocus()
 tmrLight.Enabled = True
 End Sub
 
-Private Sub MaxCyclesText_LostFocus()
-MaxCyclesText.text = MaxCycles
-End Sub
-
-Private Sub MaxPopF1Text_Change()
-    MaxPop = val(MaxPopF1Text.text)
-    If MaxPop <> 0 And MaxPop < 10 Then MaxPop = 10
-End Sub
-
-Private Sub MaxPopF1Text_LostFocus()
-    MaxPopF1Text.text = MaxPop
-End Sub
-
-
 Private Sub MutOscillSin_Click()
   TmpOpts.MutOscillSine = False
   If MutOscillSin.value = 1 Then TmpOpts.MutOscillSine = True
@@ -2765,12 +2749,8 @@ End If
 EnergyScalingFactor = n
 End Sub
 
-Private Sub txtMinRounds_LostFocus()
-    txtMinRounds.text = MinRounds
-    optMinRounds = MinRounds
-End Sub
 
-Private Sub CorpseCheck_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub CorpseCheck_MouseUp(button As Integer, Shift As Integer, x As Single, y As Single)
 If CorpseCheck.value = 1 Then 'Botsareus 1/17/2013 set default values
     TmpOpts.DecayType = 3
     TmpOpts.Decay = 75
@@ -2880,7 +2860,6 @@ End Sub
 
 Private Sub FrequencyCheckUpDn_Change()
   txtMaxRounds.text = FrequencyCheckUpDn.value
-  Maxrounds = val(txtMaxRounds.text)
 End Sub
 
 Private Sub Gradient_LostFocus()
@@ -2896,28 +2875,11 @@ frmGset.tb.Tab = 0
 frmGset.Show vbModal, Me
 End Sub
 
-Private Sub MaxCyclesText_Change()
-    MaxCycles = val(MaxCyclesText.text)
-    If MaxCycles <> 0 And MaxCycles < 2000 Then MaxCycles = 2000
-End Sub
-
-Private Sub txtMaxRounds_Change()
-    Maxrounds = val(txtMaxRounds.text)
-    If Maxrounds < 0 Then Maxrounds = 0
-End Sub
-
-Private Sub txtMaxRounds_LostFocus()
-    txtMaxRounds.text = Maxrounds
-End Sub
-
 Private Sub MutEnabledCheck_Click()
  If CurrSpec > -1 Then
  
-    If (x_restartmode = 4 Or x_restartmode = 5) And y_eco_im > 0 And Not TmpOpts.Specie(CurrSpec).Veg Then 'Botsareus 8/3/2014 At some cases mutations should be disabled
-     MutEnabledCheck.Enabled = False
-    Else
+
      MutEnabledCheck.Enabled = True
-    End If
 
     If MutEnabledCheck.value = 1 Then
       TmpOpts.Specie(CurrSpec).Mutables.Mutations = False
@@ -2945,27 +2907,11 @@ Dim i As Integer
 '    NativeSpeciesButton.Caption = "Show Non-Native Species"
     SpecList.CLEAR
     For i = 0 To TmpOpts.SpeciesNum - 1
-       If TmpOpts.Specie(i).Native Then SpecList.additem (TmpOpts.Specie(i).Name)
+      SpecList.additem (TmpOpts.Specie(i).Name)
     Next i
 '  End If
  
   SpecList.Refresh
-End Sub
-
-
-Private Sub NativeSpeciesButton_Click() 'Botsareus 1/21/2013 new code for view non-native speices
-Dim i As Integer
-Dim MSG As String
-Dim found As Boolean
-MSG = "The Non-Native Species are:" & vbCrLf & vbCrLf
-For i = 0 To SimOpts.SpeciesNum - 1
- If Not SimOpts.Specie(i).Native Then
-    MSG = MSG & """" & SimOpts.Specie(i).Name & """, "
-    found = True
- End If
-Next i
-MSG = MSG & vbCrLf & vbCrLf & "Save a snapshot and use snapshotsearch.exe to extract DNA. Press CTRL+C to copy this message."
-If found Then MsgBox MSG Else MsgBox "There are no non-native species."
 End Sub
 
 Private Sub Newseed_Click()
@@ -3190,13 +3136,7 @@ Private Sub DuplicaButt_Click() 'Botsareus 4/30/2013 Fix for the duplicator
   On Error GoTo fine
   Dim ind As Integer
   ind = SpecList.ListIndex
-  If ind >= 0 And TmpOpts.Specie(ind).Native Then
-'    CommonDialog1.FileName = ""
-'    CommonDialog1.Filter = "Dna file(*.txt)|*.txt"
-'    CommonDialog1.InitDir = MDIForm1.MainDir + "\robots"
-'    CommonDialog1.DialogTitle = WSchoosedna
-'    CommonDialog1.ShowOpen
-'    additem CommonDialog1.FileName
+  If ind >= 0 Then
     TmpOpts.SpeciesNum = TmpOpts.SpeciesNum + 1
     TmpOpts.Specie(TmpOpts.SpeciesNum - 1) = TmpOpts.Specie(ind)
     DispSettings
@@ -3241,7 +3181,6 @@ Private Sub clearall()
     k = k + 1
   Wend
   
-  TmpOpts.SunOnRnd = False
   TmpOpts.Tides = 0
   TmpOpts.TidesOf = 0
 End Sub
@@ -3296,7 +3235,6 @@ Sub additem(path As String)
   TmpOpts.Specie(k).Mutables.Mutations = True
   TmpOpts.Specie(k).qty = 5
   TmpOpts.Specie(k).Stnrg = 3000
-  TmpOpts.Specie(k).Native = True
   
   AssignSkin k, path
   ShowSkin k
@@ -3322,7 +3260,6 @@ Sub duplitem(b As Integer, a As Integer)
   TmpOpts.Specie(a).CantReproduce = TmpOpts.Specie(b).CantReproduce
   TmpOpts.Specie(a).VirusImmune = TmpOpts.Specie(b).VirusImmune
   TmpOpts.Specie(a).Mutables = TmpOpts.Specie(b).Mutables
-  TmpOpts.Specie(a).Native = TmpOpts.Specie(b).Native
 End Sub
 
 Private Sub ExtractComment(path As String, k As Integer)
@@ -3356,25 +3293,25 @@ End Sub
 
 Private Sub ShowSkin(k As Integer)
   Dim t As Integer
-  Dim X As Long
-  Dim Y As Long
-  X = Cerchio.Left + Cerchio.Width / 2
-  Y = Cerchio.Top + Cerchio.Height / 2
+  Dim x As Long
+  Dim y As Long
+  x = Cerchio.Left + Cerchio.Width / 2
+  y = Cerchio.Top + Cerchio.Height / 2
   multx = Cerchio.Width / 120
   multy = Cerchio.Height / 120
   Me.AutoRedraw = True
-  Line7.x1 = TmpOpts.Specie(k).Skin(0) * multx * Cos(TmpOpts.Specie(k).Skin(1) / 100) + X
-  Line7.y1 = TmpOpts.Specie(k).Skin(0) * multy * Sin(TmpOpts.Specie(k).Skin(1) / 100) + Y
-  Line7.x2 = TmpOpts.Specie(k).Skin(2) * multx * Cos(TmpOpts.Specie(k).Skin(3) / 100) + X
-  Line7.y2 = TmpOpts.Specie(k).Skin(2) * multy * Sin(TmpOpts.Specie(k).Skin(3) / 100) + Y
+  Line7.x1 = TmpOpts.Specie(k).Skin(0) * multx * Cos(TmpOpts.Specie(k).Skin(1) / 100) + x
+  Line7.y1 = TmpOpts.Specie(k).Skin(0) * multy * Sin(TmpOpts.Specie(k).Skin(1) / 100) + y
+  Line7.x2 = TmpOpts.Specie(k).Skin(2) * multx * Cos(TmpOpts.Specie(k).Skin(3) / 100) + x
+  Line7.y2 = TmpOpts.Specie(k).Skin(2) * multy * Sin(TmpOpts.Specie(k).Skin(3) / 100) + y
   Line8.x1 = Line7.x2
   Line8.y1 = Line7.y2
-  Line8.x2 = TmpOpts.Specie(k).Skin(4) * multx * Cos(TmpOpts.Specie(k).Skin(5) / 100) + X
-  Line8.y2 = TmpOpts.Specie(k).Skin(4) * multy * Sin(TmpOpts.Specie(k).Skin(5) / 100) + Y
+  Line8.x2 = TmpOpts.Specie(k).Skin(4) * multx * Cos(TmpOpts.Specie(k).Skin(5) / 100) + x
+  Line8.y2 = TmpOpts.Specie(k).Skin(4) * multy * Sin(TmpOpts.Specie(k).Skin(5) / 100) + y
   Line9.x1 = Line8.x2
   Line9.y1 = Line8.y2
-  Line9.x2 = TmpOpts.Specie(k).Skin(6) * multx * Cos(TmpOpts.Specie(k).Skin(7) / 100) + X
-  Line9.y2 = TmpOpts.Specie(k).Skin(6) * multy * Sin(TmpOpts.Specie(k).Skin(7) / 100) + Y
+  Line9.x2 = TmpOpts.Specie(k).Skin(6) * multx * Cos(TmpOpts.Specie(k).Skin(7) / 100) + x
+  Line9.y2 = TmpOpts.Specie(k).Skin(6) * multy * Sin(TmpOpts.Specie(k).Skin(7) / 100) + y
 End Sub
 
 'Botsareus 4/37/2013 Do not need this one also
@@ -3420,17 +3357,17 @@ robname = Replace(TmpOpts.Specie(k).Name, ".txt", "")
 Dim newR As Double
 Dim nextR As Double
 Dim nameR As Double
-Dim X As Long
+Dim x As Long
 
 Dim dbls() As Double
 
 ReDim dbls(Len(robname) - 1)
-For X = 1 To Len(robname)
-dbls(X - 1) = Rnd(-Asc(Mid(robname, X, 1)))
+For x = 1 To Len(robname)
+dbls(x - 1) = Rnd(-Asc(Mid(robname, x, 1)))
 Next 'pre seeds
 
-For X = 1 To Len(robname)
-newR = dbls(X - 1)
+For x = 1 To Len(robname)
+newR = dbls(x - 1)
 nextR = Rnd(-(angle(0, 0, nextR - 0.5, newR - 0.5)))
 Next 'randomize by name
 
@@ -3444,12 +3381,12 @@ nextR = 0
     Randomize 0
     
     ReDim dbls(UBound(rob(0).dna))
-    For X = 0 To UBound(rob(0).dna)
-    dbls(X) = Rnd(-(angle(0, 0, Rnd(-rob(0).dna(X).value) - 0.5, Rnd(-rob(0).dna(X).tipo) - 0.5)))
+    For x = 0 To UBound(rob(0).dna)
+    dbls(x) = Rnd(-(angle(0, 0, Rnd(-rob(0).dna(x).value) - 0.5, Rnd(-rob(0).dna(x).tipo) - 0.5)))
     Next 'pre seeds
     
-    For X = 0 To UBound(rob(0).dna)
-    newR = dbls(X)
+    For x = 0 To UBound(rob(0).dna)
+    newR = dbls(x)
     nextR = Rnd(-(angle(0, 0, nextR - 0.5, newR - 0.5)))
     Next 'randomize by dna
     
@@ -3500,21 +3437,8 @@ Dim j As Integer
       End If
     Next j
   Next i
-  
-'Botsareus 2/23/2013 Remove nonnative species
-For i = 0 To TmpOpts.SpeciesNum - 1
-    If TmpOpts.Specie(i).Native = False And TmpOpts.Specie(i).Name <> "" Then
-        For j = i To TmpOpts.SpeciesNum - 1
-         TmpOpts.Specie(j) = TmpOpts.Specie(j + 1)
-        Next j
-        i = i - 1
-    End If
-Next
 
 j = TmpOpts.SpeciesNum - 1
-For i = 0 To j
-If TmpOpts.Specie(i).Native = False Then TmpOpts.SpeciesNum = TmpOpts.SpeciesNum - 1
-Next
 
 End Sub
 
@@ -3711,15 +3635,15 @@ Private Sub PosReset_Click()
 
 End Sub
 
-Private Sub Initial_Position_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
-  If Button = vbLeftButton Then
+Private Sub Initial_Position_MouseDown(button As Integer, Shift As Integer, x As Single, y As Single)
+  If button = vbLeftButton Then
     DragBegin Initial_Position
     PaintObstacles
   End If
 End Sub
 
-Private Sub IPB_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
-  If Button = vbLeftButton Then
+Private Sub IPB_MouseDown(button As Integer, Shift As Integer, x As Single, y As Single)
+  If button = vbLeftButton Then
     DragBegin Initial_Position
     PaintObstacles
   End If
@@ -3789,8 +3713,8 @@ Public Sub DragBegin(ctl As Control)
     m_DragRect.TwipsToScreen m_CurrCtl
     
     'Make initial mouse position relative to control
-    m_DragPoint.X = m_DragPoint.X - m_DragRect.Left
-    m_DragPoint.Y = m_DragPoint.Y - m_DragRect.Top
+    m_DragPoint.x = m_DragPoint.x - m_DragRect.Left
+    m_DragPoint.y = m_DragPoint.y - m_DragRect.Top
     
     'Force redraw of form without sizing handles
     'before drawing dragging rectangle
@@ -3806,10 +3730,10 @@ Public Sub DragBegin(ctl As Control)
     'we set the mouse capture to the form and will process mouse
     'movement from the applicable form events
     ReleaseCapture  'This appears needed before calling SetCapture
-    SetCapture hWnd
+    SetCapture hwnd
     
     'Limit cursor movement within form
-    GetWindowRect hWnd, rc
+    GetWindowRect hwnd, rc
     ClipCursor rc
 End Sub
 
@@ -3822,7 +3746,7 @@ End Sub
 
 'To handle all mouse message anywhere on the form, we set the mouse
 'capture to the form. Mouse movement is processed here
-Private Sub Form_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y As Single)
 If CurrSpec = -1 Then Exit Sub 'Botsareus 2/3/2013 bug fix when no robot selected
 
     Dim nWidth As Single, nHeight As Single
@@ -3837,8 +3761,8 @@ If CurrSpec = -1 Then Exit Sub 'Botsareus 2/3/2013 bug fix when no robot selecte
         'Hide existing rectangle
         DrawDragRect
         'Update drag rectangle coordinates
-        m_DragRect.Left = pt.X - m_DragPoint.X
-        m_DragRect.Top = pt.Y - m_DragPoint.Y
+        m_DragRect.Left = pt.x - m_DragPoint.x
+        m_DragRect.Top = pt.y - m_DragPoint.y
         m_DragRect.Right = m_DragRect.Left + nWidth
         m_DragRect.Bottom = m_DragRect.Top + nHeight
         'Draw new rectangle
@@ -3851,25 +3775,25 @@ If CurrSpec = -1 Then Exit Sub 'Botsareus 2/3/2013 bug fix when no robot selecte
         'Action depends on handle being dragged
         Select Case m_DragHandle
             Case 0
-                m_DragRect.Left = pt.X
-                m_DragRect.Top = pt.Y
+                m_DragRect.Left = pt.x
+                m_DragRect.Top = pt.y
             Case 2
-                m_DragRect.Right = pt.X
-                m_DragRect.Top = pt.Y
+                m_DragRect.Right = pt.x
+                m_DragRect.Top = pt.y
             Case 4
-                m_DragRect.Right = pt.X
-                m_DragRect.Bottom = pt.Y
+                m_DragRect.Right = pt.x
+                m_DragRect.Bottom = pt.y
             Case 6
-                m_DragRect.Left = pt.X
-                m_DragRect.Bottom = pt.Y
+                m_DragRect.Left = pt.x
+                m_DragRect.Bottom = pt.y
             Case 9
-                m_DragRect.Top = pt.Y
+                m_DragRect.Top = pt.y
             Case 10
-                m_DragRect.Bottom = pt.Y
+                m_DragRect.Bottom = pt.y
             Case 11
-                m_DragRect.Left = pt.X
+                m_DragRect.Left = pt.x
             Case 12
-                m_DragRect.Right = pt.X
+                m_DragRect.Right = pt.x
         End Select
         'Draw new rectangle
         DrawDragRect
@@ -3878,10 +3802,10 @@ End Sub
 
 'To handle all mouse message anywhere on the form, we set the mouse
 'capture to the form. Mouse up is processed here
-Private Sub Form_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub Form_MouseUp(button As Integer, Shift As Integer, x As Single, y As Single)
 If CurrSpec = -1 Then Exit Sub 'Botsareus 2/3/2013 bug fix when no robot selected
 
-    If Button = vbLeftButton Then
+    If button = vbLeftButton Then
         If m_DragState = StateDragging Or m_DragState = StateSizing Then
             'Hide drag rectangle
             DrawDragRect
@@ -3923,7 +3847,7 @@ If CurrSpec = -1 Then Exit Sub 'Botsareus 2/3/2013 bug fix when no robot selecte
 End Sub
 
 'Process MouseDown over handles
-Private Sub picHandle_MouseDown(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub picHandle_MouseDown(Index As Integer, button As Integer, Shift As Integer, x As Single, y As Single)
     Dim i As Integer
     Dim rc As RECT
 
@@ -3947,13 +3871,13 @@ Private Sub picHandle_MouseDown(Index As Integer, Button As Integer, Shift As In
     'In order to detect mouse movement over any part of the form,
     'we set the mouse capture to the form and will process mouse
     'movement from the applicable form events
-    SetCapture hWnd
+    SetCapture hwnd
     'Limit cursor movement within form
-    GetWindowRect hWnd, rc
+    GetWindowRect hwnd, rc
     ClipCursor rc
 End Sub
 
-Private Sub Robplacline_MouseDown(Index As Integer, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub Robplacline_MouseDown(Index As Integer, button As Integer, Shift As Integer, x As Single, y As Single)
     Dim i As Integer
     Dim rc As RECT
 
@@ -3977,9 +3901,9 @@ Private Sub Robplacline_MouseDown(Index As Integer, Button As Integer, Shift As 
     'In order to detect mouse movement over any part of the form,
     'we set the mouse capture to the form and will process mouse
     'movement from the applicable form events
-    SetCapture hWnd
+    SetCapture hwnd
     'Limit cursor movement within form
-    GetWindowRect hWnd, rc
+    GetWindowRect hwnd, rc
     ClipCursor rc
 End Sub
 
@@ -4478,64 +4402,19 @@ Private Sub BrownianCombo_Click()
   End Select
 End Sub
 
-
 '''''''''''''''''''''''''''''''''''''''''''
-
 
 Private Sub ToPhysics_Click()
   PhysicsOptions.Show vbModal
   Update
 End Sub
 
-
-'Private Sub Cancel_Click()
-'  Canc = True
-'  If Form1.Visible Then Form1.SecTimer.Enabled = True
-'  'Me.Hide
-'  Unload Me
-'End Sub
-
 '
 '  All settings
 '
 
-Private Sub txtMinRounds_Change()
-  MinRounds = val(txtMinRounds.text)
-  If MinRounds < 1 Then MinRounds = 1
-  optMinRounds = MinRounds
-End Sub
-
-Private Sub ContestsUpDn_Change()
-  txtMinRounds.text = ContestsUpDn.value
-  MinRounds = val(txtMinRounds.text)
-End Sub
-
-' sets all conditions to F1 specs
-Private Sub F1check_Click()
-  If F1Check.value = 1 Then
-    TmpOpts.F1 = True
-  Else
-    TmpOpts.F1 = False
- End If
-  
-End Sub
-
-'Private Sub Form_Unload(Cancel As Integer) 'unload
-'  Form1.Timer2.Enabled = True
-'End Sub
-
 Private Sub Form_Activate()
 Form1.hide_graphs
- ' Form1.SecTimer.Enabled = False
- ' TmpOpts = SimOpts
- ' Dim i As Long
-    
- ' SpecList.CLEAR
- ' For i = 0 To TmpOpts.SpeciesNum - 1
- '   SpecList.additem (TmpOpts.Specie(i).Name)
- ' Next i
-  
-'  DispSettings
 
 'Botsareus 12/12/2012 Hide always on top forms for easy readability
 datirob.Visible = False
@@ -4553,8 +4432,8 @@ Dim o As Integer
 For o = 1 To UBound(xObstacle)
 If xObstacle(o).exist Then
 With xObstacle(o)
- .pos.X = .pos.X / SimOpts.FieldWidth
- .pos.Y = .pos.Y / SimOpts.FieldHeight
+ .pos.x = .pos.x / SimOpts.FieldWidth
+ .pos.y = .pos.y / SimOpts.FieldHeight
  .Width = .Width / SimOpts.FieldWidth
  .Height = .Height / SimOpts.FieldHeight
 End With
@@ -4569,7 +4448,7 @@ Dim o As Integer
 For o = 1 To UBound(xObstacle)
 If xObstacle(o).exist Then
 With xObstacle(o)
- IPB.Line (.pos.X * IPB.ScaleWidth, .pos.Y * IPB.ScaleHeight)-((.pos.X + .Width) * IPB.ScaleWidth, (.pos.Y + .Height) * IPB.ScaleHeight), .color, BF
+ IPB.Line (.pos.x * IPB.ScaleWidth, .pos.y * IPB.ScaleHeight)-((.pos.x + .Width) * IPB.ScaleWidth, (.pos.y + .Height) * IPB.ScaleHeight), .color, BF
 End With
 End If
 Next
@@ -4617,11 +4496,10 @@ End If
 
 savesett MDIForm1.MainDir + "\settings\lastran.set"
 
-'Botsareus 8/16/2014 Normalize the sun
-If TmpOpts.SunOnRnd = False Then
+
     SunPosition = 0.5
     SunRange = 1
-End If
+
 
 Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is normailized
 
@@ -4633,8 +4511,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
   
   DragEnd
   
-  Contests = 0
-  ReStarts = 0
   MDIForm1.Combo1.CLEAR
   MDIForm1.Combo1.additem WSnone
   
@@ -4642,14 +4518,9 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
     If i > MAXNATIVESPECIES Then
       MsgBox "Exceeded number of native species."
     Else
-      If TmpOpts.Specie(i).Native Then MDIForm1.Combo1.additem TmpOpts.Specie(i).Name
+       MDIForm1.Combo1.additem TmpOpts.Specie(i).Name
     End If
-  Next i
-    
-  If TmpOpts.F1 Then
-    a = MsgBox("You cannot change settings in the middle of a contest. Please restart the SIM or disable F1 mode if you wish to continue.", vbOKOnly)
-    Exit Sub
-  End If
+  Next
   
   If Not (fso.FolderExists(inboundPathText.text) And fso.FolderExists(outboundPathText.text)) Then
     MsgBox ("Internet paths must be set to a vaild directory.")
@@ -4660,14 +4531,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
   
   ' EricL 4/2/2006 - moved these here from control change routine to fix init bugs
   TmpOpts.chartingInterval = val(ChartInterval.text)
-  TmpOpts.Restart = RestartMode ' EricL 4/2/2006 Added this to pick up any changes to restart mode
- 
-  IntOpts.IName = Trim(IntName.text)
-  IntOpts.InboundPath = inboundPathText.text
-  IntOpts.OutboundPath = outboundPathText.text
-  IntOpts.ServIP = txtInttServ.text
-  IntOpts.ServPort = txtInttPort.text
-  SaveInternetSett
   
   'These change values while a sim is running.
   'Copy them so the correct value will be put back into SimOpts
@@ -4680,8 +4543,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
   
   
   SimOpts = TmpOpts
-  
-  If InternetMode Then ResizeInternetTeleporter (SimOpts.FieldHeight / 150)
   
   Form1.ScaleWidth = SimOpts.FieldWidth
   Form1.ScaleHeight = SimOpts.FieldHeight
@@ -4701,14 +4562,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
   Unload Me
 End Sub
 
-Private Sub RestartSimCheck_Click()
-  If RestartSimCheck = 1 Then
-    RestartMode = True
-  Else
-    RestartMode = False
-  End If
-End Sub
-
 Sub StartNew_Click() 'startnew
 
   If Form1.Visible Then
@@ -4722,18 +4575,12 @@ If chseedstartnew Then TmpOpts.UserSeedNumber = Timer * 100 'Botsareus 5/3/2013 
   'Botsareus 5/7/2013 Safemode component
   Form1.lblSafeMode.Visible = False
   
-  If x_restartmode = 0 Or x_restartmode = 4 Or x_restartmode = 7 Then
     MDIForm1.Objects.Enabled = True
     MDIForm1.inssp.Enabled = True
     MDIForm1.DisableArep.Enabled = True
-  Else
-    MDIForm1.Objects.Enabled = False
-    MDIForm1.inssp.Enabled = False
-    MDIForm1.DisableArep.Enabled = False
-  End If
-  MDIForm1.AutoFork.Enabled = x_restartmode = 0
   
-  If x_restartmode = 4 Or x_restartmode = 5 Or x_restartmode = 6 Then MDIForm1.y_info.Visible = True
+  MDIForm1.AutoFork.Enabled = True
+  
   
   If dir(MDIForm1.MainDir + "\saves\localcopy.sim") <> "" Then Kill (MDIForm1.MainDir + "\saves\localcopy.sim")
   If dir(MDIForm1.MainDir + "\saves\lastautosave.sim") <> "" Then Kill (MDIForm1.MainDir + "\saves\lastautosave.sim")
@@ -4743,9 +4590,6 @@ If chseedstartnew Then TmpOpts.UserSeedNumber = Timer * 100 'Botsareus 5/3/2013 
   Dim t As Integer
   
   DragEnd
-  
-  Contests = 0
-  ReStarts = 0
   
   ' EricL Moved here from StartSimul() so that cycles counter isn't reset when sim settings
   ' are changed.  Only reset when a new simulation is started.
@@ -4761,33 +4605,22 @@ If chseedstartnew Then TmpOpts.UserSeedNumber = Timer * 100 'Botsareus 5/3/2013 
     If i > MAXNATIVESPECIES Then
       MsgBox "Exceeded number of native species."
     Else
-      If TmpOpts.Specie(i).Native Then MDIForm1.Combo1.additem TmpOpts.Specie(i).Name
+       MDIForm1.Combo1.additem TmpOpts.Specie(i).Name
     End If
   Next i
   
   For t = 0 To TmpOpts.SpeciesNum - 1
     TmpOpts.Specie(t).population = TmpOpts.Specie(t).qty
     TmpOpts.Specie(t).SubSpeciesCounter = 0
-    TmpOpts.Specie(t).Native = True
-  '  If TmpOpts.Specie(t).Name = "plant.txt" Then
-  '    TmpOpts.Specie(t).DisplayImage.Picture = Form1.Plant.Picture
-      
-  '  End If
   Next t
   
-  ContestMode = TmpOpts.F1
-  MDIForm1.F1Piccy.Visible = TmpOpts.F1 * True
-  TmpOpts.Restart = RestartMode ' EricL 4/2/2006 This was backwards.  Changed from RestartMode = TmpOpts.Restart
+    MDIForm1.F1Piccy.Visible = False
   
   ' EricL 4/2/2006 - moved these here from control's change routine to fix init bugs
   TmpOpts.chartingInterval = val(ChartInterval.text)
   
   TmpOpts.SpeciesNum = SpecList.ListCount
   Canc = False
-  IntOpts.IName = IntName.text
-  IntOpts.InboundPath = inboundPathText.text
-  IntOpts.OutboundPath = outboundPathText.text
-  SaveInternetSett
   'Me.Hide
   
       'Botsareus 1/5/2013 more fix for n-vedio button
@@ -4799,16 +4632,10 @@ If chseedstartnew Then TmpOpts.UserSeedNumber = Timer * 100 'Botsareus 5/3/2013 
   SimOpts = TmpOpts
   
   If Form1.Active Then Form1.SecTimer.Enabled = True
-  If InternetMode Then MDIForm1.F1Internet_Click
   
-  
-  StartAnotherRound = True ' Set true for first simulation.  Will get set true if running leagues or using auto-restart mode
-  While StartAnotherRound
-    StartAnotherRound = False
     Form1.StartSimul
     SimOpts.UserSeedNumber = Rnd * 2147483647 'Botsareus 6/11/2013 Randomize seed on restart, moved to after first sim
-  Wend
-  
+
 End Sub
 
 Private Sub DispSettings()
@@ -4912,31 +4739,8 @@ End If
   
   CyclesHi.text = TmpOpts.MutCycMax
   CyclesLo.text = TmpOpts.MutCycMin
-
-  
-  IntName.text = IntOpts.IName
-  inboundPathText.text = IntOpts.InboundPath
-  outboundPathText.text = IntOpts.OutboundPath
-  txtInttServ.text = IntOpts.ServIP
-  txtInttPort.text = IntOpts.ServPort
-  If inboundPathText.text = "" Then inboundPathText.text = MDIForm1.MainDir + "\IM\inbound"
-  If outboundPathText.text = "" Then outboundPathText.text = MDIForm1.MainDir + "\IM\outbound"
   
   MaxNRGText.text = TmpOpts.MaxEnergy
-    
-  'display F1 page settings
-  ContestMode = TmpOpts.F1
-  F1Check.value = ContestMode * True
-  RestartMode = TmpOpts.Restart
-  RestartSimCheck.value = RestartMode * True
-  
-  
-  txtMinRounds.text = optMinRounds
-  txtMaxRounds.text = Maxrounds
-  MaxCyclesText.text = MaxCycles
-  MaxPopF1Text.text = MaxPop
-    
-  SampFreq = 10 'Botsareus 2/11/2014 Sample freq is always 10
   
   'EricL 5/7/2006 Initialize new UI
   FluidSolidRadio(TmpOpts.FluidSolidCustom).value = True
@@ -5036,7 +4840,7 @@ Sub LoadSettings_Click() 'opensettings
     
     SpecList.CLEAR
     For i = 0 To TmpOpts.SpeciesNum - 1
-        If TmpOpts.Specie(i).Native Then SpecList.additem (TmpOpts.Specie(i).Name)
+        SpecList.additem (TmpOpts.Specie(i).Name)
     Next i
     
     validate = True
@@ -5077,19 +4881,12 @@ On Error GoTo fine
   
   numSpecies = 0
   For t = 0 To TmpOpts.SpeciesNum - 1
-    If TmpOpts.Specie(t).Native Then numSpecies = numSpecies + 1
+    numSpecies = numSpecies + 1
   Next t
   
   
   Write #1, numSpecies - 1  ' done this way becuase of the busted way the read routine loops through species...
   For t = 0 To TmpOpts.SpeciesNum - 1
-  
-    If Not TmpOpts.Specie(t).Native Then GoTo skipthisspecie
-    
-    'Write #1, TmpOpts.Specie(t).Posrg
-    'Write #1, TmpOpts.Specie(t).Posdn
-    'Write #1, TmpOpts.Specie(t).Poslf
-    'Write #1, TmpOpts.Specie(t).Postp
     
     Write #1, TmpOpts.FieldWidth
     Write #1, TmpOpts.FieldHeight
@@ -5173,7 +4970,7 @@ skipthisspecie:
   'obsolete
   Write #1, TmpOpts.Costs(MOVECOST)
   
-  Write #1, TmpOpts.F1
+  Write #1, False
   Write #1, TmpOpts.Restart
   
   SaveScripts
@@ -5189,7 +4986,6 @@ skipthisspecie:
   Write #1, TmpOpts.UserSeedNumber
   
   For t = 0 To TmpOpts.SpeciesNum - 1
-    If Not TmpOpts.Specie(t).Native Then GoTo skipthisspecie2
     For k = 14 To 20
       Write #1, TmpOpts.Specie(t).Mutables.mutarray(k)
     Next k
@@ -5210,7 +5006,6 @@ skipthisspecie2:
   
   
   For k = 0 To TmpOpts.SpeciesNum - 1
-    If Not TmpOpts.Specie(k).Native Then GoTo skipthisspecie3
     Write #1, TmpOpts.Specie(k).Mutables.CopyErrorWhatToChange
     Write #1, TmpOpts.Specie(k).Mutables.PointWhatToChange
     
@@ -5228,7 +5023,6 @@ skipthisspecie3:
   Next k
   
   For k = 0 To TmpOpts.SpeciesNum - 1
-    If Not TmpOpts.Specie(k).Native Then GoTo skipthisspecie4
     Write #1, TmpOpts.Specie(k).Poslf
     Write #1, TmpOpts.Specie(k).Posrg
     Write #1, TmpOpts.Specie(k).Postp
@@ -5298,39 +5092,29 @@ skipthisspecie4:
     Write #1, .color
     Write #1, .Width
     Write #1, .Height
-    Write #1, .vel.X
-    Write #1, .vel.Y
-    Write #1, .pos.X
-    Write #1, .pos.Y
+    Write #1, .vel.x
+    Write #1, .vel.y
+    Write #1, .pos.x
+    Write #1, .pos.y
   End With
   End If
   Next
   
-  Write #1, optMinRounds
-  Write #1, Maxrounds
-  Write #1, MaxCycles
-  Write #1, MaxPop
+  Write #1, 0
+  Write #1, 0
+  Write #1, 0
+  Write #1, 0
   
   'Botsareus 3/28/2014 Some more species data
   For t = 0 To numSpecies - 1
     Write #1, TmpOpts.Specie(t).NoChlr
   Next
-  
-  'Botsareus 7/15/2014 Some more variables
-  Write #1, TmpOpts.SunOnRnd
-  
-  
+
   'Botsareus 7/30/2014 Some UI exposed to settings
   Write #1, MDIForm1.displayResourceGuagesToggle
   Write #1, MDIForm1.displayMovementVectorsToggle
   Write #1, MDIForm1.displayShotImpactsToggle
   Write #1, MDIForm1.showVisionGridToggle
-  
-  'Botsareus 7/29/2014 Some more species data
-  For t = 0 To numSpecies - 1
-    Write #1, TmpOpts.Specie(t).kill_mb
-    Write #1, TmpOpts.Specie(t).dq_kill
-  Next
   
   'Botsareus 8/5/2014 Disable fixing
   Write #1, TmpOpts.DisableFixing
@@ -5518,7 +5302,9 @@ Public Sub ReadSettFromFile()
   'obsolete
   If Not EOF(1) Then Input #1, TmpOpts.Costs(MOVECOST)
   
-  If Not EOF(1) Then Input #1, TmpOpts.F1
+  Dim discard As Boolean
+  
+  If Not EOF(1) Then Input #1, discard
   If Not EOF(1) Then Input #1, TmpOpts.Restart
   
   LoadScripts 'load up the scripts. Only available in form1. Can't access them from here.
@@ -5574,7 +5360,6 @@ Public Sub ReadSettFromFile()
     If Not EOF(1) Then Input #1, TmpOpts.Specie(k).Posrg
     If Not EOF(1) Then Input #1, TmpOpts.Specie(k).Postp
     If Not EOF(1) Then Input #1, TmpOpts.Specie(k).Posdn
-    TmpOpts.Specie(k).Native = True
   Next k
   
   If Not EOF(1) Then Input #1, TmpOpts.MaxVelocity
@@ -5658,27 +5443,25 @@ Public Sub ReadSettFromFile()
     If Not EOF(1) Then Input #1, .color
     If Not EOF(1) Then Input #1, .Width
     If Not EOF(1) Then Input #1, .Height
-    If Not EOF(1) Then Input #1, .vel.X
-    If Not EOF(1) Then Input #1, .vel.Y
-    If Not EOF(1) Then Input #1, .pos.X
-    If Not EOF(1) Then Input #1, .pos.Y
+    If Not EOF(1) Then Input #1, .vel.x
+    If Not EOF(1) Then Input #1, .vel.y
+    If Not EOF(1) Then Input #1, .pos.x
+    If Not EOF(1) Then Input #1, .pos.y
     .exist = True
   End With
   Next
   
-  If Not EOF(1) Then Input #1, optMinRounds
-  MinRounds = optMinRounds
-  If Not EOF(1) Then Input #1, Maxrounds
-  If Not EOF(1) Then Input #1, MaxCycles
-  If Not EOF(1) Then Input #1, MaxPop
+  Dim disc As Integer
+  
+  If Not EOF(1) Then Input #1, disc
+  If Not EOF(1) Then Input #1, disc
+  If Not EOF(1) Then Input #1, disc
+  If Not EOF(1) Then Input #1, disc
   
   'Botsareus 3/28/2014 Some more species data
   For t = 0 To maxsp
     If Not EOF(1) Then Input #1, TmpOpts.Specie(t).NoChlr
   Next
-  
-  'Botsareus 7/15/2014 Some more variables
-  If Not EOF(1) Then Input #1, TmpOpts.SunOnRnd
   
   'Botsareus 7/18/2014 Some more settings exposed for Testlund
   If Not EOF(1) Then Input #1, check
@@ -5694,12 +5477,6 @@ Public Sub ReadSettFromFile()
   MDIForm1.showVisionGridToggle = check
   MDIForm1.ShowVisionGrid.Checked = check
   
-  'Botsareus 7/29/2014 Some more species data
-  For t = 0 To maxsp
-    If Not EOF(1) Then Input #1, TmpOpts.Specie(t).kill_mb
-    If Not EOF(1) Then Input #1, TmpOpts.Specie(t).dq_kill
-  Next
-
   'Botsareus 8/5/2014 Disable fixing
   TmpOpts.DisableFixing = 0
   If Not EOF(1) Then Input #1, TmpOpts.DisableFixing
@@ -5798,38 +5575,6 @@ Private Sub MutOscill_Click()
   CycLoUpDn.Visible = MutOscill.value = 1
 End Sub
 
-'
-'  I N T E R N E T   O P T I O N S
-'  -------------------------------
-'
-Private Sub SaveInternetSett()
-On Error GoTo fine
-  Open MDIForm1.MainDir + "\intsett.ini" For Output As 1
-    
-  'Breaking change as of 2.44.07 - Shasta
-  Print #1, IntName.text
-  Print #1, inboundPathText.text
-  Print #1, outboundPathText.text
-  Print #1, txtInttServ.text
-  Print #1, txtInttPort.text
-  Close 1
-  Exit Sub
-fine:
-  MsgBox ("Unable to save internet settings: some error occurred")
-End Sub
 
-Public Sub IntSettLoad()
-  Dim a As String
-  a = dir(MDIForm1.MainDir + "\intsett.ini")
-  If a <> "" Then
-    Open MDIForm1.MainDir + "\intsett.ini" For Input As 1
 
-    'Breaking change as of 2.44.07 - Shasta
-    Input #1, IntOpts.IName
-    Input #1, IntOpts.InboundPath
-    Input #1, IntOpts.OutboundPath
-    If Not EOF(1) Then Input #1, IntOpts.ServIP
-    If Not EOF(1) Then Input #1, IntOpts.ServPort
-    Close 1
-  End If
-End Sub
+

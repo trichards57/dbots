@@ -23,6 +23,7 @@ Begin VB.Form Consoleform
       _ExtentX        =   8281
       _ExtentY        =   3572
       _Version        =   393217
+      Enabled         =   -1  'True
       ReadOnly        =   -1  'True
       ScrollBars      =   2
       TextRTF         =   $"console.frx":058A
@@ -156,16 +157,13 @@ Attribute VB_Exposed = False
 'Botsareus 5/30/2012 Set transperancy for all icons
 Option Explicit
 
+Private wcount As Integer
 Private cnum As Integer
 Private hist(100) As String
 Private hpos As Integer
 Private hcurr As Integer
 Private words(100) As String
-Public wcount As Integer
-Dim lasttim As Single
-
-Public WithEvents evnt As cevent
-Attribute evnt.VB_VarHelpID = -1
+Private lasttim As Single
 
 Private Sub ClearButton_Click()
   Text1.text = ""
@@ -178,7 +176,7 @@ Private Sub Command1_Click()
   textout "showdna"
   Text2.text = "showdna"
   Parse
-  Consoleform.evnt.fire cnum, "showdna"
+  evnt_textentered cnum, "showdna"
   hist(hcurr) = "showdna"
   hcurr = hcurr + 1
   If hcurr > 100 Then hcurr = 0
@@ -189,24 +187,24 @@ End Sub
 Private Sub Command2_Click()
   words(1) = "printtouch"
   wcount = 1
-  Consoleform.evnt.fire cnum, "printtouch"
+  evnt_textentered cnum, "printtouch"
 End Sub
 
 Private Sub Command3_Click()
   words(1) = "printtaste"
   wcount = 1
-  Consoleform.evnt.fire cnum, "printtaste"
+  evnt_textentered cnum, "printtaste"
 End Sub
 
 Private Sub debug_Click() 'Botsareus 2/2/2013 The debug button
   words(1) = "debug"
   wcount = 1
-  Consoleform.evnt.fire cnum, "debug"
+  evnt_textentered cnum, "debug"
 End Sub
 
 Private Sub Form_Load()
   strings Me
-  SetWindowPos hWnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
+  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub Form_Resize()
@@ -227,32 +225,32 @@ Private Sub cyclebut_Click()
   words(1) = "cycle"
   words(2) = "1"
   wcount = 2
-  Consoleform.evnt.fire cnum, "cycle"
+  evnt_textentered cnum, "cycle"
 End Sub
 
 Private Sub eyebut_Click()
   words(1) = "printeye"
   wcount = 1
-  Consoleform.evnt.fire cnum, "printeye"
+  evnt_textentered cnum, "printeye"
 End Sub
 
 Private Sub pausebut_Click()
   words(1) = "pause"
   wcount = 1
-  Consoleform.evnt.fire cnum, "pause"
+  evnt_textentered cnum, "pause"
 End Sub
 
 Private Sub playbut_Click()
   words(1) = "play"
   wcount = 1
-  Consoleform.evnt.fire cnum, "play"
+  evnt_textentered cnum, "play"
 End Sub
 
 Private Sub Text2_KeyDown(KeyCode As Integer, Shift As Integer)
   If KeyCode = 13 And Text2.text <> "" Then
     textout Text2.text
     Parse
-    Consoleform.evnt.fire cnum, Text2.text
+    evnt_textentered cnum, Text2.text
     hist(hcurr) = Text2.text
     hcurr = hcurr + 1
     If hcurr > 100 Then hcurr = 0
@@ -321,7 +319,6 @@ Public Sub openconsole()
     Set rob(robfocus).console = New Consoleform
     rob(robfocus).console.newconsole robfocus, "Robot " + Str$(rob(robfocus).AbsNum) + " console", "Robot " + Str$(rob(robfocus).AbsNum) + " - " + rob(robfocus).FName + " console"
     rob(robfocus).console.textout "Type 'help' for commands"
-    Active = False
   End If
 End Sub
 
@@ -337,8 +334,6 @@ Private Sub evnt_textentered(ind As Integer, text As String)
   
   text = rob(ind).console.text(1)
   Select Case text
-    Case "debug"
-      rob(ind).console.textout printdebug(ind)
     Case "printeye"
       rob(ind).console.textout printeye(ind)
     Case "printtouch"
@@ -429,12 +424,6 @@ Private Function printeye(ind As Integer) As String
   Next t
 End Function
 
-' printdebug command
-Private Function printdebug(ind As Integer) As String 'Botsareus 4/5/2016 Rearchetectured for cleaner code
-  printdebug = "***ROBOT DEBUG***"
-  printdebug = printdebug & rob(ind).dbgstring
-End Function
-
 
 ' printtouch...
 Private Function printtouch(ind As Integer) As String
@@ -461,28 +450,23 @@ End Function
 Public Sub cycle(num As Integer)
   Dim q As Integer, k As Integer
   For k = 1 To num
-      Form1.cyc = Form1.cyc + 1
-      
-      UpdateSim
-      Form1.Redraw
-      
-      If datirob.Visible And Not datirob.ShowMemoryEarlyCycle Then
-        With rob(robfocus)
-        datirob.infoupdate robfocus, .nrg, .parent, .Mutations, .age, .SonNumber, 1, .FName, .genenum, .LastMut, .generation, .DnaLen, .LastOwner, .Waste, .body, .mass, .venom, .shell, .Slime, .chloroplasts
-        End With
-      End If
-      
-      If lasttim > Int(Timer) Then lasttim = Int(Timer)
-      If lasttim < Int(Timer) Then
-        Form1.cyccaption Form1.cyc
-        lasttim = Int(Timer)
-        Form1.cyc = 0
-      End If
-      
-'      Select Case SimOpts.PopLimMethod
-'        Case 1, 2
-'          If TotalRobots > SimOpts.MaxPopulation Then Form1.popcontrol
-'      End Select
+    Form1.cyc = Form1.cyc + 1
+    
+    UpdateSim
+    Form1.Redraw
+    
+    If datirob.Visible And Not datirob.ShowMemoryEarlyCycle Then
+      With rob(robfocus)
+      datirob.infoupdate robfocus, .nrg, .parent, .Mutations, .age, .SonNumber, 1, .FName, .genenum, .LastMut, .generation, .DnaLen, .LastOwner, .Waste, .body, .mass, .venom, .shell, .Slime, .chloroplasts
+      End With
+    End If
+    
+    If lasttim > Int(Timer) Then lasttim = Int(Timer)
+    If lasttim < Int(Timer) Then
+      Form1.cyccaption Form1.cyc
+      lasttim = Int(Timer)
+      Form1.cyc = 0
+    End If
     DoEvents
   Next k
 End Sub

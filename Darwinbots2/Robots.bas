@@ -334,9 +334,6 @@ Private Type robot
   CantReproduce As Boolean          ' Indicates whether reproduction for this robot has been disabled
   VirusImmune As Boolean            ' Indicates whether this robot is immune to viruses
   SubSpecies As Integer             ' Indicates this bot's subspecies.  Changed when mutation or virus infection occurs
-'  Ancestors(500) As ancestorType    ' Orderred list of ancestor bot numbers.
-'  AncestorIndex As Integer          ' Index into the Ancestors array.  Points to the bot's immediate parent.  Older ancestors have lower numbers then wrap.
-  
   fertilized As Integer             ' If non-zero, indicates this bot has been fertilized via a sperm shot.  This bot can choose to sexually reproduce
                                     ' with this DNA until the counter hits 0.  Will be zero if unfertilized.
   spermDNA() As block               ' Contains the DNA this bot has been fertilized with.
@@ -347,13 +344,7 @@ Private Type robot
   monitor_r As Integer
   monitor_g As Integer
   monitor_b As Integer
-  
-  multibot_time As Byte
   Chlr_Share_Delay As Byte
-  dq As Byte
-  
-  dbgstring As String
-
 End Type
 
 Public Const RobSize As Integer = 120       ' rob diameter in fixed diameter sims
@@ -868,9 +859,9 @@ Public Sub UpdatePosition(ByVal n As Integer)
   .mem(dirsx) = 0
   
   .mem(velscalar) = iceil(Sqr(vt))
-  .mem(vel) = iceil(Cos(.aim) * .vel.X + Sin(.aim) * .vel.Y * -1)
+  .mem(vel) = iceil(Cos(.aim) * .vel.x + Sin(.aim) * .vel.y * -1)
   .mem(veldn) = .mem(vel) * -1
-  .mem(veldx) = iceil(Sin(.aim) * .vel.X + Cos(.aim) * .vel.Y)
+  .mem(veldx) = iceil(Sin(.aim) * .vel.x + Cos(.aim) * .vel.y)
   .mem(velsx) = .mem(veldx) * -1
   
   .mem(masssys) = .mass
@@ -878,9 +869,9 @@ Public Sub UpdatePosition(ByVal n As Integer)
   End With
 End Sub
 
-Private Function iceil(X As Single) As Integer
-    If (Abs(X) > 32000) Then X = Sgn(X) * 32000
-    iceil = X
+Private Function iceil(x As Single) As Integer
+    If (Abs(x) > 32000) Then x = Sgn(x) * 32000
+    iceil = x
 End Function
 
 Private Sub makeshell(n As Integer)
@@ -924,9 +915,6 @@ Dim shellNrgConvRate As Single
     .mem(822) = 0                          ' reset the .mkshell sysvar
     .mem(823) = CInt(.shell)               ' update the .shell sysvar
 getout:
-    'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason .FName, .tag, "making shell"
-    If Not SimOpts.F1 And .dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
   End With
 End Sub
 
@@ -972,11 +960,6 @@ Dim slimeNrgConvRate As Single
     .mem(821) = CInt(.Slime)                ' update the .slime sysvar
     
 getout:
-    'Botsareus 3/14/2014 Disqualify
-    If Not .Veg Then
-        If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason .FName, .tag, "making slime"
-        If Not SimOpts.F1 And .dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
-    End If
   End With
 End Sub
 
@@ -1433,9 +1416,6 @@ Private Sub FireTies(ByVal n As Integer)
       If length <= maxLength Then
         'maketie auto deletes existing ties for you
         maketie n, rob(n).lastopp, rob(n).radius + rob(rob(n).lastopp).radius + RobSize * 2, -20, rob(n).mem(mtie)
-        'Botsareus 3/14/2014 Disqualify
-        If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason rob(n).FName, rob(n).tag, "making a tie"
-        If Not SimOpts.F1 And rob(n).dq = 1 And Disqualify = 2 Then rob(n).Dead = True  'safe kill robot
       End If
       
     End If
@@ -1447,29 +1427,13 @@ Private Sub FireTies(ByVal n As Integer)
 End Sub
 
 Private Sub DeleteSpecies(i As Integer)
-  Dim X As Integer
+  Dim x As Integer
   
-  For X = i To SimOpts.SpeciesNum - 1
-    SimOpts.Specie(X) = SimOpts.Specie(X + 1)
-  Next X
-  SimOpts.Specie(SimOpts.SpeciesNum - 1).Native = False ' Do this just in case
+  For x = i To SimOpts.SpeciesNum - 1
+    SimOpts.Specie(x) = SimOpts.Specie(x + 1)
+  Next x
   SimOpts.SpeciesNum = SimOpts.SpeciesNum - 1
    
-End Sub
-
-
-Private Sub RemoveExtinctSpecies()
-Dim i, j As Integer
-  
-  i = 0
-  While i < SimOpts.SpeciesNum
-    If SimOpts.Specie(i).population = 0 And Not SimOpts.Specie(i).Native Then
-      DeleteSpecies (i)
-      ' Don't increment i since we need to recheck the i postion after deleting the species
-    Else
-      i = i + 1
-    End If
-  Wend
 End Sub
 
 'The heart of the robots to simulation interfacing
@@ -1481,7 +1445,7 @@ Public Sub UpdateBots()
   Dim z As Integer
   Dim q As Integer
   Dim ti As Single
-  Dim X As Integer
+  Dim x As Integer
   Dim staticV As Single
     
   rp = 1
@@ -1498,19 +1462,6 @@ Public Sub UpdateBots()
   totnvegs = 0
   totvegsDisplayed = totvegs
   totvegs = 0
-  
-  If ContestMode Then
-    F1count = F1count + 1
-    If F1count = SampFreq Then Countpop
-  End If
-  
-  'Need to do this first as NetForces can update bots later in the loop
-  For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
-      If numTeleporters > 0 Then CheckTeleporters t
-    End If
-  Next t
-  
   
   'Only calculate mass due to fuild displacement if the sim medium has density.
   If SimOpts.Density <> 0 Then
@@ -1544,8 +1495,8 @@ Public Sub UpdateBots()
       If Not rob(t).Fixed Then NetForces t 'calculate forces on all robots
       BucketsCollision t
       'Botsareus 6/17/2016 Static friction fix
-      If rob(t).ImpulseStatic > 0 And (rob(t).ImpulseInd.X <> 0 Or rob(t).ImpulseInd.Y <> 0) Then
-        If rob(t).vel.X = 0 And rob(t).vel.Y = 0 Then
+      If rob(t).ImpulseStatic > 0 And (rob(t).ImpulseInd.x <> 0 Or rob(t).ImpulseInd.y <> 0) Then
+        If rob(t).vel.x = 0 And rob(t).vel.y = 0 Then
             staticV = rob(t).ImpulseStatic
         Else
             'Takes into account the fact that the robot may be moving along the same vector
@@ -1642,18 +1593,6 @@ Public Sub UpdateBots()
   Next t
   'DoEvents
   ReproduceAndKill
-  RemoveExtinctSpecies
-  
-  
-  'Restart
-  'Leaguemode handles restarts differently so only restart here if not in leaguemode
-  If totnvegs = 0 And SimOpts.Restart And Not SimOpts.F1 Then 'Botsareus 6/11/2013 Using SimOpts instead of raw RestartMode
-  ' totnvegs = 1
-  ' Contests = Contests + 1
-    ReStarts = ReStarts + 1
-  ' Form1.StartSimul
-    StartAnotherRound = True
-  End If
 End Sub
 
 Private Sub ReproduceAndKill()
@@ -1788,9 +1727,6 @@ Private Sub robshoot(n As Integer)
     If rob(n).nrg < Cost Then Cost = rob(n).nrg
     rob(n).nrg = rob(n).nrg - Cost ' EricL - postive shots should cost the shotcost
     newshot n, shtype, value, 1, True
-    'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason rob(n).FName, rob(n).tag, "firing an info shot"
-    If Not SimOpts.F1 And rob(n).dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
   Case -1 ' Nrg request Feeding Shot
     If rob(n).Multibot Then
       value = 20 + (rob(n).body / 5) * (IIf(rob(n).numties < 0, 0, rob(n).numties) + 1) 'Botsareus 6/22/2016 Bugfix
@@ -2041,9 +1977,6 @@ Public Sub storevenom(n As Integer)
     .mem(824) = 0                          ' reset the .mkvenom sysvar
     .mem(825) = Int(.venom)               ' update the .venom sysvar
 getout:
-    'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason .FName, .tag, "making venom"
-    If Not SimOpts.F1 And .dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
   End With
 End Sub
 ' Robot n converts some of his energy to poison
@@ -2081,9 +2014,6 @@ Public Sub storepoison(n As Integer)
     .mem(826) = 0                          ' reset the .mkpoison sysvar
     .mem(827) = CInt(.poison)              ' update the .poison sysvar
 getout:
-    'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason .FName, .tag, "making poison"
-    If Not SimOpts.F1 And .dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
   End With
  
 End Sub
@@ -2142,8 +2072,8 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
   
   tempnrg = rob(n).nrg
   If tempnrg > 0 Then
-    nx = rob(n).pos.X + absx(rob(n).aim, sondist, 0, 0, 0)
-    ny = rob(n).pos.Y + absy(rob(n).aim, sondist, 0, 0, 0)
+    nx = rob(n).pos.x + absx(rob(n).aim, sondist, 0, 0, 0)
+    ny = rob(n).pos.y + absy(rob(n).aim, sondist, 0, 0, 0)
     tests = tests Or simplecoll(nx, ny, n)
     tests = tests Or Not rob(n).exist 'Botsareus 6/4/2014 Can not reproduce from a dead robot
     'tests = tests Or (rob(n).Fixed And IsInSpawnArea(nx, ny))
@@ -2180,11 +2110,11 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
       Erase rob(nuovo).mem
       Erase rob(nuovo).Ties
       
-      rob(nuovo).pos.X = rob(n).pos.X + absx(rob(n).aim, sondist, 0, 0, 0)
-      rob(nuovo).pos.Y = rob(n).pos.Y + absy(rob(n).aim, sondist, 0, 0, 0)
+      rob(nuovo).pos.x = rob(n).pos.x + absx(rob(n).aim, sondist, 0, 0, 0)
+      rob(nuovo).pos.y = rob(n).pos.y + absy(rob(n).aim, sondist, 0, 0, 0)
       rob(nuovo).exist = True
-      rob(nuovo).BucketPos.X = -2
-      rob(nuovo).BucketPos.Y = -2
+      rob(nuovo).BucketPos.x = -2
+      rob(nuovo).BucketPos.y = -2
       UpdateBotBucket nuovo
       rob(nuovo).vel = rob(n).vel
       rob(nuovo).actvel = rob(n).actvel 'Botsareus 7/1/2016 Bugfix
@@ -2252,24 +2182,7 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
       rob(nuovo).tag = rob(n).tag
       'Botsareus 7/22/2014 Both robots should have same boyancy
       rob(nuovo).Bouyancy = rob(n).Bouyancy
-      
-      'Botsareus 7/29/2014 New kill restrictions
-      If rob(n).multibot_time > 0 Then rob(nuovo).multibot_time = rob(n).multibot_time / 2 + 2
-      rob(nuovo).dq = rob(n).dq
-    
-'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
-'      For i = 0 To 500
-'        rob(nuovo).Ancestors(i) = rob(n).Ancestors(i)  ' copy the parents ancestor list
-'      Next i
-'      rob(nuovo).AncestorIndex = rob(n).AncestorIndex + 1  ' increment the ancestor index
-'      If rob(nuovo).AncestorIndex > 500 Then rob(nuovo).AncestorIndex = 0  ' wrap it
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).num = rob(n).AbsNum  ' add the parent as the most recent ancestor
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).mut = rob(n).LastMut ' add the number of mutations the parent has had up until now.
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).sim = SimOpts.SimGUID ' Use this seed to uniqufiy this ancestor in Internet mode
-        
-      'BucketsProximity n, 12
-      'BucketsProximity nuovo, 12
-      
+            
       rob(nuovo).Vtimer = 0
       rob(nuovo).virusshot = 0
       
@@ -2295,17 +2208,8 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
             Dim dmoc As Double
             dmoc = 1 + (rob(nuovo).DnaLen - curr_dna_size) / 500
             If dmoc < 0.01 Then dmoc = 0.01 'Botsareus 1/16/2016 Bug fix
-            If Not y_normsize Then dmoc = 1
+             dmoc = 1
             'zerobot stabilization
-            If x_restartmode = 7 Or x_restartmode = 8 Then
-                If .FName = "Mutate.txt" Then
-                    'normalize child
-                    .Mutables.mutarray(PointUP) = .Mutables.mutarray(PointUP) * 1.75
-                    If .Mutables.mutarray(PointUP) > MratesMax Then .Mutables.mutarray(PointUP) = MratesMax
-                    .Mutables.mutarray(P2UP) = .Mutables.mutarray(P2UP) * 1.75
-                    If .Mutables.mutarray(P2UP) > MratesMax Then .Mutables.mutarray(P2UP) = MratesMax
-                End If
-            End If
             '
             Dim mrep As Byte
             For mrep = 0 To (Int(3 * rndy) + 1) * -(rob(n).mem(mrepro) > 0)   '2x to 4x
@@ -2381,11 +2285,6 @@ skip:
       rob(n).onrg = rob(n).nrg 'saves parent from dying from shock after giving birth
       rob(nuovo).mass = nbody / 1000 + rob(nuovo).shell / 200
       rob(nuovo).mem(timersys) = rob(n).mem(timersys) 'epigenetic timer
-      
-      'A little hack here to remain in control of reproduced robots
-      If MDIForm1.pbOn.Checked Then
-        If n = robfocus Or rob(n).highlight Then rob(nuovo).highlight = True
-      End If
                 
       'Successfully reproduced
       rob(n).mem(Repro) = 0
@@ -2468,19 +2367,14 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
   
   tempnrg = rob(female).nrg
   If tempnrg > 0 Then
-    nx = rob(female).pos.X + absx(rob(female).aim, sondist, 0, 0, 0)
-    ny = rob(female).pos.Y + absy(rob(female).aim, sondist, 0, 0, 0)
+    nx = rob(female).pos.x + absx(rob(female).aim, sondist, 0, 0, 0)
+    ny = rob(female).pos.y + absy(rob(female).aim, sondist, 0, 0, 0)
     tests = tests Or simplecoll(nx, ny, female)
     tests = tests Or Not rob(female).exist 'Botsareus 6/4/2014 Can not reproduce from a dead robot
     'tests = tests Or (rob(n).Fixed And IsInSpawnArea(nx, ny))
     If Not tests Then
     
     'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason rob(female).FName, rob(female).tag, "attempting to reproduce sexually"
-    If Not SimOpts.F1 And rob(female).dq = 1 And Disqualify = 2 Then
-        rob(female).Dead = True 'safe kill robot
-        GoTo getout
-    End If
       'Do the crossover.  The sperm DNA is on the mom's bot structure
       'Botsareus 4/2/2013 Crossover fix
       'Botsareus 5/24/2014 Crossover fix
@@ -2628,11 +2522,11 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
       Erase rob(nuovo).mem
       Erase rob(nuovo).Ties
       
-      rob(nuovo).pos.X = rob(female).pos.X + absx(rob(female).aim, sondist, 0, 0, 0)
-      rob(nuovo).pos.Y = rob(female).pos.Y + absy(rob(female).aim, sondist, 0, 0, 0)
+      rob(nuovo).pos.x = rob(female).pos.x + absx(rob(female).aim, sondist, 0, 0, 0)
+      rob(nuovo).pos.y = rob(female).pos.y + absy(rob(female).aim, sondist, 0, 0, 0)
       rob(nuovo).exist = True
-      rob(nuovo).BucketPos.X = -2
-      rob(nuovo).BucketPos.Y = -2
+      rob(nuovo).BucketPos.x = -2
+      rob(nuovo).BucketPos.y = -2
       UpdateBotBucket nuovo
       
       rob(nuovo).vel = rob(female).vel
@@ -2711,21 +2605,6 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
       'Botsareus 7/22/2014 Both robots should have same boyancy
       rob(nuovo).Bouyancy = rob(female).Bouyancy
       
-      'Botsareus 7/29/2014 New kill restrictions
-      If rob(female).multibot_time > 0 Then rob(nuovo).multibot_time = rob(female).multibot_time / 2 + 2
-      rob(nuovo).dq = rob(female).dq
-        
-'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
-'      For i = 0 To 500
-'        rob(nuovo).Ancestors(i) = rob(female).Ancestors(i)  ' copy the parents ancestor list
-'      Next i
-'      rob(nuovo).AncestorIndex = rob(female).AncestorIndex + 1  ' increment the ancestor index
-'      If rob(nuovo).AncestorIndex > 500 Then rob(nuovo).AncestorIndex = 0  ' wrap it
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).num = rob(female).AbsNum  ' add the parent as the most recent ancestor
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).mut = rob(female).LastMut ' add the number of mutations the parent has had up until now.
-'      rob(nuovo).Ancestors(rob(nuovo).AncestorIndex).sim = SimOpts.SimGUID ' Use this seed to uniqufiy this ancestor in Internet mode
-      
-         
       rob(nuovo).Vtimer = 0
       rob(nuovo).virusshot = 0
       
@@ -2754,17 +2633,8 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
             Dim dmoc As Double
             dmoc = 1 + (rob(nuovo).DnaLen - curr_dna_size) / 500
             If dmoc < 0.01 Then dmoc = 0.01 'Botsareus 1/16/2016 Bug fix
-            If Not y_normsize Then dmoc = 1
-            'zerobot stabilization
-            If x_restartmode = 7 Or x_restartmode = 8 Then
-                If .FName = "Mutate.txt" Then
-                    'normalize child
-                    .Mutables.mutarray(PointUP) = .Mutables.mutarray(PointUP) * 1.75
-                    If .Mutables.mutarray(PointUP) > MratesMax Then .Mutables.mutarray(PointUP) = MratesMax
-                    .Mutables.mutarray(P2UP) = .Mutables.mutarray(P2UP) * 1.75
-                    If .Mutables.mutarray(P2UP) > MratesMax Then .Mutables.mutarray(P2UP) = MratesMax
-                End If
-            End If
+             dmoc = 1
+
             '
             For t = 1 To 10
              If t = 9 Then GoTo skip 'ignore PM2 mutation here
@@ -2816,11 +2686,6 @@ skip:
       rob(nuovo).mass = nbody / 1000 + rob(nuovo).shell / 200
       rob(nuovo).mem(timersys) = rob(female).mem(timersys) 'epigenetic timer
       
-      'A little hack here to remain in control of reproduced robots
-      If MDIForm1.pbOn.Checked Then
-        If female = robfocus Or rob(female).highlight Then rob(nuovo).highlight = True
-      End If
-      
       rob(female).mem(SEXREPRO) = 0 ' sucessfully reproduced, so reset .sexrepro
       rob(female).fertilized = -1           ' Set to -1 so spermDNA space gets reclaimed next cycle
       rob(female).mem(SYSFERTILIZED) = 0    ' Sperm is only good for one birth presently
@@ -2865,7 +2730,7 @@ Public Sub DoGeneticMemory(t As Integer)
 End Sub
 
 ' verifies rapidly if a field position is already occupied
-Public Function simplecoll(X As Long, Y As Long, k As Integer) As Boolean
+Public Function simplecoll(x As Long, y As Long, k As Integer) As Boolean
   Dim t As Integer
   Dim radius As Long
   
@@ -2873,8 +2738,8 @@ Public Function simplecoll(X As Long, Y As Long, k As Integer) As Boolean
   
   For t = 1 To MaxRobs
     If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
-      If Abs(rob(t).pos.X - X) < rob(t).radius + rob(k).radius And _
-        Abs(rob(t).pos.Y - Y) < rob(t).radius + rob(k).radius Then
+      If Abs(rob(t).pos.x - x) < rob(t).radius + rob(k).radius And _
+        Abs(rob(t).pos.y - y) < rob(t).radius + rob(k).radius Then
         If k <> t Then
           simplecoll = True
           GoTo getout
@@ -2885,21 +2750,21 @@ Public Function simplecoll(X As Long, Y As Long, k As Integer) As Boolean
   
   'EricL Can't reproduce into or across a shape
   For t = 1 To numObstacles
-    If Not ((Obstacles.Obstacles(t).pos.X > Max(rob(k).pos.X, X)) Or _
-           (Obstacles.Obstacles(t).pos.X + Obstacles.Obstacles(t).Width < Min(rob(k).pos.X, X)) Or _
-           (Obstacles.Obstacles(t).pos.Y > Max(rob(k).pos.Y, Y)) Or _
-           (Obstacles.Obstacles(t).pos.Y + Obstacles.Obstacles(t).Height < Min(rob(k).pos.Y, Y))) Then
+    If Not ((Obstacles.Obstacles(t).pos.x > Max(rob(k).pos.x, x)) Or _
+           (Obstacles.Obstacles(t).pos.x + Obstacles.Obstacles(t).Width < Min(rob(k).pos.x, x)) Or _
+           (Obstacles.Obstacles(t).pos.y > Max(rob(k).pos.y, y)) Or _
+           (Obstacles.Obstacles(t).pos.y + Obstacles.Obstacles(t).Height < Min(rob(k).pos.y, y))) Then
        simplecoll = True
        GoTo getout
     End If
   Next t
   
   If SimOpts.Dxsxconnected = False Then
-    If X < rob(k).radius + smudgefactor Or X + rob(k).radius + smudgefactor > SimOpts.FieldWidth Then simplecoll = True
+    If x < rob(k).radius + smudgefactor Or x + rob(k).radius + smudgefactor > SimOpts.FieldWidth Then simplecoll = True
   End If
   
   If SimOpts.Updnconnected = False Then
-    If Y < rob(k).radius + smudgefactor Or Y + rob(k).radius + smudgefactor > SimOpts.FieldHeight Then simplecoll = True
+    If y < rob(k).radius + smudgefactor Or y + rob(k).radius + smudgefactor > SimOpts.FieldHeight Then simplecoll = True
   End If
 getout:
 End Function
@@ -2909,7 +2774,7 @@ Public Function posto() As Integer
   Dim newsize As Long
   Dim t As Integer
   Dim foundone As Boolean
-  Dim X As Long
+  Dim x As Long
   
   t = 1
   foundone = False
@@ -2976,22 +2841,8 @@ Public Sub KillRobot(n As Integer)
     End If
   End If
 
-
-'robfocus to next highlighted robot on kill robot for playerbot mode
-If n = robfocus And MDIForm1.pbOn.Checked Then
-  Dim t As Integer
-  For t = 1 To MaxRobs
-    With rob(t)
-     If .exist And .highlight And t <> n Then
-        robfocus = t
-     End If
-    End With
-  Next
-End If
-
-
  Dim newsize As Long
- Dim X As Long
+ Dim x As Long
  
   'If n = -1 Then n = robfocus
    

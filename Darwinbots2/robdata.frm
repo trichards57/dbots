@@ -55,6 +55,7 @@ Begin VB.Form datirob
          _ExtentX        =   11562
          _ExtentY        =   11827
          _Version        =   393217
+         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"robdata.frx":0E42
@@ -603,14 +604,13 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Public Senses As Boolean
-Public enlarged As Boolean
-Public showingMemory As Boolean
+Private enlarged As Boolean
+Private showingMemory As Boolean
 Public ShowMemoryEarlyCycle As Boolean
 
 Private Sub robfname_DblClick() 'Botsareus 10/26/2014 Should make forking easyer
-Clipboard.CLEAR
-Clipboard.SetText robfname.Caption
+  Clipboard.CLEAR
+  Clipboard.SetText robfname.Caption
 End Sub
 
 Public Sub ShowDna()
@@ -618,13 +618,13 @@ Public Sub ShowDna()
 End Sub
 
 Private Sub btnMark_Click() 'Botsareus 2/25/2013 Makes the program easy to debug
-Visible = False
-Dim poz As Double
-    poz = val(InputBox("""[<POSITION MARKER]"" will be displayed next to dna location. Specify position:"))
-    poz = Abs(poz)
-    If poz > 32000 Then poz = 32000
-Visible = True
-dnatext.text = DetokenizeDNA(robfocus, CInt(poz))
+  Visible = False
+  Dim poz As Double
+  poz = val(InputBox("""[<POSITION MARKER]"" will be displayed next to dna location. Specify position:"))
+  poz = Abs(poz)
+  If poz > 32000 Then poz = 32000
+  Visible = True
+  dnatext.text = DetokenizeDNA(robfocus, CInt(poz))
 End Sub
 
 Private Sub Command3_Click()
@@ -655,7 +655,7 @@ Private Sub dnashow_Click()
 End Sub
 
 Private Sub dnatext_Change()
-robtag.Caption = Left(rob(robfocus).tag, 45) 'Botsareus 1/28/2014 New short description feature
+  robtag.Caption = Left(rob(robfocus).tag, 45) 'Botsareus 1/28/2014 New short description feature
 End Sub
 
 Private Sub Form_Activate()
@@ -663,8 +663,8 @@ Private Sub Form_Activate()
 End Sub
 
 Private Sub MemoryCommand_Click()
- showingMemory = True
- MemoryStateCheck.Visible = True
+  showingMemory = True
+  MemoryStateCheck.Visible = True
   Me.Width = 12645
   dnatext.Width = 9050
   Frame2.Width = 4695 + 8055
@@ -676,9 +676,10 @@ Private Sub MemoryCommand_Click()
   End If
   btnMark.Visible = False 'Botsareus 3/15/2013 Makes dna easyer to debug
 End Sub
-Public Function GetRobMemoryString(n As Integer) As String
-Dim i As Integer
-Dim j As Integer
+
+Private Function GetRobMemoryString(n As Integer) As String
+  Dim i As Integer
+  Dim j As Integer
 
   If Not rob(n).exist Then
     GetRobMemoryString = "This robot is dead"
@@ -693,7 +694,6 @@ Dim j As Integer
   Next j
   
 End Function
-
 
 Private Sub MemoryStateCheck_Click()
   ShowMemoryEarlyCycle = MemoryStateCheck.value
@@ -716,11 +716,11 @@ Private Function GiveMutationDetails(robfocus) As String
 End Function
 
 Private Sub robtag_DblClick() 'Botsareus 1/28/2014 Enter short description for robot
-    SetWindowPos hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
-    rob(robfocus).tag = InputBox("Enter short description for robot. Can not be more then 45 characters long.", , Left(rob(robfocus).tag, 45))
-    rob(robfocus).tag = Left(replacechars(rob(robfocus).tag), 45)
-    robtag.Caption = rob(robfocus).tag
-    SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
+  SetWindowPos hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
+  rob(robfocus).tag = InputBox("Enter short description for robot. Can not be more then 45 characters long.", , Left(rob(robfocus).tag, 45))
+  rob(robfocus).tag = Left(replacechars(rob(robfocus).tag), 45)
+  robtag.Caption = rob(robfocus).tag
+  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
 End Sub
 
 Private Sub ShrinkWin_Click()
@@ -736,7 +736,7 @@ Public Sub RefreshDna()
   End If
 End Sub
 
-Sub Form_Load()
+Private Sub Form_Load()
   strings Me
   rage.Caption = "Age (cycles)" 'EricL 4/13/2006 Override resource file because I don't have a resource editor handy :)
   Me.Width = 3255
@@ -745,7 +745,7 @@ Sub Form_Load()
   MemoryStateCheck.value = 0
 End Sub
 
-Sub infoupdate(n As Integer, nrg As Single, par As Long, mut As Long, age As Long, _
+Public Sub infoupdate(n As Integer, nrg As Single, par As Long, mut As Long, age As Long, _
                 son As Integer, pmut As Single, FName As String, gn As Integer, mo As Long, _
                 gennum As Integer, DnaLen As Integer, lastown As String, Waste As Single, body As Single, _
                 mass As Single, venom As Single, shell As Single, Slime As Single, ChlrVal As Single) 'Botsareus 8/25/2013 Mod to display chloroplast info.
@@ -781,7 +781,7 @@ Sub infoupdate(n As Integer, nrg As Single, par As Long, mut As Long, age As Lon
   If enlarged And showingMemory Then dnatext.text = GetRobMemoryString(n)
 End Sub
 
-Sub Form_Unload(Cancel As Integer)
+Public Sub Form_Unload(Cancel As Integer)
   If Cancel = 0 Then
     Cancel = -1
     datirob.Visible = False

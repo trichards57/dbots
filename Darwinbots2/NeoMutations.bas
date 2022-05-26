@@ -59,29 +59,29 @@ Private Function EraseUnit(ByRef unit As block)
   unit.value = -1
 End Function
 
-Public Function MakeSpace(ByRef dna() As block, ByVal beginning As Long, ByVal Length As Long, Optional DNALength As Integer = -1) As Boolean
+Public Function MakeSpace(ByRef dna() As block, ByVal beginning As Long, ByVal length As Long, Optional DNALength As Integer = -1) As Boolean
   'add length elements after beginning.  Beginning doesn't move places
   'returns true if the space was created,
   'false otherwise
 
   Dim t As Integer
   If DNALength < 0 Then DNALength = DnaLen(dna)
-  If Length < 1 Or beginning < 0 Or beginning > DNALength - 1 Or (DNALength + Length > 32000) Then
+  If length < 1 Or beginning < 0 Or beginning > DNALength - 1 Or (DNALength + length > 32000) Then
     MakeSpace = False
     GoTo getout
   End If
   
   MakeSpace = True
 
-  ReDim Preserve dna(DNALength + Length)
+  ReDim Preserve dna(DNALength + length)
   
   'Botsareus 6/25/2016 Bugfix - erase dna that was just created to insure all units get erased
-  For t = DNALength + 1 To DNALength + Length Step 1
+  For t = DNALength + 1 To DNALength + length Step 1
     EraseUnit dna(t)
   Next
 
   For t = DNALength To beginning + 1 Step -1
-    dna(t + Length) = dna(t)
+    dna(t + length) = dna(t)
     EraseUnit dna(t)
   Next t
 getout:
@@ -243,7 +243,7 @@ On Error GoTo getout:
   '4. Insert copied DNA
       
   Dim t As Long
-  Dim Length As Long
+  Dim length As Long
   With rob(robn)
   
  Dim floor As Double
@@ -259,22 +259,22 @@ On Error GoTo getout:
   Do
   t = t + 1
     If rndy < 1 / (.Mutables.mutarray(AmplificationUP) / SimOpts.MutCurrMult) Then
-      Length = Gauss(.Mutables.StdDev(AmplificationUP), .Mutables.Mean(AmplificationUP))
-      Length = Length Mod UBound(.dna)
-      If Length < 1 Then Length = 1
+      length = Gauss(.Mutables.StdDev(AmplificationUP), .Mutables.Mean(AmplificationUP))
+      length = length Mod UBound(.dna)
+      If length < 1 Then length = 1
       
-      Length = Length - 1
-      Length = Length \ 2
-      If t - Length < 1 Then GoTo skip
-      If t + Length > .DnaLen - 1 Then GoTo skip
-      If UBound(.dna) + CLng(Length) * 2 > 32000 Then GoTo skip 'Botsareus 10/5/2015 Size limit is calculated here
+      length = length - 1
+      length = length \ 2
+      If t - length < 1 Then GoTo skip
+      If t + length > .DnaLen - 1 Then GoTo skip
+      If UBound(.dna) + CLng(length) * 2 > 32000 Then GoTo skip 'Botsareus 10/5/2015 Size limit is calculated here
       
-      If Length > 0 Then
+      If length > 0 Then
       
-        ReDim tempDNA(Length * 2)
+        ReDim tempDNA(length * 2)
         
         second = 0
-        For counter = t - Length To t + Length
+        For counter = t - length To t + length
           tempDNA(second) = .dna(counter)
           second = second + 1
         Next counter
@@ -290,7 +290,7 @@ On Error GoTo getout:
         'BOTSAREUSIFIED
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
-        logmutation robn, "Amplification copied a series at" + Str(t) + Str(Length * 2 + 1) + "bps long to " + Str(start) + " during cycle" + _
+        logmutation robn, "Amplification copied a series at" + Str(t) + Str(length * 2 + 1) + "bps long to " + Str(start) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
           
       End If
@@ -316,7 +316,7 @@ On Error GoTo getout:
   '4. Insert copied DNA
   
   Dim t As Long
-  Dim Length As Long
+  Dim length As Long
   With rob(robn)
   
  Dim floor As Double
@@ -332,28 +332,28 @@ On Error GoTo getout:
   For t = 1 To UBound(.dna) - 1
     If rndy < 1 / (.Mutables.mutarray(TranslocationUP) / SimOpts.MutCurrMult) Then
 
-      Length = Gauss(.Mutables.StdDev(TranslocationUP), .Mutables.Mean(TranslocationUP))
-      Length = Length Mod UBound(.dna)
-      If Length < 1 Then Length = 1
+      length = Gauss(.Mutables.StdDev(TranslocationUP), .Mutables.Mean(TranslocationUP))
+      length = length Mod UBound(.dna)
+      If length < 1 Then length = 1
       
-      Length = Length - 1
-      Length = Length \ 2
-      If t - Length < 1 Then GoTo skip
-      If t + Length > UBound(.dna) - 1 Then GoTo skip
+      length = length - 1
+      length = length \ 2
+      If t - length < 1 Then GoTo skip
+      If t + length > UBound(.dna) - 1 Then GoTo skip
       
-      If Length > 0 Then
+      If length > 0 Then
       
-        ReDim tempDNA(Length * 2)
+        ReDim tempDNA(length * 2)
         
         second = 0
-        For counter = t - Length To t + Length
+        For counter = t - length To t + length
           tempDNA(second) = .dna(counter)
           second = second + 1
         Next counter
         'we now have the appropriate length of DNA in the temporary array.
         
         'delete fragment
-        Delete .dna, t - Length, Length * 2 + 1 'Botsareus 12/11/2015 Bug fix
+        Delete .dna, t - length, length * 2 + 1 'Botsareus 12/11/2015 Bug fix
 
         'open up a hole
         start = Random(1, UBound(.dna) - 2)
@@ -366,7 +366,7 @@ On Error GoTo getout:
         'BOTSAREUSIFIED
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
-        logmutation robn, "Translocation moved a series at" + Str(t) + Str(Length * 2 + 1) + "bps long to " + Str(start) + " during cycle" + _
+        logmutation robn, "Translocation moved a series at" + Str(t) + Str(length * 2 + 1) + "bps long to " + Str(start) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
           
           
@@ -574,7 +574,7 @@ End Sub
 
 Private Sub CopyError(robn As Integer)
   Dim t As Long
-  Dim Length As Long
+  Dim length As Long
   
   With rob(robn)
   
@@ -586,10 +586,10 @@ Private Sub CopyError(robn As Integer)
   For t = 1 To (.DnaLen - 1) 'note that DNA(.dnalen) = end, and we DON'T mutate that.
    
     If rndy < 1 / (rob(robn).Mutables.mutarray(CopyErrorUP) / SimOpts.MutCurrMult) Then
-      Length = Gauss(rob(robn).Mutables.StdDev(CopyErrorUP), _
+      length = Gauss(rob(robn).Mutables.StdDev(CopyErrorUP), _
         rob(robn).Mutables.Mean(CopyErrorUP)) 'length
         
-      ChangeDNA robn, t, Length, rob(robn).Mutables.CopyErrorWhatToChange, _
+      ChangeDNA robn, t, length, rob(robn).Mutables.CopyErrorWhatToChange, _
         CopyErrorUP
     End If
   Next t
@@ -682,7 +682,7 @@ With rob(robn)
 End With
 End Sub
 
-Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal Length As Long = 1, Optional ByVal PointWhatToChange As Integer = 50, Optional Mtype As Integer = PointUP)
+Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length As Long = 1, Optional ByVal PointWhatToChange As Integer = 50, Optional Mtype As Integer = PointUP)
 
   'we need to rework .lastmutdetail
   Dim Max As Long
@@ -696,7 +696,7 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal Length 
   
   With rob(robn)
      
-  For t = nth To (nth + Length - 1) 'if length is 1, it's only one bp we're mutating, remember?
+  For t = nth To (nth + length - 1) 'if length is 1, it's only one bp we're mutating, remember?
     If t >= .DnaLen Then GoTo getout 'don't mutate end either
     If .dna(t).tipo = 10 Then GoTo getout 'mutations can't cross control barriers
     
@@ -810,7 +810,7 @@ End Sub
 
 Private Sub Insertion(robn As Integer)
   Dim location As Integer
-  Dim Length As Integer
+  Dim length As Integer
   Dim accum As Long
   Dim t As Long
   
@@ -825,17 +825,17 @@ Private Sub Insertion(robn As Integer)
       If rndy < 1 / (.Mutables.mutarray(InsertionUP) / SimOpts.MutCurrMult) Then
         If .Mutables.Mean(InsertionUP) = 0 Then .Mutables.Mean(InsertionUP) = 1
         Do
-          Length = Gauss(.Mutables.StdDev(InsertionUP), .Mutables.Mean(InsertionUP))
-        Loop While Length <= 0
+          length = Gauss(.Mutables.StdDev(InsertionUP), .Mutables.Mean(InsertionUP))
+        Loop While length <= 0
         
-        If CLng(rob(robn).DnaLen) + CLng(Length) > 32000 Then Exit Sub
+        If CLng(rob(robn).DnaLen) + CLng(length) > 32000 Then Exit Sub
         
         
-        MakeSpace .dna(), t + accum, Length, .DnaLen
-        rob(robn).DnaLen = rob(robn).DnaLen + Length
-        ChangeDNA robn, t + 1 + accum, Length, 0, InsertionUP 'change the type first so that the mutated value is within the space of the new type
-        ChangeDNA robn, t + 1 + accum, Length, 100, InsertionUP 'set a good value up
-        accum = Length + accum 'Botsareus 3/22/2016 Bugfix Since DNA expended move index down
+        MakeSpace .dna(), t + accum, length, .DnaLen
+        rob(robn).DnaLen = rob(robn).DnaLen + length
+        ChangeDNA robn, t + 1 + accum, length, 0, InsertionUP 'change the type first so that the mutated value is within the space of the new type
+        ChangeDNA robn, t + 1 + accum, length, 100, InsertionUP 'set a good value up
+        accum = length + accum 'Botsareus 3/22/2016 Bugfix Since DNA expended move index down
       End If
     Next t
       
@@ -844,7 +844,7 @@ End Sub
 
 Private Sub Reversal(robn As Integer)
   'reverses a length of DNA
-  Dim Length As Long
+  Dim length As Long
   Dim counter As Long
   Dim location As Long
   Dim low As Long
@@ -867,27 +867,27 @@ Private Sub Reversal(robn As Integer)
         If .Mutables.Mean(ReversalUP) < 2 Then .Mutables.Mean(ReversalUP) = 2
         
         Do
-          Length = Gauss(.Mutables.StdDev(ReversalUP), .Mutables.Mean(ReversalUP))
-        Loop While Length <= 0
+          length = Gauss(.Mutables.StdDev(ReversalUP), .Mutables.Mean(ReversalUP))
+        Loop While length <= 0
         
-        Length = Length \ 2 'be sure we go an even amount to either side
+        length = length \ 2 'be sure we go an even amount to either side
         
-        If t - Length < 1 Then Length = t - 1
-        If t + Length > .DnaLen - 1 Then Length = .DnaLen - 1 - t
-        If Length > 0 Then
+        If t - length < 1 Then length = t - 1
+        If t + length > .DnaLen - 1 Then length = .DnaLen - 1 - t
+        If length > 0 Then
         
           second = 0
-          For counter = t - Length To t - 1
+          For counter = t - length To t - 1
             tempblock = .dna(counter)
-            .dna(counter) = .dna(t + Length - second)
-            .dna(t + Length - second) = tempblock
+            .dna(counter) = .dna(t + length - second)
+            .dna(t + length - second) = tempblock
             second = second + 1
           Next counter
           
           .Mutations = .Mutations + 1
           .LastMut = .LastMut + 1
           
-          logmutation robn, "Reversal of" + Str(Length * 2 + 1) + "bps centered at " + Str(t) + " during cycle" + _
+          logmutation robn, "Reversal of" + Str(length * 2 + 1) + "bps centered at " + Str(t) + " during cycle" + _
             Str(SimOpts.TotRunCycle)
          
         End If
@@ -897,7 +897,7 @@ Private Sub Reversal(robn As Integer)
 End Sub
 
 Private Sub MinorDeletion(robn As Integer)
-  Dim Length As Long, t As Long
+  Dim length As Long, t As Long
   With rob(robn)
   
  Dim floor As Double
@@ -910,20 +910,20 @@ Private Sub MinorDeletion(robn As Integer)
     For t = 1 To (.DnaLen - 1)
       If rndy < 1 / (.Mutables.mutarray(MinorDeletionUP) / SimOpts.MutCurrMult) Then
         Do
-          Length = Gauss(.Mutables.StdDev(MinorDeletionUP), .Mutables.Mean(MinorDeletionUP))
-        Loop While Length <= 0
+          length = Gauss(.Mutables.StdDev(MinorDeletionUP), .Mutables.Mean(MinorDeletionUP))
+        Loop While length <= 0
         
-        If t + Length > .DnaLen Then Length = .DnaLen - t 'Botsareus 3/22/2016 Bug fix
-        If Length <= 0 Then Exit Sub  'Botsareus 3/22/2016 Bugfix
+        If t + length > .DnaLen Then length = .DnaLen - t 'Botsareus 3/22/2016 Bug fix
+        If length <= 0 Then Exit Sub  'Botsareus 3/22/2016 Bugfix
         
-        Delete .dna, t, Length, .DnaLen
+        Delete .dna, t, length, .DnaLen
         
         .DnaLen = DnaLen(.dna())
         
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
         logmutation robn, "Minor Deletion deleted a run of" + _
-          Str(Length) + " bps at position" + Str(t) + " during cycle" + _
+          Str(length) + " bps at position" + Str(t) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
         
       End If
@@ -932,7 +932,7 @@ Private Sub MinorDeletion(robn As Integer)
 End Sub
 
 Private Sub MajorDeletion(robn As Integer)
-  Dim Length As Long, t As Long
+  Dim length As Long, t As Long
   With rob(robn)
   
  Dim floor As Double
@@ -944,20 +944,20 @@ Private Sub MajorDeletion(robn As Integer)
     For t = 1 To (.DnaLen - 1)
       If rndy < 1 / (.Mutables.mutarray(MajorDeletionUP) / SimOpts.MutCurrMult) Then
         Do
-          Length = Gauss(.Mutables.StdDev(MajorDeletionUP), .Mutables.Mean(MajorDeletionUP))
-        Loop While Length <= 0
+          length = Gauss(.Mutables.StdDev(MajorDeletionUP), .Mutables.Mean(MajorDeletionUP))
+        Loop While length <= 0
         
-        If t + Length > .DnaLen Then Length = .DnaLen - t 'Botsareus 3/22/2016 Bugfix
-        If Length <= 0 Then Exit Sub  'Botsareus 3/22/2016 Bugfix
+        If t + length > .DnaLen Then length = .DnaLen - t 'Botsareus 3/22/2016 Bugfix
+        If length <= 0 Then Exit Sub  'Botsareus 3/22/2016 Bugfix
         
-        Delete .dna, t, Length, .DnaLen
+        Delete .dna, t, length, .DnaLen
         
         .DnaLen = DnaLen(.dna())
         
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
         logmutation robn, "Major Deletion deleted a run of" + _
-          Str(Length) + " bps at position" + Str(t) + " during cycle" + _
+          Str(length) + " bps at position" + Str(t) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
         
       End If
@@ -1015,49 +1015,8 @@ Public Function delgene(n As Integer, g As Integer) As Boolean
     rob(n).mem(DnaLenSys) = rob(n).DnaLen
     rob(n).mem(GenesSys) = rob(n).genenum
     makeoccurrlist n
-    'Botsareus 3/14/2014 Disqualify
-    If (SimOpts.F1 Or x_restartmode = 1) And Disqualify = 2 Then dreason rob(n).FName, rob(n).tag, "deleting a gene"
-    If Not SimOpts.F1 And rob(n).dq = 1 And Disqualify = 2 Then rob(n).Dead = True 'safe kill robot
   End If
 End Function
-
-'Botsareus 10/5/2015 Replaced with something better
-''Botsareus 9/16/2014 Save a backup of the gene that is about to get deleted
-'Private Function SaveSpecificGene(ByVal n As Integer, ByVal k As Integer) As Boolean
-'  Dim i As Long, f As Long
-'  Dim t As Integer
-'  Dim b As Integer
-'  Dim datacount As Long
-'
-'  With rob(n)
-'
-'  'Make sure we have a sane memory limit
-'  datacount = UBound(.dna)
-'  For i = 0 To UBound(.delgenes)
-'    datacount = datacount + UBound(.delgenes(i).dna)
-'  Next
-'  If datacount > 32000 Then GoTo getout
-'
-'  i = genepos(.dna, k)
-'  If i < 0 Then GoTo getout
-'  f = GeneEnd(.dna, i)
-'
-'  t = UBound(.delgenes) + 1
-'  ReDim Preserve .delgenes(t)
-'  .delgenes(t).position = i
-'
-'  ReDim .delgenes(t).dna(f - i + 1)
-'  For b = i To f + 1
-'    .delgenes(t).dna(b - i) = .dna(b)
-'  Next
-'
-'  End With
-'SaveSpecificGene = True
-'Exit Function
-'getout:
-'SaveSpecificGene = False
-'End Function
-
 
 Private Sub DeleteSpecificGene(ByRef dna() As block, ByVal k As Integer)
   Dim i As Long, f As Long
@@ -1071,18 +1030,18 @@ End Sub
 
 Public Sub SetDefaultMutationRates(ByRef changeme As mutationprobs, Optional skipNorm As Boolean = False)
 'Botsareus 12/17/2013 Figure out dna length
-Dim Length As Integer
+Dim length As Integer
 Dim path As String
 If NormMut And Not skipNorm Then
     If optionsform.CurrSpec = 50 Or optionsform.CurrSpec = -1 Then    'only if current spec is selected
-        Length = rob(robfocus).DnaLen
+        length = rob(robfocus).DnaLen
     Else 'load dna length
         If MaxRobs = 0 Then ReDim rob(0)
         path = TmpOpts.Specie(optionsform.CurrSpec).path & "\" & TmpOpts.Specie(optionsform.CurrSpec).Name
         path = Replace(path, "&#", MDIForm1.MainDir)
         If dir(path) = "" Then path = MDIForm1.MainDir & "\Robots\" & TmpOpts.Specie(optionsform.CurrSpec).Name
         If LoadDNA(path, 0) Then
-            Length = DnaLen(rob(0).dna)
+            length = DnaLen(rob(0).dna)
         End If
     End If
 End If
@@ -1091,7 +1050,7 @@ End If
   With (changeme)
   
   For a = 0 To 20
-    .mutarray(a) = IIf(NormMut And Not skipNorm, Length * CLng(valNormMut), 5000)
+    .mutarray(a) = IIf(NormMut And Not skipNorm, length * CLng(valNormMut), 5000)
     .Mean(a) = 1
     .StdDev(a) = 0
   Next a

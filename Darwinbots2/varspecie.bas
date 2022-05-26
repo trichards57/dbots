@@ -28,7 +28,6 @@ Public Type datispecie
   Posrg As Single
   qty As Integer
   Comment As String
-  Leaguefilecomment As String
   Mutables As mutationprobs
   CantSee As Boolean                ' Flag indicating eyes should be turned off for this species
   DisableDNA As Boolean             ' Flag indicating DNA should not execute for this species
@@ -37,10 +36,6 @@ Public Type datispecie
   VirusImmune As Boolean            ' Flag indicating whether members of this species are suceptable to viruses.
   population As Integer             ' Number of this species in the sim.  Updated each cycle.
   SubSpeciesCounter As Integer      ' Using to increment the per-bot subspecies.
-  Native As Boolean                 ' Indicates this species was first added locally to this sim and not teleported in from another
   DisplayImage As Image
-  '
-  kill_mb As Boolean
-  dq_kill As Boolean
 End Type
 

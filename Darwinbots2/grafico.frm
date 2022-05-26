@@ -3639,19 +3639,7 @@ Dim Sum(MaxItems) As Single
 Dim Pivot As Integer
 Dim MaxSeries As Byte
 Dim maxy As Single
-
 Dim secretunloadoverwrite As Boolean 'Botsareus 6/29/2013
-
-' EricL 4/7/2006
-'Public Sub SetYLabel(a As String)
-'  Dim b As String
-'  b = ""
-'  For t = 1 To Len(a)
-'    b = b + Mid(a, t, 1) + vbCrLf
-'  Next t
-'  'YLabel.Caption = b
-'  Me.Caption = a + " / Cycles graph"
-'End Sub
 
 Public Sub ResetGraph()
   Dim t As Integer
@@ -3743,12 +3731,7 @@ Public Sub SetValues(n As String, v As Single)
         i = i + 1
       Wend
       If i = SimOpts.SpeciesNum Then ' Internet Species not in this sim yet
-        i = 0
-        While InternetSpecies(i).Name <> n And i < numInternetSpecies
-          i = i + 1
-          If i > MAXINTERNETSPECIES Then Exit Sub
-        Wend
-        AddSeries n, InternetSpecies(i).color
+        
       Else ' species already in the species list
         AddSeries n, SimOpts.Specie(i).color
       End If
@@ -3893,11 +3876,7 @@ Private Sub Form_Activate()
   'Botsareus 5/31/2013 Special graph info
   graphvisible(WhichGraphAmI) = True
   
-  'Botsareus 3/19/2014 Auto save
-  If y_graphs And (x_restartmode = 4 Or x_restartmode = 5) Then
-    graphsave(WhichGraphAmI) = True
-    chk_GDsave.value = 1
-  End If
+
 
 End Sub
 

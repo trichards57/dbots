@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{FE0065C0-1B7B-11CF-9D53-00AA003C9CB6}#1.1#0"; "COMCT232.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.1#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Begin VB.Form CostsForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Costs"
@@ -1233,8 +1233,6 @@ fine:
   DynamicCostsIncludePlantsCheck.value = IIf(TmpOpts.Costs(DYNAMICCOSTINCLUDEPLANTS) = 0, 0, 1)
      
 End Sub
-
-
 
 Private Sub LinearAgeCostCheck_Click()
   If LinearAgeCostCheck.value = 1 Then

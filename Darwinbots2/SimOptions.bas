@@ -87,7 +87,6 @@ Public Type SimOptions
   MutCycMin As Long
   DisableMutations As Boolean ' Indicates whether all mutations should be disabled
 
-  F1 As Boolean
   League As Boolean
   Restart As Boolean
   
@@ -192,8 +191,6 @@ Public Type SimOptions
   SpeciationGenerationalDistance As Integer
   SpeciationMinimumPopulation As Integer
   SpeciationForkInterval As Long
-  
-  SunOnRnd As Boolean
   
   Tides As Integer
   TidesOf As Integer

@@ -5,172 +5,11 @@ Option Explicit
 '   D I S K    O P E R A T I O N S
 '
 
-Public Sub movetopos(ByVal s As String, ByVal pos As Integer)  'Botsareus 3/7/2014 Used in Stepladder to move files in specific order
-    Dim files As Collection
-    Dim tmpname As String
-    Dim i As Integer
-    Dim j As Integer
-    Set files = getfiles(MDIForm1.MainDir & "\league\stepladder")
-    If pos > files.count Then
-        'just put at end
-        FileCopy s, MDIForm1.MainDir & "\league\stepladder\" & (files.count + 1) & "-" & extractname(s)
-    Else
-        'move files first
-        For i = files.count To pos Step -1
-            'find a file prefixed i
-            For j = 1 To files.count
-                tmpname = extractname(files(j))
-                If tmpname Like CStr(i) & "-*" Then
-                    FileCopy files(j), MDIForm1.MainDir & "\league\stepladder\" & (i + 1) & "-" & Right(tmpname, Len(tmpname) - Len(CStr(i) & "-"))
-                    Kill files(j)
-                Exit For
-                End If
-            Next
-        Next
-        FileCopy s, MDIForm1.MainDir & "\league\stepladder\" & pos & "-" & extractname(s)
-    End If
-    
-    Kill s
-End Sub
-
-Public Sub deseed(ByVal s As String) 'Botsareus 2/25/2014 Used in Tournament to get back original names of the files and move to result folder
-Dim lastline As String
-Dim files As Collection
-Set files = getfiles(s)
-    Dim i As Integer
-    For i = 1 To files.count
-        Open files(i) For Input As #1 ' Open file for input.
-            Do While Not EOF(1) ' Check for end of file.
-            Line Input #1, lastline
-            Loop
-        Close #1
-        lastline = Replace(lastline, "'#tag:", "")
-        FileCopy files(i), MDIForm1.MainDir & "\league\Tournament_Results\" & lastline
-    Next
-End Sub
-
-Public Function NamefileRecursive(ByVal s As String) As String 'Botsareus 1/31/2014 .txt files only
-Dim i As Integer
-i = Asc("a") - 1
-NamefileRecursive = s
-Do While dir(NamefileRecursive) <> ""
-i = i + 1
-If Asc("z") < i Then
-    NamefileRecursive = Replace(s, ".txt", "") & Chr((i - Asc("a")) \ 26 + Asc("a") - 1) & Chr((i - Asc("a")) Mod 26 + Asc("a")) & ".txt"
-Else
-    NamefileRecursive = Replace(s, ".txt", "") & Chr(i) & ".txt"
-End If
-Loop
-End Function
-
-Public Sub movefilemulti(ByVal source As String, ByVal Out As String, ByVal count As Integer) 'Botsareus 2/18/2014 top/buttom pattern file move
-    Dim files As Collection
-    Dim last As Boolean
-    Dim i As Integer
-    For i = 1 To count
-        Set files = getfiles(source)
-        SortCollection files, "Moving " & i & " of " & count & " files"
-        If last Then
-            FileCopy files(1), Out & "\" & extractname(files(1))
-            Kill files(1)
-        Else
-            FileCopy files(files.count), Out & "\" & extractname(files(files.count))
-            Kill files(files.count)
-        End If
-        last = Not last
-    Next
-End Sub
-
 Public Function FolderExists(sFullPath As String) As Boolean
-Dim myFSO As Object
-Set myFSO = CreateObject("Scripting.FileSystemObject")
-FolderExists = myFSO.FolderExists(sFullPath)
+  Dim myFSO As Object
+  Set myFSO = CreateObject("Scripting.FileSystemObject")
+  FolderExists = myFSO.FolderExists(sFullPath)
 End Function
-
-'Botsareus 1/31/2014 Delete this directory and all the files it contains.
-Public Sub RecursiveRmDir(ByVal dir_name As String)
-Dim file_name As String
-Dim files As Collection
-Dim i As Integer
-
-    ' Get a list of files it contains.
-    Set files = New Collection
-    file_name = dir$(dir_name & "\*.*", vbReadOnly + _
-        vbHidden + vbSystem + vbDirectory)
-    Do While Len(file_name) > 0
-        If (file_name <> "..") And (file_name <> ".") Then
-            files.Add dir_name & "\" & file_name
-        End If
-        file_name = dir$()
-    Loop
-
-    ' Delete the files.
-    For i = 1 To files.count
-        file_name = files(i)
-        ' See if it is a directory.
-        If GetAttr(file_name) And vbDirectory Then
-            ' It is a directory. Delete it.
-            RecursiveRmDir file_name
-        Else
-            ' It's a file. Delete it.
-            SetAttr file_name, vbNormal
-            Kill file_name
-        End If
-    Next i
-
-    ' The directory is now empty. Delete it.
-    RmDir dir_name
-End Sub
-
-'Botsareus 1/31/2014  stores all files names in folder into Collection
-Function getfiles(ByVal dir_name As String) As Collection
-Dim file_name As String
-Dim i As Integer
-
-    ' Get a list of files it contains.
-    Set getfiles = New Collection
-    file_name = dir$(dir_name & "\*.*")
-    Do While Len(file_name) > 0
-        getfiles.Add dir_name & "\" & file_name
-        file_name = dir$()
-    Loop
-End Function
-
-Private Sub SortCollection(ByRef ColVar As Collection, Optional moredata As String)   'special code to reorder by name
-    Dim oCol As Collection
-    Dim i As Integer
-    Dim i2 As Integer
-    Dim iBefore As Integer
-    If Not (ColVar Is Nothing) Then
-        If ColVar.count > 0 Then
-            Set oCol = New Collection
-            For i = 1 To ColVar.count
-                If oCol.count = 0 Then
-                    oCol.Add ColVar(i)
-                Else
-                    iBefore = 0
-                    For i2 = oCol.count To 1 Step -1
-                        If val(extractexactname(extractname(ColVar(i)))) < val(extractexactname(extractname(oCol(i2)))) Then
-                            iBefore = i2
-                        Else
-                            Exit For
-                        End If
-                    Next
-                    If iBefore = 0 Then
-                        oCol.Add ColVar(i)
-                    Else
-                        oCol.Add ColVar(i), , iBefore
-                    End If
-                End If
-                MDIForm1.Caption = "Moving files " & Int(i / ColVar.count * 100) & "% " & moredata
-                DoEvents
-            Next
-            Set ColVar = oCol
-            Set oCol = Nothing
-        End If
-    End If
-End Sub
-
 
 Public Function RecursiveMkDir(destDir As String) As Boolean
    
@@ -204,11 +43,11 @@ End Function
 ' inserts organism file in the simulation
 ' remember that organisms could be made of more than one robot
 Public Sub InsertOrganism(path As String)
-  Dim X As Single, Y As Single
+  Dim x As Single, y As Single
   Dim n As Integer
-  X = Random(60, SimOpts.FieldWidth - 60) 'Botsareus 2/24/2013 bug fix: robots location within screen limits
-  Y = Random(60, SimOpts.FieldHeight - 60)
-  n = LoadOrganism(path, X, Y)
+  x = Random(60, SimOpts.FieldWidth - 60) 'Botsareus 2/24/2013 bug fix: robots location within screen limits
+  y = Random(60, SimOpts.FieldHeight - 60)
+  n = LoadOrganism(path, x, y)
   'rob(n).BucketPos.x = -2
   'rob(n).BucketPos.Y = -2
   'UpdateBotBucket n
@@ -229,7 +68,6 @@ Public Sub SaveOrganism(path As String, r As Integer)
   Open path For Binary As #401
     Put #401, , cnum
     For k = 0 To cnum - 1
-      rob(clist(k)).LastOwner = IntOpts.IName
       SaveRobotBody 401, clist(k)
     Next k
   Close #401
@@ -263,41 +101,22 @@ Public Function AddSpecie(n As Integer, IsNative As Boolean) As Integer
   SimOpts.Specie(k).VirusImmune = rob(n).VirusImmune
   SimOpts.Specie(k).population = 1
   SimOpts.Specie(k).SubSpeciesCounter = 0
-  'If rob(n).FName = "Corpse" Then
-  '  SimOpts.Specie(k).color = vbBlack
-  'Else
-   SimOpts.Specie(k).color = rob(n).color
-  'End If
+  SimOpts.Specie(k).color = rob(n).color
   SimOpts.Specie(k).Comment = "Species arrived from the Internet"
   SimOpts.Specie(k).Posrg = 1
   SimOpts.Specie(k).Posdn = 1
   SimOpts.Specie(k).Poslf = 0
   SimOpts.Specie(k).Postp = 0
-  
   SetDefaultMutationRates SimOpts.Specie(k).Mutables
   SimOpts.Specie(k).Mutables.Mutations = rob(n).Mutables.Mutations
   SimOpts.Specie(k).qty = 5
   SimOpts.Specie(k).Stnrg = 3000
-  SimOpts.Specie(k).Native = IsNative
-'  On Error GoTo bypass
-'  Set robotFile = fso.GetFile(MDIForm1.MainDir + "\robots\" + rob(n).FName)
- ' If robotFile.size > 0 Then
- '   SimOpts.Specie(k).Native = True
-'    MDIForm1.Combo1.additem rob(n).FName
-'  End If
-'bypass:
   SimOpts.Specie(k).path = MDIForm1.MainDir + "\robots"
-  
-  ' Have to do this becuase of the crazy way SimOpts is NOT copied into TmpOpts when the options dialog is opened
- ' TmpOpts.Specie(k) = SimOpts.Specie(k)
- ' TmpOpts.SpeciesNum = SimOpts.SpeciesNum
-  
   AddSpecie = k
-  
 End Function
 
 ' loads an organism file
-Public Function LoadOrganism(path As String, X As Single, Y As Single) As Integer
+Public Function LoadOrganism(path As String, x As Single, y As Single) As Integer
   Dim clist(50) As Integer
   Dim OList(50) As Integer
   Dim k As Integer, cnum As Integer
@@ -328,8 +147,8 @@ tryagain:
       
     Next k
   Close #402
-  If X > -1 And Y > -1 Then
-    PlaceOrganism clist(), X, Y
+  If x > -1 And y > -1 Then
+    PlaceOrganism clist(), x, y
   End If
   RemapTies clist(), OList, cnum
 
@@ -347,18 +166,18 @@ End Function
 
 ' places an organism (made of robots listed in clist())
 ' in the specified x,y position
-Public Sub PlaceOrganism(clist() As Integer, X As Single, Y As Single)
+Public Sub PlaceOrganism(clist() As Integer, x As Single, y As Single)
   Dim k As Integer
   Dim dx As Single, dy As Single
   k = 0
   
-  dx = X - rob(clist(0)).pos.X
-  dy = Y - rob(clist(0)).pos.Y
+  dx = x - rob(clist(0)).pos.x
+  dy = y - rob(clist(0)).pos.y
   While clist(k) > 0
-    rob(clist(k)).pos.X = rob(clist(k)).pos.X + dx
-    rob(clist(k)).pos.Y = rob(clist(k)).pos.Y + dy
-    rob(clist(k)).BucketPos.X = -2
-    rob(clist(k)).BucketPos.Y = -2
+    rob(clist(k)).pos.x = rob(clist(k)).pos.x + dx
+    rob(clist(k)).pos.y = rob(clist(k)).pos.y + dy
+    rob(clist(k)).BucketPos.x = -2
+    rob(clist(k)).BucketPos.y = -2
     UpdateBotBucket clist(k)
     k = k + 1
   Wend
@@ -440,58 +259,6 @@ nextshot:
   Next i
 End Function
 
-'Saves a small file with per species population informaton
-'Used for aggregating the population stats from multiple connected sims
-Public Sub SaveSimPopulation(path As String)
-  Dim X As Integer
-  Dim numSpecies As Integer
-  Const Fe As Byte = 254
-  Dim fso As New FileSystemObject
-  Dim fileToDelete As file
-  
-  Form1.MousePointer = vbHourglass
-  On Error GoTo bypass
-  Set fileToDelete = fso.GetFile(path)
-  fileToDelete.Delete
-    
-bypass:
-  Open path For Binary As 10
-  
-  Put #10, , Len(IntOpts.IName)
-  Put #10, , IntOpts.IName
-  
-  numSpecies = 0
-  For X = 0 To SimOpts.SpeciesNum - 1
-     If SimOpts.Specie(X).population > 0 Then numSpecies = numSpecies + 1
-  Next X
-  
-  Put #10, , numSpecies  ' Only save non-zero populations
-  
-      
-  For X = 0 To SimOpts.SpeciesNum - 1
-    If SimOpts.Specie(X).population > 0 Then
-      Put #10, , Len(SimOpts.Specie(X).Name)
-      Put #10, , SimOpts.Specie(X).Name
-      Put #10, , SimOpts.Specie(X).population
-      Put #10, , SimOpts.Specie(X).Veg
-      Put #10, , SimOpts.Specie(X).color
-      
-      'write any future data here
-    
-      'Record ending bytes
-      Put #10, , Fe
-      Put #10, , Fe
-      Put #10, , Fe
-    End If
-            
-  Next X
-  
-  
-  Close 10
-  Form1.MousePointer = vbArrow
-
-End Sub
-
 Public Function GetFilePath(FileName As String) As String
     Dim i As Long
     For i = Len(FileName) To 1 Step -1
@@ -508,13 +275,12 @@ Public Function GetFilePath(FileName As String) As String
     Next
 End Function
 
-
 ' saves a whole simulation
 Public Sub SaveSimulation(path As String)
 On Error GoTo tryagain
   Dim t As Integer
   Dim n As Integer
-  Dim X As Integer
+  Dim x As Integer
   Dim j As Long
   Dim s2 As String
   Dim temp As String
@@ -524,9 +290,9 @@ On Error GoTo tryagain
   
   numOfExistingBots = 0
   
-  For X = 1 To MaxRobs
-    If rob(X).exist Then numOfExistingBots = numOfExistingBots + 1
-  Next X
+  For x = 1 To MaxRobs
+    If rob(x).exist Then numOfExistingBots = numOfExistingBots + 1
+  Next x
   
   Dim justPath As String
   justPath = GetFilePath(path)
@@ -616,7 +382,7 @@ On Error GoTo tryagain
     'obsolete
     Put #1, , SimOpts.Costs(MOVECOST)
     
-    Put #1, , SimOpts.F1
+    Put #1, , False
     Put #1, , SimOpts.Restart
     
     'even even newer newer stuff
@@ -717,17 +483,13 @@ On Error GoTo tryagain
     Put #1, , SimOpts.Daytime
     Put #1, , SimOpts.SunThresholdMode
     
-    Put #1, , numTeleporters
-    
-    For X = 1 To numTeleporters
-      SaveTeleporter 1, X
-    Next X
+    Put #1, , 0
                 
     Put #1, , numObstacles
     
-    For X = 1 To numObstacles
-      SaveObstacle 1, X
-    Next X
+    For x = 1 To numObstacles
+      SaveObstacle 1, x
+    Next x
     
     Put #1, , False
     
@@ -765,10 +527,6 @@ On Error GoTo tryagain
    For k = 0 To SimOpts.SpeciesNum - 1
       Put #1, , SimOpts.Specie(k).population
       Put #1, , SimOpts.Specie(k).SubSpeciesCounter
-   Next k
-   
-   For k = 0 To SimOpts.SpeciesNum - 1
-     Put #1, , SimOpts.Specie(k).Native
    Next k
    
    Put #1, , SimOpts.EGridWidth
@@ -818,9 +576,6 @@ On Error GoTo tryagain
    Put #1, , energydifX2
    Put #1, , energydifXP2
    
-   'some mor simopts stuff
-   Put #1, , SimOpts.SunOnRnd
-   
    'Botsareus 8/5/2014
    Put #1, , SimOpts.DisableFixing
    
@@ -859,7 +614,6 @@ HideDB = False
 MDIForm1.MainDir = App.path
 UseSafeMode = True 'Botsareus 10/5/2015
 UseEpiGene = False 'Botsareus 10/8/2015
-UseIntRnd = False 'Botsareus 10/8/2015
 intFindBestV2 = 100
 UseOldColor = True
 'mutations tab
@@ -880,11 +634,6 @@ NormMut = False
 valNormMut = 1071
 valMaxNormMut = 1071
 Dim holdmaindir As String
-'
-y_hidePredCycl = 1500
-y_LFOR = 10
-'
-y_zblen = 255
 
 'see if maindir overwrite exisits
 If dir(App.path & "\Maindir.gset") <> "" Then
@@ -895,26 +644,6 @@ If dir(App.path & "\Maindir.gset") <> "" Then
     If dir(holdmaindir & "\", vbDirectory) <> "" Then 'Botsareus 6/11/2013 small bug fix to do with no longer finding a main directory
         MDIForm1.MainDir = holdmaindir
     End If
-End If
-
-leagueSourceDir = MDIForm1.MainDir & "\Robots\F1league"
-
-'see if eco exsists
-y_eco_im = 0
-If dir(App.path & "\im.gset") <> "" Then
-  Open App.path & "\im.gset" For Input As #1
-    Input #1, y_eco_im
-  Close #1
-  y_eco_im = y_eco_im + 1
-End If
-
-'see if restartmode exisit
-
-If dir(App.path & "\restartmode.gset") <> "" Then
-    Open App.path & "\restartmode.gset" For Input As #1
-      Input #1, x_restartmode
-      Input #1, x_filenumber
-    Close #1
 End If
 
 'see if settings exsist
@@ -946,54 +675,13 @@ If dir(MDIForm1.MainDir & "\Global.gset") <> "" Then
       If Not EOF(1) Then Input #1, NormMut
       If Not EOF(1) Then Input #1, valNormMut
       If Not EOF(1) Then Input #1, valMaxNormMut
-      '
       If Not EOF(1) Then Input #1, DeltaWTC
       If Not EOF(1) Then Input #1, DeltaMainChance
       If Not EOF(1) Then Input #1, DeltaDevChance
-      '
-      If Not EOF(1) Then Input #1, leagueSourceDir
-      If Not EOF(1) Then Input #1, UseStepladder
-      If Not EOF(1) Then Input #1, x_fudge
       If Not EOF(1) Then Input #1, StartChlr
-      If Not EOF(1) Then Input #1, Disqualify
-      '
-      If Not EOF(1) Then Input #1, y_robdir
-      If Not EOF(1) Then Input #1, y_graphs
-      If Not EOF(1) Then Input #1, y_normsize
-      'Botsareus 10/6/2015 Overwrite y_normsize
-      If x_restartmode < 4 Or x_restartmode = 10 Then y_normsize = False
-      
-      If Not EOF(1) Then Input #1, y_hidePredCycl
-      If Not EOF(1) Then Input #1, y_LFOR
-      '
-      Dim unused As Boolean
-      If Not EOF(1) Then Input #1, unused
-      '
-      If Not EOF(1) Then Input #1, y_zblen
-      '
-      If Not EOF(1) Then Input #1, x_res_kill_chlr
-      If Not EOF(1) Then Input #1, x_res_kill_mb
-      If Not EOF(1) Then Input #1, x_res_other
-      '
-      If Not EOF(1) Then Input #1, y_res_kill_chlr
-      If Not EOF(1) Then Input #1, y_res_kill_mb
-      If Not EOF(1) Then Input #1, y_res_kill_dq
-      If Not EOF(1) Then Input #1, y_res_other
-      '
-      If Not EOF(1) Then Input #1, x_res_kill_mb_veg
-      If Not EOF(1) Then Input #1, x_res_other_veg
-      '
-      If Not EOF(1) Then Input #1, y_res_kill_mb_veg
-      If Not EOF(1) Then Input #1, y_res_kill_dq_veg
-      If Not EOF(1) Then Input #1, y_res_other_veg
-      '
       If Not EOF(1) Then Input #1, GraphUp
       If Not EOF(1) Then Input #1, HideDB
-      '
       If Not EOF(1) Then Input #1, UseEpiGene
-      '
-      If Not EOF(1) Then Input #1, UseIntRnd
-      
     Close #1
 End If
 
@@ -1026,45 +714,12 @@ If simalreadyrunning = False Then autosaved = False
 
 'Botsareus 3/16/2014 If autosaved, we change restartmode, this forces system to run in diagnostic mode
 'The difference between x_restartmode 0 and 5 is that 5 uses hidepred settings
-If autosaved And x_restartmode = 4 Then
-    x_restartmode = 5
-     MDIForm1.y_info.Visible = True
-End If
-If autosaved And x_restartmode = 7 Then
-    x_restartmode = 8 'Botsareus 4/14/2014 same deal for zb evo
-    intFindBestV2 = 20 + Rnd(-(x_filenumber + 1)) * 40 'Botsareus 10/26/2015 Value more interesting
-End If
 
 'Botsareus 3/19/2014 Load data for evo mode
-If x_restartmode = 4 Or x_restartmode = 5 Or x_restartmode = 6 Then
-    Open MDIForm1.MainDir & "\evolution\data.gset" For Input As #1
-        Input #1, LFOR   'LFOR init
-        Input #1, LFORdir  'dir
-        Input #1, LFORcorr  'corr
-        '
-        Input #1, hidePredCycl  'hidePredCycl
-        '
-        Input #1, curr_dna_size  'curr_dna_size
-        Input #1, target_dna_size   'target_dna_size
-        '
-        Input #1, Init_hidePredCycl
-        '
-        Input #1, y_Stgwins
-    Close #1
-Else
-    y_eco_im = 0
-End If
 
 'Botsareus 3/22/2014 Initial hidepred offset is normal
 
 hidePredOffset = hidePredCycl / 6
-
-If UseIntRnd Then
-'Use pictures from internet as randomizer
-cprndy = 0
-ReDim rndylist(3999)
-MDIForm1.grabfile
-End If
 
 End Sub
 
@@ -1078,7 +733,7 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
   '(not 2.37.2, but everything that comes after)
   Dim j As Long
   Dim k As Long
-  Dim X As Integer
+  Dim x As Integer
   Dim t As Integer
   Dim s As Single 'EricL 4/1/2006 Use this to read in single values
   Dim tempbool As Boolean
@@ -1179,7 +834,9 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
     'obsolete
     Get #1, , SimOpts.Costs(MOVECOST)
     
-    Get #1, , SimOpts.F1
+    Dim disc As Boolean
+    
+    Get #1, , disc
     Get #1, , SimOpts.Restart
     
     'newer stuff
@@ -1329,27 +986,15 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
     SimOpts.SunThresholdMode = 0
     If Not EOF(1) Then Get #1, , SimOpts.SunThresholdMode
       
-    numTeleporters = 0
-    If Not EOF(1) Then Get #1, , numTeleporters
-    
-    t = numTeleporters
-        
-    For X = 1 To numTeleporters
-      LoadTeleporter 1, X
-    Next X
-    
-    For X = 1 To numTeleporters
-     If Teleporters(X).Internet Then
-       DeleteTeleporter (X)
-     End If
-    Next X
+    Dim discard As Integer
+    If Not EOF(1) Then Get #1, , discard
     
     numObstacles = 0
     If Not EOF(1) Then Get #1, , numObstacles
            
-    For X = 1 To numObstacles
-      LoadObstacle 1, X
-    Next X
+    For x = 1 To numObstacles
+      LoadObstacle 1, x
+    Next x
     
     If Not EOF(1) Then Get #1, , tempbool
     
@@ -1428,11 +1073,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
       
       SimOpts.Specie(k).SubSpeciesCounter = 0
       If Not EOF(1) Then Get #1, , SimOpts.Specie(k).SubSpeciesCounter
-    Next k
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      SimOpts.Specie(k).Native = True  ' Default
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Native
     Next k
         
     If Not EOF(1) Then Get #1, , SimOpts.EGridWidth
@@ -1535,9 +1175,6 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is n
    If Not EOF(1) Then Get #1, , energydifX2
    If Not EOF(1) Then Get #1, , energydifXP2
    
-        'some more simopts stuff
-   If Not EOF(1) Then Get #1, , SimOpts.SunOnRnd
-   
    SimOpts.DisableFixing = False
    If Not EOF(1) Then Get #1, , SimOpts.DisableFixing
     
@@ -1612,16 +1249,16 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     Get #n, , .wall
     Get #n, , .Fixed
     
-    Get #n, , .pos.X
-    Get #n, , .pos.Y
-    Get #n, , .vel.X
-    Get #n, , .vel.Y
+    Get #n, , .pos.x
+    Get #n, , .pos.y
+    Get #n, , .vel.x
+    Get #n, , .vel.y
     Get #n, , .aim
     Get #n, , .ma           'momento angolare
     Get #n, , .mt           'momento torcente
     
-    .BucketPos.X = -2
-    .BucketPos.Y = -2
+    .BucketPos.x = -2
+    .BucketPos.y = -2
      
     'ties
     For t = 0 To MAXTIES
@@ -1889,63 +1526,22 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     
     'Botsareus 3/28/2014 Read kill resrictions
     
-    If FileContinue(n) Then Get #n, , .multibot_time
     If FileContinue(n) Then Get #n, , .Chlr_Share_Delay
     If .Chlr_Share_Delay > 8 Then .Chlr_Share_Delay = 8 'Botsareus 4/18/2016 Protection against currupt file
-    If FileContinue(n) Then Get #n, , .dq
-    If .dq > 3 Then .dq = 3 'Botsareus 4/18/2016 Protection against currupt file
     
     'Botsareus 10/8/2015 Keep track of mutations from old dna file
     If FileContinue(n) Then Get #n, , .OldMutations
     
     'Botsareus 6/22/2016 Actual velocity
     
-    If FileContinue(n) Then Get #n, , .actvel.X
-    If FileContinue(n) Then Get #n, , .actvel.Y
+    If FileContinue(n) Then Get #n, , .actvel.x
+    If FileContinue(n) Then Get #n, , .actvel.y
     
-    .dq = .dq - IIf(.dq > 1, 2, 0)
     
-    If Not .Veg Then
-     If y_eco_im > 0 And Form1.lblSaving.Visible = False Then
-      If Trim(Right(.tag, 5)) <> Trim(Left(.nrg & .nrg, 5)) Then
-        .dq = 2 + (.dq = 1) * True
-      End If
-      If .FName <> "Mutate.txt" And .FName <> "Base.txt" And .FName <> "Corpse" Then
-        .dq = 2 + (.dq = 1) * True
-      End If
-     End If
-    Else
-     If y_eco_im > 0 And .chloroplasts < 2000 Then .Dead = True
+    If .Veg Then
      If TotalChlr > SimOpts.MaxPopulation Then .Dead = True
     End If
     If .FName = "Corpse" Then .nrg = 0
-    
-    'Botsareus 10/5/2015 Replaced with something better
-    'Botsareus 9/16/2014 Read gene kill resrictions
-'    ReDim .delgenes(0)
-'    ReDim .delgenes(0).dna(0)
-'    Dim x As Integer
-'    Dim y As Integer
-'    Dim poz As Long
-'    poz = Seek(n)
-'    Get #n, , x
-'    If x < 0 Then
-'        Get #n, poz - 1, Fe
-'        If y_eco_im > 0 And Form1.lblSaving.Visible = False Then
-'            .dq = 2 + (.dq = 1) * True
-'        End If
-'        GoTo OldFile
-'    End If
-'    ReDim .delgenes(x)
-'    For y = 0 To x
-'        Get #n, , .delgenes(y).position
-'        Get #n, , k
-'        ReDim .delgenes(y).dna(k)
-'        For t = 0 To k
-'          Get #n, , .delgenes(y).dna(t).tipo
-'          Get #n, , .delgenes(y).dna(t).value
-'        Next t
-'    Next
     
     'read in any future data here
     
@@ -2025,10 +1621,10 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .Fixed
     
     ' fisiche
-    Put #n, , .pos.X
-    Put #n, , .pos.Y
-    Put #n, , .vel.X
-    Put #n, , .vel.Y
+    Put #n, , .pos.x
+    Put #n, , .pos.y
+    Put #n, , .vel.x
+    Put #n, , .vel.y
     Put #n, , .aim
     Put #n, , .ma           'momento angolare
     Put #n, , .mt           'momento torcente
@@ -2199,13 +1795,6 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     
     Dim blank As String * 50
     
-    If Not .Veg Then
-     If y_eco_im > 0 And Form1.lblSaving.Visible = False And .dq < 2 Then
-      If Left(.tag, 45) = Left(blank, 45) Then .tag = .FName
-      .tag = Left(.tag, 45) & Left(.nrg & .nrg, 5)
-     End If
-    End If
-    
     Put #n, , .tag
     
     'Botsareus 1/28/2014 Write if robot is using sunbelt
@@ -2218,9 +1807,7 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     
     'Botsareus 3/28/2014 Read kill resrictions
     
-    Put #n, , .multibot_time
     Put #n, , .Chlr_Share_Delay
-    Put #n, , .dq
     
     'Botsareus 10/8/2015 Keep track of mutations from old dna file
     
@@ -2228,8 +1815,8 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     
     'Botsareus 6/22/2016 Actual velocity
     
-    Put #n, , .actvel.X
-    Put #n, , .actvel.Y
+    Put #n, , .actvel.x
+    Put #n, , .actvel.y
     
     
     'Botsareus 10/5/2015 Replaced with something better
@@ -2302,101 +1889,11 @@ Sub salvarob(n As Integer, path As String)
   'Botsareus 12/11/2013 Save mrates file
   Save_mrates rob(n).Mutables, extractpath(path) & "\" & extractexactname(extractname(path)) & ".mrate"
   
-  If x_restartmode > 0 Then Exit Sub 'Botsareus 10/8/2015 Can not rename robot in any special restart mode
-  
   If MsgBox("Do you want to change robot's name to " + extractname(path) + " ?", vbYesNo, "Robot DNA saved") = vbYes Then
    rob(n).FName = extractname(path)
   End If
 End Sub
 
-' saves a Teleporter
-Private Sub SaveTeleporter(n As Integer, t As Integer)
-    
-  Const Fe As Byte = 254
-
-  With Teleporters(t)
-    Put #n, , .pos
-    Put #n, , .Width
-    Put #n, , .Height
-    Put #n, , .color
-    Put #n, , .vel
-    Put #n, , CInt(Len(.path))
-    Put #n, , .path
-    Put #n, , .In
-    Put #n, , .Out
-    Put #n, , .local
-    Put #n, , .driftHorizontal
-    Put #n, , .driftVertical
-    Put #n, , .highlight
-    Put #n, , .teleportVeggies
-    Put #n, , .teleportCorpses
-    Put #n, , .RespectShapes
-    Put #n, , .NumTeleported
-    Put #n, , .teleportHeterotrophs
-    Put #n, , .InboundPollCycles
-    Put #n, , .BotsPerPoll
-    Put #n, , .PollCountDown
-    Put #n, , .Internet
-        
-    'write any future data here
-    
-    Put #n, , Fe
-    Put #n, , Fe
-    Put #n, , Fe
-    'don't you dare put anything after this!
-    
-  End With
-End Sub
-
-' loads a Teleporter
-Private Sub LoadTeleporter(n As Integer, t As Integer)
-  Dim k As Integer
-  Dim Fe As Byte
-
-  With Teleporters(t)
-    Get #n, , .pos
-    Get #n, , .Width
-    Get #n, , .Height
-    Get #n, , .color
-    Get #n, , .vel
-    Get #n, , k: .path = Space(k)
-    Get #n, , .path
-    Get #n, , .In
-    Get #n, , .Out
-    Get #n, , .local
-    Get #n, , .driftHorizontal
-    Get #n, , .driftVertical
-    Get #n, , .highlight
-    Get #n, , .teleportVeggies
-    Get #n, , .teleportCorpses
-    Get #n, , .RespectShapes
-    Get #n, , .NumTeleported
-    
-    .teleportHeterotrophs = True
-    .InboundPollCycles = 10
-    .BotsPerPoll = 10
-    .PollCountDown = 10
-    
-    If FileContinue(n) Then Get #n, , .teleportHeterotrophs
-    If FileContinue(n) Then Get #n, , .InboundPollCycles
-    If FileContinue(n) Then Get #n, , .BotsPerPoll
-    If FileContinue(n) Then Get #n, , .PollCountDown
-    If FileContinue(n) Then Get #n, , .Internet
-    
-        
-    'burn through any new data from a newer version
-    While FileContinue(n)
-      Get #n, , Fe
-    Wend
-    
-    'grab these three FE codes
-    Get #n, , Fe
-    Get #n, , Fe
-    Get #n, , Fe
-    'don't you dare put anything after this!
-    
-  End With
-End Sub
 
 ' saves a Obstacle
 Private Sub SaveObstacle(n As Integer, t As Integer)
@@ -2452,7 +1949,7 @@ End Sub
 'New routine by EricL
 Private Sub SaveShot(n As Integer, t As Long)
   Dim k As Integer
-  Dim X As Integer
+  Dim x As Integer
   
   Const Fe As Byte = 254
 
@@ -2477,10 +1974,10 @@ Private Sub SaveShot(n As Integer, t As Long)
     ' Somewhere to store genetic code for a virus or sperm
     If (.shottype = -7 Or .shottype = -8) And .exist And .DnaLen > 0 Then
       Put #n, , .DnaLen
-      For X = 1 To .DnaLen
-        Put #n, , .dna(X).tipo
-        Put #n, , .dna(X).value
-      Next X
+      For x = 1 To .DnaLen
+        Put #n, , .dna(x).tipo
+        Put #n, , .dna(x).value
+      Next x
     Else
       k = 0: Put #n, , k
     End If
@@ -2503,7 +2000,7 @@ End Sub
 'New routine from EricL
 Private Sub LoadShot(n As Integer, t As Long)
   Dim k As Integer
-  Dim X As Integer
+  Dim x As Integer
   Dim Fe As Byte
 
   With Shots(t)
@@ -2531,10 +2028,10 @@ Private Sub LoadShot(n As Integer, t As Long)
     Get #n, , k
     If k > 0 Then
       ReDim .dna(k)
-      For X = 1 To k
-        Get #n, , .dna(X).tipo
-        Get #n, , .dna(X).value
-      Next X
+      For x = 1 To k
+        Get #n, , .dna(x).tipo
+        Get #n, , .dna(x).value
+      Next x
     End If
     
     .DnaLen = k

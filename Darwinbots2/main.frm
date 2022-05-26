@@ -30,17 +30,6 @@ Begin VB.Form Form1
       _ExtentY        =   847
       _Version        =   393216
    End
-   Begin VB.Label PlayerBot 
-      BackStyle       =   0  'Transparent
-      Caption         =   "PlayerBot Mode"
-      ForeColor       =   &H0000FFFF&
-      Height          =   255
-      Left            =   120
-      TabIndex        =   6
-      Top             =   120
-      Visible         =   0   'False
-      Width           =   1935
-   End
    Begin VB.Label lblSaving 
       BackStyle       =   0  'Transparent
       BeginProperty Font 
@@ -251,33 +240,14 @@ Attribute VB_Exposed = False
 'WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
 'MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
-
 Option Explicit
 
-'Botsareus 5/19/2012 removed old teleporter pics that are no longer in use
-'Botsareus 5/19/2012 removed 'smilymode' pics that are no longer in use
-'Botsareus 3/15/2013 got rid of screen save code (was broken)
-'Botsareus 4/9/2013 New graph label to keep track of graph update progress
+Const PIOVER4 = PI / 4
 
-'Botsareus 5/25/2013 onrounded math for custom graphs
 Private Type Stack
   val(100) As Double
   pos As Integer
 End Type
-Private QStack As Stack
-
-Public camfix As Boolean 'Botsareus 2/23/2013 normalizes screen
-Public pausefix As Boolean 'Botsareus 3/6/2013 Figure out if simulation must start paused
-Public TotalOffspring As Long 'Botsareus 5/22/2013 For find best
-Dim Cancer As Boolean 'Botsareus 10/21/2016 For zerobot mode ignore cancer familys
-
-Public WithEvents t As TrayIcon
-Attribute t.VB_VarHelpID = -1
-Public BackPic As String
-
-Dim edat(10) As Single
-
-Const PIOVER4 = PI / 4
 
 ' for graphs
 Private Type Graph
@@ -285,99 +255,63 @@ Private Type Graph
   graf As grafico
 End Type
 
-Dim MouseClickX As Long     ' mouse pos when clicked
-Dim MouseClickY As Long
-Dim MouseClicked As Boolean
-Dim ZoomFlag As Boolean        ' EricL True while mouse button four is held down - for zooming
-Dim DraggingBot As Boolean     ' EricL True while mouse is down dragging bot around
-
 'Botsareus 11/29/2013 Allows for moving whole organism
 Private Type tmppostyp
-n As Integer
-x As Single
-y As Single
+  n As Integer
+  x As Single
+  y As Single
 End Type
-Private tmprob_c As Byte
-Private tmppos(50) As tmppostyp
 
-
+Public camfix As Boolean 'Botsareus 2/23/2013 normalizes screen
+Public pausefix As Boolean 'Botsareus 3/6/2013 Figure out if simulation must start paused
+Public TotalOffspring As Long 'Botsareus 5/22/2013 For find best
+Public BackPic As String
 Public cyc As Integer          ' cycles/second
 Public dispskin As Boolean  ' skin drawing enabled?
 Public Active As Boolean    ' sim running?
 Public visiblew As Single     ' field visible portion (for zoom)
 Public visibleh As Long
-
 Public DNAMaxConds As Integer   ' max conditions per gene allowed by mutation
-Dim Charts(NUMGRAPHS) As Graph        ' array of graph pointers
-
-Private GridRef As Integer
 Public PiccyMode As Boolean   'display that piccy or not?
 Public Newpic As Boolean      'IIs it a new picture?
-Public Flickermode As Boolean 'Speed up graphics at the cost of some flicker
-
-Public MagX As Long
-Public MagY As Long
-
 Public twipWidth As Single
 Public TwipHeight As Single
 Public FortyEightOverTwipWidth As Single
 Public FortyEightOverTwipHeight As Single
 Public xDivisor As Single
 Public yDivisor As Single
-
+Private Charts(NUMGRAPHS) As Graph        ' array of graph pointers
+Private tmprob_c As Byte
+Private tmppos(50) As tmppostyp
 Private p_reclev As Integer 'Botsareus 8/3/2012 for generational distance
-
-Private Type IMbots
-    Name As String
-    vegy As Boolean
-    pop As Integer
-End Type
+Private MouseClickX As Long     ' mouse pos when clicked
+Private MouseClickY As Long
+Private MouseClicked As Boolean
+Private ZoomFlag As Boolean        ' EricL True while mouse button four is held down - for zooming
+Private DraggingBot As Boolean     ' EricL True while mouse is down dragging bot around
+Private QStack As Stack
 
 Private Sub BoyLabl_Click()
-BoyLabl.Visible = False
-End Sub
-
-Private Sub Form_KeyDown(KeyCode As Integer, Shift As Integer)
-If PlayerBot.Visible Then
-    Dim i As Integer
-    For i = 1 To UBound(PB_keys)
-        With PB_keys(i)
-         If .key = KeyCode Then .Active = True
-        End With
-    Next
-End If
-End Sub
-
-Private Sub Form_KeyUp(KeyCode As Integer, Shift As Integer)
-If PlayerBot.Visible Then
-    Dim i As Integer
-    For i = 1 To UBound(PB_keys)
-        With PB_keys(i)
-         If .key = KeyCode Then .Active = False
-        End With
-    Next
-End If
+  BoyLabl.Visible = False
 End Sub
 
 Private Sub Form_Load()
   Dim i As Integer
    
   strings Me
-  Set Consoleform.evnt = New cevent
   
   LoadSysVars
- ' LoadLists
+  
   If BackPic <> "" Then
     Form1.Picture = LoadPicture(BackPic)
   Else
     Form1.Picture = Nothing
   End If
+  
   Form1.Top = 0
   Form1.Left = 0
   Form1.Width = MDIForm1.ScaleWidth
   Form1.Height = MDIForm1.ScaleHeight
-  'SimOpts.FieldWidth = Form1.ScaleWidth
-  'SimOpts.FieldHeight = Form1.ScaleHeight
   visiblew = SimOpts.FieldWidth
   visibleh = SimOpts.FieldHeight
   MDIForm1.visualize = True
@@ -386,13 +320,10 @@ Private Sub Form_Load()
   TotalRobots = 0
   robfocus = 0
   MDIForm1.DisableRobotsMenu
-  'maxshots = 300
   maxshotarray = 50
   shotpointer = 1
   ReDim Shots(maxshotarray)
-  'MaxAbsNum = 0
   dispskin = True
-  'Form1.Active = True Botsareus 2/21/2013 moved to mdiform1
   
   FlashColor(1) = vbBlack         ' Hit with memory shot
   FlashColor(-1 + 10) = vbRed     ' Hit with Nrg feeding shot
@@ -403,15 +334,6 @@ Private Sub Form_Load()
   FlashColor(-6 + 10) = vbMagenta ' Hit with body feeding shot
   FlashColor(-7 + 10) = vbCyan    ' Hit with virus shot
   InitObstacles
-    
- ' SimOpts.DayNight = False ' EricL March 15, 2006
- ' SimOpts.Daytime = True ' EricL March 15, 2006
- ' MDIForm1.daypic.Visible = True
- ' MDIForm1.nightpic.Visible = False
-  MDIForm1.F1Piccy.Visible = False
-  ContestMode = False
-  'SimOpts.chartingInterval = 200 ' EricL 3/28/2006 -Botsareus 8/3/2012 Commented out as it was overriding the saved settings
-  'SimOpts.MutCurrMult = 1 ' EricL 4/1/2006 Botsareus 8/3/2013 no longer nessisary
 End Sub
 
 '
@@ -432,13 +354,6 @@ Next
 
 
   Dim count As Long
-'  count = SimOpts.TotRunCycle / 10
-  
-'  If count = SimOpts.TotRunCycle / 10 Then                  'gridref = layer of grid to refresh
-'    Cls
-'    GridRef = GridRef + 1: If GridRef > 9 Then GridRef = 1
-'    'envir.RefreshGrid GridRef
-'  End If
   
   If PiccyMode Then
     If Newpic Then
@@ -448,15 +363,12 @@ Next
     End If
   End If
   Cls
-  
-  If Flickermode Then Me.AutoRedraw = False
     
   If numObstacles > 0 Then Obstacles.DrawObstacles
   
   DrawArena
   DrawAllTies
   DrawAllRobs
-  If numTeleporters > 0 Then Teleport.DrawTeleporters
   DrawShots
   Me.AutoRedraw = True
   
@@ -598,10 +510,6 @@ Private Sub DrawRobPer(n As Integer)
   Dim topX As Single
   Dim topY As Single
   
-  
- 
- ' Sides = rob(n).Shape
- ' If Sides > 0 Then Sdlen = 6.28 / Sides
   CentreX = rob(n).pos.x
   CentreY = rob(n).pos.y
   radius = rob(n).radius
@@ -609,15 +517,7 @@ Private Sub DrawRobPer(n As Integer)
   If rob(n).highlight Then Circle (CentreX, CentreY), radius * 1.2, vbYellow
   If n = robfocus Then Circle (CentreX, CentreY), radius * 1.2, vbWhite
  
-' If rob(n).flash < 0 Then
-'    FillColor = FlashColor(rob(n).flash + 10)
-'    rob(n).flash = 0
-'  ElseIf rob(n).flash > 0 Then
-'    FillColor = vbBlack
-'    rob(n).flash = 0
-'  Else
     FillColor = BackColor
-'  End If
   
       Circle (CentreX, CentreY), rob(n).radius, rob(n).color    'new line
       
@@ -725,12 +625,8 @@ Private Sub DrawRobDistPer(n As Integer)
   
   Form1.FillColor = rob(n).color
 
- 
- ' If Not rob(n).wall Then
     Circle (CentreX, CentreY), rob(n).radius, rob(n).color
- ' Else
- '   Line (rob(n).pos.X, rob(n).pos.Y)-Step(RobSize, RobSize), vbWhite, BF
- ' End If
+
 End Sub
 
 ' draws rob aim
@@ -744,7 +640,6 @@ Private Sub DrawRobAim(n As Integer)
   Dim arrow3 As vector
   Dim temp As vector
   
-  'If Not rob(n).wall And Not rob(n).Corpse Then
   If Not rob(n).Corpse Then
     With rob(n)
   
@@ -760,7 +655,6 @@ Private Sub DrawRobAim(n As Integer)
       If .lastup <> 0 Then
         If .lastup < -1000 Then .lastup = -1000
         If .lastup > 1000 Then .lastup = 1000
-        'pos2 = VectorAdd(.pos, VectorScalar(pos, .radius)) 'done above
         vol = VectorAdd(pos2, VectorScalar(pos, CSng(.lastup)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -942,7 +836,6 @@ Private Sub DrawRobTiesCol(t As Integer, w As Integer, ByVal s As Integer)
       End If
       
       Line (CentreX, CentreY)-(CentreX1, CentreY1), col
-      'Line (.x + s, .Y + s)-(rob(rp).x + s, rob(rp).Y + s), col
     End If
     k = k + 1
   Wend
@@ -997,8 +890,6 @@ Public Sub DrawAllRobs()
   visibleRight = Form1.ScaleLeft + Form1.ScaleWidth
   visibleTop = Form1.ScaleTop
   visibleBottom = Form1.ScaleTop + Form1.ScaleHeight
- 
-  
   
   twipWidth = GetTwipWidth
   TwipHeight = GetTwipHeight
@@ -1006,10 +897,6 @@ Public Sub DrawAllRobs()
   FortyEightOverTwipWidth = 48 / twipWidth
   FortyEightOverTwipHeight = 48 / TwipHeight
    
-'  PixelsPerTwip = GetTwipWidth
-'  PixRobSize = PixelsPerTwip * RobSize
-'  PixBorderSize = PixRobSize / 10
-'  If PixBorderSize < 1 Then PixBorderSize = 1
   noeyeskin = False
   w = Int(30 / (Form1.visiblew / RobSize) + 1)
   If (Form1.visiblew / RobSize) > 500 Then noeyeskin = True
@@ -1035,14 +922,9 @@ Public Sub DrawAllRobs()
       While low < 0: low = low + PI * 2: Wend
       While hi < 0: hi = hi + PI * 2: Wend
       
-      'a + 1 = eye
       If rob(robfocus).mem(EyeStart + a + 1) > 0 Then
         DrawMode = vbNotMergePen
-        'length = (RobSize * 100) / rob(robfocus).mem(EyeStart + a + 1) - RobSize + rob(robfocus).radius + rob(robfocus).radius + 1
-  
         length = (1 / Sqr(rob(robfocus).mem(EyeStart + a + 1))) * (EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + rob(robfocus).radius) + rob(robfocus).radius ' + rob(robfocus).radius
- '       length = Buckets_Module.eyeDistance(a + 1)
-  '      Buckets_Module.eyeDistance(a + 1) = 0
         If length < 0 Then length = 0
       Else
         DrawMode = vbCopyPen
@@ -1055,16 +937,11 @@ Public Sub DrawAllRobs()
         Circle (rob(robfocus).pos.x, rob(robfocus).pos.y), length, vbRed, low, hi
       End If
        
-    Next a
-    
-    'Line (rob(robfocus).pos.x, rob(robfocus).pos.y)- _
-    '  (rob(robfocus).pos.x + Cos(-rob(robfocus).aim) * length, _
-    '  rob(robfocus).pos.y + Sin(-rob(robfocus).aim) * length)
+    Next
   End If
 
   
   DrawMode = vbCopyPen
-  'DrawWidth = PixBorderSize
   DrawStyle = 0
   
   
@@ -1193,12 +1070,9 @@ Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the scren is no
 MDIForm1.visualize = True 'Botsareus 8/31/2012 reset vedio tuggle button
 MDIForm1.menuupdate
 
-'  If SimOpts.UserSeedToggle = True Then 'Botsareus 5/3/2013 Replaced by safemode
     Rnd -1
     Randomize SimOpts.UserSeedNumber / 100
-'  Else
-'    Randomize Timer
-'  End If
+
 
     'Botsareus 5/5/2013 Update the system that the sim is running
   
@@ -1224,19 +1098,12 @@ MDIForm1.menuupdate
     End If
   
 'Botsareus 8/16/2014 Lets initate the sun
-If SimOpts.SunOnRnd Then
-    SunRange = 0.5
-    SunChange = Int(Rnd * 3) + Int(Rnd * 2) * 10
-    SunPosition = Rnd
-Else
+
     SunPosition = 0.5
     SunRange = 1
-End If
+
 
   SimOpts.SimGUID = CLng(Rnd)
-  Over = False
-  
-  'LoadSysVars
   
   If BackPic <> "" Then
     Form1.Picture = LoadPicture(BackPic)
@@ -1267,19 +1134,12 @@ End If
   MDIForm1.SnpDeadEnable.Checked = SimOpts.DeadRobotSnp
   MDIForm1.SnpDeadExRep.Checked = SimOpts.SnpExcludeVegs
   
-  'SimOpts.MutCurrMult = 1 'EricL 4/1/2006 Commented out as it was overriding saved values
-  'SimOpts.TotRunCycle = -1 'EricL 4/7/2006 Now initialized in Options Dialog Start New button Click
   SimOpts.TotBorn = 0
   grafico.ResetGraph
-  'Active = True
   MaxMem = 1000
   maxfieldsize = SimOpts.FieldWidth * 2
   robfocus = 0
   MDIForm1.DisableRobotsMenu
-  nlink = RobSize
-  klink = 0.01
-  plink = 0.1
-  mlink = RobSize * 1.5
   
   'EricL - This is used in Shot collision as a fast way to weed out bots that could not possibily have collided with a shot
   'this cycle.  It is the maximum possible distance a bot center can be from a shot and still have had the shot impact.
@@ -1315,29 +1175,17 @@ End If
   Next t
   numObstacles = 0
   
- ' SimOpts.shapeDriftRate = 5
- ' SimOpts.makeAllShapesBlack = False
- ' SimOpts.makeAllShapesTransparent = False
   defaultWidth = 0.2
   defaultHeight = 0.2
-  
-  'Egrid Stuff
-  'InitEGrid
        
   MaxRobs = 0
- ' maxshots = 0
- ' MaxAbsNum = 0
   loadrobs
   If Form1.Active Then SecTimer.Enabled = True
   SimOpts.TotRunTime = 0
-  'setfeed
   If MDIForm1.visualize Then DrawAllRobs
   MDIForm1.enablesim
   
-  If ContestMode Then
-     FindSpecies
-     F1count = 0
-  End If
+
 
   If SimOpts.MaxEnergy > 5000 Then
     If MsgBox("Your nrg allotment is set to" + Str(SimOpts.MaxEnergy) + ".  A correct value " + _
@@ -1346,7 +1194,6 @@ End If
         SimOpts.MaxEnergy = 10
     End If
   End If
- ' MDIForm1.ZoomOut
  
   strSimStart = Replace(Replace(Now, ":", "-"), "/", "-")
   
@@ -1386,13 +1233,8 @@ Sub startloaded()
       Write #1, False
     Close #1
   
-    
-  'If SimOpts.UserSeedToggle = True Then 'Botsareus 5/3/2013 Replaced by safemode
     Rnd -1
     Randomize SimOpts.UserSeedNumber / 100
-  'Else
-  '  Randomize Timer
-  'End If
   
     'Botsareus 5/5/2013 Update the system that the sim is running
   
@@ -1441,10 +1283,6 @@ Sub startloaded()
   robfocus = 0
   MDIForm1.DisableRobotsMenu
   'SimOpts.MutCurrMult = 1
-  nlink = RobSize
-  klink = 0.01
-  plink = 0.1
-  mlink = RobSize * 1.5
   
   'EricL - This is used in Shot collision as a fast way to weed out bots that could not possibily have collided with a shot
   'this cycle.  It is the maximum possible distance a bot center can be from a shot and still have had the shot impact.
@@ -1454,28 +1292,9 @@ Sub startloaded()
   'side B is the sum of the maximum bot velocity and the maximum shot velocity, the latter of which can be robsize/3 + the bot
   'max velocity since bot velocity is added to shot velocity.
   MaxBotShotSeperation = Sqr((FindRadius(0, -1) ^ 2) + ((SimOpts.MaxVelocity * 2 + RobSize / 3) ^ 2))
-  
-  'maxshotarray = 50
-  'ReDim Shots(maxshotarray)
+
   shotpointer = 1
   
-  'For t = 1 To maxshotarray
-  '  Shots(t).exist = False
-  '  Shots(t).flash = False
-  '  Shots(t).stored = False
-  'Next t
-  
-  
-  'For t = 1 To MaxRobs
-  '  rob(t).virusshot = 0
-  'Next t
-  'For t = 1 To MAXOBSTACLES
-  '  Obstacles.Obstacles(t).exist = False
-  'Next t
-  
-'  SimOpts.shapeDriftRate = 5
-'  SimOpts.makeAllShapesBlack = False
-'  SimOpts.makeAllShapesTransparent = False
   defaultWidth = 0.2
   defaultHeight = 0.2
     
@@ -1500,15 +1319,10 @@ Sub startloaded()
   
   NoDeaths = True
   
-  'Egrid Stuff
-  'InitEGrid
-  
-  'Vegs.cooldown = 0
   Vegs.cooldown = -SimOpts.RepopCooldown
   totnvegsDisplayed = -1 ' Just set this to -1 for the first cycle so the cost low water mark doesn't trigger.
   totvegs = -1 ' Set to -1 to avoid veggy reproduction on first cycle
   totnvegs = SimOpts.Costs(DYNAMICCOSTTARGET) ' Just set this high for the first cycle so the cost low water mark doesn't trigger.
-'  MDIForm1.ZoomOut
 
   main
 End Sub
@@ -1525,10 +1339,7 @@ Private Sub loadrobs()
       a = RobScriptLoad(respath(SimOpts.Specie(k).path) + "\" + SimOpts.Specie(k).Name)
       If a < 0 Then
         t = SimOpts.Specie(k).qty
-        SimOpts.Specie(k).Native = False
         GoTo bypassThisSpecies
-      Else
-        SimOpts.Specie(k).Native = True
       End If
       rob(a).Veg = SimOpts.Specie(k).Veg
       rob(a).NoChlr = SimOpts.Specie(k).NoChlr
@@ -1568,10 +1379,6 @@ Private Sub loadrobs()
       
       rob(a).mem(DnaLenSys) = rob(a).DnaLen
       rob(a).mem(GenesSys) = rob(a).genenum
-      
-      'Botsareus 7/29/2014 New kill restrictions
-      rob(a).multibot_time = IIf(SimOpts.Specie(k).kill_mb, 210, 0)
-      rob(a).dq = IIf(SimOpts.Specie(k).dq_kill, 1, 0)
     Next t
 bypassThisSpecies:
     k = k + 1
@@ -1636,7 +1443,7 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
     MouseClickY = y
   End If
   
-  If button = 1 And Not MDIForm1.insrob And obstaclefocus = 0 And teleporterFocus = 0 And Not MDIForm1.pbOn.Checked Then
+  If button = 1 And Not MDIForm1.insrob And obstaclefocus = 0 Then
     If MouseClicked Then
       st = ScaleTop + MouseClickY - y
       sl = ScaleLeft + MouseClickX - x
@@ -1679,44 +1486,23 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
   End If
   
   If button = 1 And obstaclefocus > 0 Then
-  ' Obstacles.Obstacles(obstaclefocus).pos = VectorSet(x - (mousepos.x - Obstacles.Obstacles(obstaclefocus).pos.x), y - (mousepos.x - Obstacles.Obstacles(obstaclefocus).pos.y))
    Obstacles.Obstacles(obstaclefocus).pos = VectorSet(x - (Obstacles.Obstacles(obstaclefocus).Width / 2), y - (Obstacles.Obstacles(obstaclefocus).Height / 2))
     If Not Active Then Redraw
     Exit Sub
   End If
   
-  If button = 1 And teleporterFocus > 0 Then
-  ' Obstacles.Obstacles(obstaclefocus).pos = VectorSet(x - (mousepos.x - Obstacles.Obstacles(obstaclefocus).pos.x), y - (mousepos.x - Obstacles.Obstacles(obstaclefocus).pos.y))
-   Teleport.Teleporters(teleporterFocus).pos = VectorSet(x - (Teleport.Teleporters(teleporterFocus).Width / 2), y - (Teleport.Teleporters(teleporterFocus).Height / 2))
-    If Not Active Then Redraw
-    Exit Sub
-  End If
-  
-  'Botsareus 7/2/2014 Overwrite for PlayerBot mode
-  If button = 1 And MDIForm1.pbOn.Checked Then
-    Mouse_loc.x = x
-    Mouse_loc.y = y
-  End If
-  
-  
- ' If GetInputState() <> 0 Then DoEvents
+
 End Sub
 
 ' it seems that there's no simple way to know the mouse status
 ' outside of a Form event. So I've used the event to switch
 ' on and off some global vars
 Private Sub Form_MouseUp(button As Integer, Shift As Integer, x As Single, y As Single)
-If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
+  If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   
   MouseClicked = False
   ZoomFlag = False ' EricL - stop zooming in!
   DraggingBot = False
-  
-  If MDIForm1.pbOn.Checked And Not MDIForm1.insrob Then
-    MousePointer = vbNormal
-    Mouse_loc.x = 0
-    Mouse_loc.y = 0
-  End If
 End Sub
 
 Private Sub Form_Resize()
@@ -1735,9 +1521,7 @@ Private Sub Form_DblClick()
   Dim n As Integer
   Dim m As Integer
   n = whichrob(CSng(MouseClickX), CSng(MouseClickY))
-  If n = 0 Then
-    m = whichTeleporter(CSng(MouseClickX), CSng(MouseClickY))
-  End If
+
   If n > 0 Then
     robfocus = n
     MDIForm1.EnableRobotsMenu
@@ -1746,9 +1530,6 @@ Private Sub Form_DblClick()
     datirob.RefreshDna
     DoEvents 'fixo?
     datirob.infoupdate n, rob(n).nrg, rob(n).parent, rob(n).Mutations, rob(n).age, rob(n).SonNumber, 1, rob(n).FName, rob(n).genenum, rob(n).LastMut, rob(n).generation, rob(n).DnaLen, rob(n).LastOwner, rob(n).Waste, rob(n).body, rob(n).mass, rob(n).venom, rob(n).shell, rob(n).Slime, rob(n).chloroplasts
-  ElseIf m > 0 Then
-    TeleportForm.teleporterFormMode = 1
-    TeleportForm.Show
   Else
     datirob.Form_Unload 0
     robfocus = 0
@@ -1762,22 +1543,11 @@ End Sub
 Private Sub Form_Click()
 If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
 
-If robfocus <> 0 And MDIForm1.pbOn.Checked Then Exit Sub
-
   Dim n As Integer
   Dim m As Integer
    
   'LogForm.Visible = False
   n = whichrob(CSng(MouseClickX), CSng(MouseClickY))
-   
-  'Click on teleporter unless its the internet mode teleporter.
-  If n = 0 Then
-    m = whichTeleporter(CSng(MouseClickX), CSng(MouseClickY))
-    If m <> 0 And Teleporters(m).Internet = False Then
-      teleporterFocus = m
-      'MDIForm1.DeleteTeleporter.Enabled = True
-    End If
-  End If
   
   If n = 0 And m = 0 Then
     m = whichobstacle(CSng(MouseClickX), CSng(MouseClickY))
@@ -1847,16 +1617,6 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
     
   n = whichrob(x, y)
   
-    
-  'Botsareus 7/2/2014 Multiselect for pb mode
-  If n > 0 And MDIForm1.pbOn.Checked And Shift = 1 Then
-    If n <> robfocus Then
-     rob(n).highlight = True
-     Redraw
-     Exit Sub
-    End If
-  End If
-  
   If n = 0 Then
     DraggingBot = False
     If Not Form1.SecTimer.Enabled Then datirob.Visible = False 'Botsareus 1/5/2013 Small fix to do with wrong data displayed in robot info, auto hide the window
@@ -1866,16 +1626,6 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   End If
   
   If n = 0 Then
-    teleporterFocus = whichTeleporter(x, y)
-    If teleporterFocus <> 0 Then
-      'MDIForm1.DeleteTeleporter.Enabled = True
-      mousepos = VectorSet(x, y)
-    Else
-     ' MDIForm1.DeleteTeleporter.Enabled = False
-    End If
-  End If
-  
-  If n = 0 And teleporterFocus = 0 Then
     obstaclefocus = whichobstacle(x, y)
     If obstaclefocus <> 0 Then
       MDIForm1.DeleteShape.Enabled = True
@@ -1896,7 +1646,7 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   If n > 0 Then
     robfocus = n
     MDIForm1.EnableRobotsMenu
-    If Not rob(n).highlight And (Not MDIForm1.pbOn.Checked Or Shift <> 1) Then deletemark
+    If Not rob(n).highlight Then deletemark
   End If
   
   If n = 0 And button = 1 And MDIForm1.insrob Then
@@ -1921,11 +1671,6 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   End If
   
   Redraw
-  
-  If n = 0 And button = 1 And MDIForm1.pbOn.Checked Then
-    MousePointer = vbCrosshair
-  End If
- 
 End Sub
 
 ' deletes the yellow highlight mark around robots
@@ -2078,7 +1823,7 @@ Private Sub main()
       UpdateSim
       MDIForm1.Follow ' 11/29/2013 zoom follow selected robot
       
-      If StartAnotherRound Then Exit Sub
+
       
       ' redraws all:
       If MDIForm1.visualize Then
@@ -2105,9 +1850,6 @@ Private Sub main()
            End If
           End If
         Next i
-      End If
-      If SimOpts.TotRunCycle Mod 200 = 0 Then
-        If InternetMode.Visible Then writeIMdata 'Botsareus 9/6/2014 calculate stats for IM
       End If
     End If
     DoEvents
@@ -3004,15 +2746,12 @@ sPopulation = (IIf(intFindBestV2 < 100, 100, 200 - intFindBestV2)) / 100
   For t = 1 To MaxRobs
     If rob(t).exist And Not rob(t).Veg And Not rob(t).FName = "Corpse" And Not (rob(t).FName = "Base.txt" And hidepred) Then
       TotalOffspring = 1
-      Cancer = False
       s = score(t, 1, 10, 0) + rob(t).nrg + rob(t).body * 10 'Botsareus 5/22/2013 Advanced fit test
       If s < 0 Then s = 0 'Botsareus 9/23/2016 Bug fix
       s = (TotalOffspring ^ sPopulation) * (s ^ sEnergy)
       
       '
-      If x_restartmode = 7 Or x_restartmode = 8 Then
-        If Cancer Then s = 0 'Botsareus 10/21/2016 For zerobot mode ignore cancer familys
-      End If
+
       '
       
       
@@ -3025,12 +2764,7 @@ sPopulation = (IIf(intFindBestV2 < 100, 100, 200 - intFindBestV2)) / 100
   
     'Z E R O B O T
     'Pass result of fittest back to evo
-        If x_restartmode = 7 Or x_restartmode = 8 Then
-            If rob(fittest).FName = "Mutate.txt" Then
-                calculateZB rob(fittest).AbsNum, Mx, fittest
-                robfocus = fittest
-            End If
-        End If
+
 End Function
 
 ' does various things: with
@@ -3074,11 +2808,10 @@ Function score(ByVal r As Integer, ByVal reclev As Integer, maxrec As Integer, t
     DrawAllRobs
   End If
 End Function
+
 Function InvestedEnergy(t As Integer) As Double 'Botsareus 5/22/2013 Calculate both population and energy
   InvestedEnergy = rob(t).nrg + rob(t).body * 10 'botschange fittest
   TotalOffspring = TotalOffspring + 1 'botschange fittest
-  
-  If InvestedEnergy < 1000 Then Cancer = True 'Botsareus 10/21/2016 For zerobot mode ignore cancer familys
 End Function
 
 ' goes up the tree searching for eldest ancestor
@@ -3101,102 +2834,3 @@ Function parent(r As Integer) As Integer
     If rob(t).AbsNum = rob(r).parent And rob(t).exist Then parent = t
   Next t
 End Function
-
-
-'
-'   IM STUFF
-'
-
-''''''''''''''''''''''''''''''''''''''''''
-
-
-Private Function IMgetname(i As Integer)
-IMgetname = extractexactname(rob(i).FName) & IIf(y_eco_im > 0, "(" & Trim(Left(rob(i).tag, 45)) & ")", "")
-
-Dim blank As String * 50
-If Left(rob(i).tag, 45) = Left(blank, 45) Then IMgetname = extractexactname(rob(i).FName)
-
-IMgetname = Replace(IMgetname, "[", "")
-IMgetname = Replace(IMgetname, "]", "")
-IMgetname = Replace(IMgetname, "{", "")
-IMgetname = Replace(IMgetname, "}", "")
-IMgetname = Replace(IMgetname, ",", "")
-End Function
-
-Private Sub writeIMdata()
-    Dim i As Integer
-    Dim b As Integer
-    Dim datehit As Boolean
-    Dim simdata As String
-    Dim simpopulations() As IMbots
-    Dim upperbound As Integer
-    ReDim simpopulations(0)
-    simdata = "{""cycle"":" & SimOpts.TotRunCycle & ",""simId"":""" & strSimStart & """,""width"":" & SimOpts.FieldWidth & ",""height"":" & SimOpts.FieldHeight & ",""population"":["   'bug fix
-    
-    'calculate species
-    For i = 1 To MaxRobs
-      With rob(i)
-       If rob(i).exist Then
-         datehit = False
-         For b = 1 To upperbound
-          If simpopulations(b).Name = IMgetname(i) And simpopulations(b).vegy = .Veg Then
-           datehit = True
-           Exit For
-          End If
-         Next
-         If Not datehit Then
-           upperbound = upperbound + 1
-           ReDim Preserve simpopulations(upperbound)
-           simpopulations(upperbound).Name = IMgetname(i)
-           simpopulations(upperbound).vegy = .Veg
-         End If
-       End If
-      End With
-    Next
-    'calculate populations
-    For i = 1 To MaxRobs
-      With rob(i)
-       If rob(i).exist Then
-         For b = 1 To upperbound
-          If simpopulations(b).Name = IMgetname(i) And simpopulations(b).vegy = .Veg Then
-           simpopulations(b).pop = simpopulations(b).pop + 1
-          End If
-         Next
-       End If
-      End With
-    Next
-    
-    For b = 1 To upperbound
-     With simpopulations(b)
-      simdata = simdata & "{""botName"":""" & .Name & """,""count"":" & .pop & IIf(.vegy, ",""repopulating"":true", "") & "}"
-      If b < upperbound Then simdata = simdata & ","
-     End With
-    Next
-    
-    simdata = simdata & "]}"
-               
-    Open OutboundPath & "\" & SimOpts.TotRunCycle & SimOpts.UserSeedNumber & ".stats" For Output As #299
-     Print #299, simdata
-    Close #299
-End Sub
-
-
-
-
-'
-'   MISC STUFF
-'
-
-''''''''''''''''''''''''''''''''''''''''''
-Public Sub t_MouseDown(ByVal button As Integer)
-  If MDIForm1.stealthmode And button = 1 Then
-    MDIForm1.Show
-    t.Remove
-    MDIForm1.stealthmode = False
-    ElseIf MDIForm1.stealthmode And button = 2 Then
-    Call MDIForm1.PopupMenu(MDIForm1.TrayIconPopup)
-  End If
-End Sub
-
-
-

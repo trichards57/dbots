@@ -338,11 +338,6 @@ Attribute VB_Exposed = False
 'MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 Option Explicit
-'Botsareus 6/12/2012 form's icon change
-
-Private Sub chkRnd_Click() 'Botsareus 7/15/2014 Randomize the Sun On Cycles
-    TmpOpts.SunOnRnd = chkRnd.value * True
-End Sub
 
 Private Sub DNCheck_Click()
   TmpOpts.DayNight = DNCheck.value * True
@@ -350,7 +345,6 @@ Private Sub DNCheck_Click()
   DNLength.Enabled = DNCheck.value * True
   DNCycleUpDn.Enabled = DNCheck.value * True
 End Sub
-
 
 Private Sub DNLength_Change()
   If val(DNLength.text) > 32000 Then DNLength.text = 32000
@@ -373,7 +367,6 @@ Private Sub Form_Load()
   SunDownUpDn.Enabled = TmpOpts.SunDown * True
   SunDown.value = TmpOpts.SunDown * True
   ThresholdMode(TmpOpts.SunThresholdMode).value = True
-  chkRnd.value = TmpOpts.SunOnRnd * True
   
   txtTide = TmpOpts.Tides
   txtTideOf = TmpOpts.TidesOf
@@ -388,7 +381,6 @@ Private Sub SunDown_Click()
   SunDownThreshold.Enabled = SunDown.value * True
   SunDownUpDn.Enabled = SunDown.value * True
 End Sub
-
 
 Private Sub SunDownThreshold_Change()
   TmpOpts.SunDownThreshold = val(SunDownThreshold.text)
@@ -409,16 +401,16 @@ Private Sub ThresholdMode_Click(Index As Integer)
 End Sub
 
 Private Sub txtTide_Change()
-txtTide = Int(val(txtTide))
-If txtTide < 0 Then txtTide = 0
-If txtTide > 32000 Then txtTide = 32000
-If txtTide = 0 Then lblTides = "cycles (off)" Else lblTides = "cycles"
-TmpOpts.Tides = txtTide
+  txtTide = Int(val(txtTide))
+  If txtTide < 0 Then txtTide = 0
+  If txtTide > 32000 Then txtTide = 32000
+  If txtTide = 0 Then lblTides = "cycles (off)" Else lblTides = "cycles"
+  TmpOpts.Tides = txtTide
 End Sub
 
 Private Sub txtTideOf_Change()
-txtTideOf = Int(val(txtTideOf))
-If txtTideOf < 0 Then txtTideOf = 0
-If txtTideOf > 32000 Then txtTideOf = 32000
-TmpOpts.TidesOf = txtTideOf
+  txtTideOf = Int(val(txtTideOf))
+  If txtTideOf < 0 Then txtTideOf = 0
+  If txtTideOf > 32000 Then txtTideOf = 32000
+  TmpOpts.TidesOf = txtTideOf
 End Sub

@@ -1,20 +1,10 @@
 Attribute VB_Name = "Common"
-'vectors are not done as an object (class)
-'to save speed.  Object calls, especially functions,
-'slow things alot
-
-'try it as a class if you like, but be sure to get out a profiler and
-'see what kind of speed cut we're talking about
-
 Option Explicit
 
 Public Type vector
   x As Single
   y As Single
 End Type
-
-Declare Function GetInputState Lib "user32" () As Long
-'Declare Function FastInvSqrt Lib "FastMath" (ByRef x As Single) As Single
 
 Public Const PI As Single = 3.14159265
 Public timerthis As Long
@@ -26,29 +16,32 @@ Public cprndy As Integer
 Public filemem As String
 
 Public Function nextlowestmultof2(ByVal value As Integer) 'Botsareus 2/18/2014
-Dim a As Integer
-a = 1
-Do
-a = a * 2
-Loop Until a > value
-nextlowestmultof2 = a / 2
+  Dim a As Integer
+  a = 1
+  
+  Do
+    a = a * 2
+  Loop Until a > value
+  
+  nextlowestmultof2 = a / 2
 End Function
 
 Public Function TargetDNASize(ByVal size As Integer) As Integer 'Botsareus 3/16/2014
-Dim Max As Integer
-Dim i As Integer
-Dim overload As Double
-Max = 250
-For i = 1 To size
-If i > Max Then
-    overload = (5000 - Max) / 4750
-    If overload < 0 Then overload = 0
-    Max = Max + 10 + overload * 250
-End If
-Next
-TargetDNASize = Max
+  Dim Max As Integer
+  Dim i As Integer
+  Dim overload As Double
+  Max = 250
+  
+  For i = 1 To size
+    If i > Max Then
+      overload = (5000 - Max) / 4750
+      If overload < 0 Then overload = 0
+      Max = Max + 10 + overload * 250
+    End If
+  Next
+  
+  TargetDNASize = Max
 End Function
-
 
 Public Function Random(low, hi) As Long
   Random = Int((hi - low + 1) * rndy + low)
@@ -59,9 +52,7 @@ Public Function fRnd(ByVal low As Long, ByVal up As Long) As Long
   fRnd = CLng(rndy * (up - low + 1) + low)
 End Function
 
-'Gauss returns a gaussian number centered at the
-'mean with a standard deviation of stddev
-'in theory anyway
+'Gauss returns a gaussian number centered at the mean with a standard deviation of stddev
 Public Function Gauss(ByVal StdDev As Single, Optional ByVal Mean As Single = 0#) As Single
 
   'gasdev returns a gauss value with unit variance centered at 0
@@ -70,10 +61,8 @@ Public Function Gauss(ByVal StdDev As Single, Optional ByVal Mean As Single = 0#
   If Mean < -32000# Then Mean = -32000#
   If Mean > 32000# Then Mean = 32000#
   
-  'Or is it Gauss = gasdev * stddev * stddev + mean
   If (Abs(StdDev) < 0.0000001 And StdDev <> 0#) Or Abs(StdDev) > 32000# Then ' Prevents underflows for very small or large stdDev
     Gauss = Mean + gasdev
-    'StdDev = 1#               ' Reset the StdDev.  Likely a mutation took it too small or too large.
   Else
     Gauss = gasdev * StdDev + Mean
   End If
@@ -103,7 +92,6 @@ Private Function gasdev() As Single
   End If
 End Function
 
-'Vectors.  Wow does this make stuff easier
 Public Function Dot(V1 As vector, V2 As vector) As Single
   Dot = V1.x * V2.x + V1.y * V2.y
 End Function
@@ -123,13 +111,12 @@ Public Function VectorSub(V1 As vector, V2 As vector) As vector
 End Function
 
 Public Function VectorScalar(ByRef V1 As vector, ByRef k As Single) As vector
-If Abs(k) > 32000 Then k = Sgn(k) * 32000
-If Abs(V1.x) > 32000 Then V1.x = Sgn(V1.x) * 32000
-If Abs(V1.y) > 32000 Then V1.y = Sgn(V1.y) * 32000
+  If Abs(k) > 32000 Then k = Sgn(k) * 32000
+  If Abs(V1.x) > 32000 Then V1.x = Sgn(V1.x) * 32000
+  If Abs(V1.y) > 32000 Then V1.y = Sgn(V1.y) * 32000
   VectorScalar.x = V1.x * k
   VectorScalar.y = V1.y * k
 End Function
-
 
 Public Function VectorUnit(V1 As vector) As vector 'unit vector.  Called vector unit to keep nomenclature consistant
   Dim mag As Single
@@ -138,7 +125,6 @@ Public Function VectorUnit(V1 As vector) As vector 'unit vector.  Called vector 
   
   VectorUnit.x = V1.x * mag
   VectorUnit.y = V1.y * mag
-
 End Function
 
 Public Function VectorMagnitude(V1 As vector) As Single
@@ -156,8 +142,6 @@ Public Function VectorMagnitude(V1 As vector) As Single
 End Function
 
 Public Function VectorInvMagnitude(V1 As vector) As Single
-  'VectorInvMagnitude = FastInvSqrt(v1.x * v1.x + v1.y * v1.y)
-  
   Dim mag As Single
   mag = VectorMagnitude(V1)
   
@@ -180,76 +164,34 @@ Public Function VectorSet(ByVal x As Single, ByVal y As Single) As vector
 End Function
 
 Public Function VectorMax(ByRef x As vector, ByRef y As vector) As vector
-    VectorMax.x = Max(x.x, y.x)
-    VectorMax.y = Max(x.y, y.y)
+  VectorMax.x = Max(x.x, y.x)
+  VectorMax.y = Max(x.y, y.y)
 End Function
 
 Public Function VectorMin(ByRef x As vector, ByRef y As vector) As vector
-    VectorMin.x = Min(x.x, y.x)
-    VectorMin.y = Min(x.y, y.y)
+  VectorMin.x = Min(x.x, y.x)
+  VectorMin.y = Min(x.y, y.y)
 End Function
 
 Public Function Max(ByVal x As Single, ByVal y As Single) As Single
-    If (x > y) Then
-        Max = x
-        Exit Function
-    End If
-    Max = y
+  If (x > y) Then
+    Max = x
+    Exit Function
+  End If
+  Max = y
 End Function
 
 Public Function Min(ByVal x As Single, ByVal y As Single) As Single
-    If (x < y) Then
-        Min = x
-        Exit Function
-    End If
-    Min = y
+  If (x < y) Then
+    Min = x
+    Exit Function
+  End If
+  Min = y
 End Function
-
-Public Sub restarter()
-Static called As Boolean
-If called Then Exit Sub
-called = True
-
-    traycleanup
-    shell App.path & "\Restarter.exe " & App.path & "\" & App.EXEName
-End Sub
-
-Private Sub traycleanup()
-On Error Resume Next
-If HideDB Then
-    MDIForm1.Show
-    Form1.t.Remove
-    MDIForm1.stealthmode = False
-End If
-End Sub
 
 'Botsareus 10/5/2015 Randomize 'Y' with Y being a more interesting randomization source
 
 Public Function rndy() As Single
-If UseIntRnd Then
-
-Static y As Integer
-
-If y = 0 Then
-    Randomize rndylist(cprndy)
-    cprndy = cprndy + 1
-    If cprndy = 3900 Then savenow = True 'Time for an autosave
-    If cprndy > 3999 Then
-        cprndy = 0
-        Kill App.path & "\" & filemem 'kill current file and grab the next
-        MDIForm1.grabfile
-    End If
-    y = (Rnd * 1500) + 1
-End If
-
-rndy = Rnd
-
-y = y - 1
-
-Else
-
-rndy = Rnd
-
-End If
+  rndy = Rnd
 End Function
 

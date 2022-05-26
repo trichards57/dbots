@@ -39,31 +39,6 @@ End Sub
 
 ' gives vegs their energy meal
 Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no longer needed
-
-'Sun position calculation
-If SimOpts.SunOnRnd Then
-Dim Sposition As Byte
-Dim Srange As Byte
-'0 1 2 position + 10 20 range (calculated as one byte, being aware of memory at this pont)
-Sposition = SunChange Mod 10
-Srange = SunChange \ 10
-
-If Int(Rndy * 2000) = 0 Then Srange = IIf(Srange = 0, 1, 0)
-If Int(Rndy * 2000) = 0 Then Sposition = Int(Rndy * 3)
-
-    If Srange = 1 Then SunRange = SunRange + 0.0005
-    If Srange = 0 Then SunRange = SunRange - 0.0005
-    If SunRange >= 1 Then Srange = 0
-    If SunRange <= 0 Then Srange = 1
-
-    If Sposition = 0 Then SunPosition = SunPosition - 0.0005
-    If Sposition = 2 Then SunPosition = SunPosition + 0.0005
-    If SunPosition >= 1 Then Sposition = 0
-    If SunPosition <= 0 Then Sposition = 2
-'0 1 2 position + 10 20 range
-SunChange = Sposition + Srange * 10
-End If
-  
   Dim t As Integer
   Dim tok As Single
   Dim depth As Long
@@ -279,7 +254,7 @@ Public Sub feedveg2(t As Integer) 'gives veg an additional meal based on waste '
    Energy = .chloroplasts / 64000 * (1 - SimOpts.VegFeedingToBody)
    body = (.chloroplasts / 64000 * SimOpts.VegFeedingToBody) / 10
    
-   If Int(Rndy * 2) = 0 Then
+   If Int(rndy * 2) = 0 Then
    
    'energy first
    

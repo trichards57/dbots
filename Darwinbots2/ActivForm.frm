@@ -57,7 +57,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Dim gb() As Integer
+Private gb() As Integer
 
 Public Sub NoFocus()
   Me.FillStyle = 0
@@ -83,8 +83,6 @@ Private Sub SetLab(ga() As Boolean)
   stp = pbox.Width / da
   pbox.Cls
   If da < 25 Then
-    'pbox.CurrentX = pbox.Left + (pbox.Width / da) / 2
-    'pbox.Print "1";
     For t = 0 To da - 1
       pbox.CurrentX = pbox.Left + (pbox.Width / da) * t + (pbox.Width / da) / 2 - Len(CStr(t + 1)) * 40
       pbox.Print CStr(t + 1);
@@ -103,7 +101,7 @@ End Sub
 Private Sub DrawStat(ga() As Boolean)
   Dim stp As Single, t As Integer, gn As Integer
   gn = UBound(ga)
-  If gn = 0 Then Exit Sub ' EricL to prevent overflow
+  If gn = 0 Then Exit Sub
   stp = cornice.Width / gn
   Me.FillStyle = 0
   For t = 1 To gn

@@ -320,15 +320,15 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Sub btnBoff_Click()
-SimOpts.PhysBrown = 0
+  SimOpts.PhysBrown = 0
 End Sub
 
 Private Sub btnCosts_Click()
-SimOpts.Costs(COSTMULTIPLIER) = 0
+  SimOpts.Costs(COSTMULTIPLIER) = 0
 End Sub
 
 Private Sub btnOut_Click()
-Dim i As Byte
+  Dim i As Byte
   On Error GoTo fine
   CommonDialog1.DialogTitle = MBSaveDNA
   CommonDialog1.FileName = ""
@@ -354,8 +354,8 @@ fine:
 End Sub
 
 Private Sub btnRaim_Click()
-On Error Resume Next
-rob(robfocus).mem(SetAim) = 0
+  On Error Resume Next
+  rob(robfocus).mem(SetAim) = 0
 End Sub
 
 Private Sub Form_Activate()
@@ -363,11 +363,11 @@ Private Sub Form_Activate()
 End Sub
 
 Private Sub txtDir_Change(Index As Integer)
-On Error Resume Next
-rob(robfocus).mem(Index + EYE1DIR) = txtDir(Index).text
+  On Error Resume Next
+  rob(robfocus).mem(Index + EYE1DIR) = txtDir(Index).text
 End Sub
 
 Private Sub txtWth_Change(Index As Integer)
-On Error Resume Next
-rob(robfocus).mem(Index + EYE1WIDTH) = txtWth(Index).text
+  On Error Resume Next
+  rob(robfocus).mem(Index + EYE1WIDTH) = txtWth(Index).text
 End Sub

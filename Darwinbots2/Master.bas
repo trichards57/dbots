@@ -51,7 +51,6 @@ Public Sub UpdateSim()
   
   'Botsareus 3/22/2014 Main hidepred logic (hide pred means hide base robot a.k.a. Predator)
   Dim usehidepred As Boolean
-  usehidepred = x_restartmode = 4 Or x_restartmode = 5 'Botsareus expend to evo mode
   '
   'Dim avgsize As Long
   Dim k As Long 'robots moved last attempt
@@ -78,13 +77,11 @@ Public Sub UpdateSim()
         Form1.Active = False
         Form1.SecTimer.Enabled = False
         stopflag = True 'Botsareus 9/2/2014 A bug fix from Spork22
-        UpdateLostEvo
     End If
     If Base_count = 0 And Not stopflag Then
         DisplayActivations = False
         Form1.Active = False
         Form1.SecTimer.Enabled = False
-        UpdateWonEvo Form1.fittest
     End If
     'Botsareus 10/19/2015 Prevents simulation from running too long
     If SimOpts.TotRunCycle = 1000000 Then stagnent = True 'Set the stagnent flag now and see what happens
@@ -298,19 +295,6 @@ Mode:
     CostsWereZeroed = False ' Set the flag so we don't do this again unless they get zeored again
     SimOpts.Costs(COSTMULTIPLIER) = SimOpts.oldCostX
   End If
-  
-  'Store new energy handycap
-    For t = 1 To MaxRobs
-     If rob(t).exist Then
-         If rob(t).FName = "Mutate.txt" And hidepred Then
-            If rob(t).LastMut > 0 Then '4/5/2016 Handycap freshly mutated robots more than other robots
-              rob(t).nrg = rob(t).nrg + calc_handycap
-            Else
-              rob(t).nrg = rob(t).nrg + calc_handycap / 2
-            End If
-         End If
-     End If
-    Next t
 
   If usehidepred Then
   'Calculate average energy before sim update
@@ -342,22 +326,6 @@ Mode:
       If (rob(t).DisableDNA = False) Then EraseSenses t
     End If
   Next t
-  
-  'it is time for some overwrites by playerbot mode
-  If MDIForm1.pbOn.Checked Then
-   For t = 1 To MaxRobs
-    With rob(t)
-     If .exist Then
-      If t = robfocus Or .highlight Then
-       If Not (Mouse_loc.X = 0 And Mouse_loc.Y = 0) Then .mem(SetAim) = angnorm(angle(.pos.X, .pos.Y, Mouse_loc.X, Mouse_loc.Y)) * 200
-       For i = 1 To UBound(PB_keys)
-        If PB_keys(i).Active <> PB_keys(i).Invert Then .mem(PB_keys(i).memloc) = PB_keys(i).value
-       Next
-      End If
-     End If
-    End With
-   Next t
-  End If
 
   updateshots
   
@@ -374,12 +342,11 @@ Mode:
     For t = 1 To MaxRobs
         If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
             'Only if the robots position was already configured
-            If Not (rob(t).opos.X = 0 And rob(t).opos.Y = 0) Then rob(t).actvel = VectorSub(rob(t).pos, rob(t).opos)
+            If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then rob(t).actvel = VectorSub(rob(t).pos, rob(t).opos)
         End If
     Next
   
   If numObstacles > 0 Then MoveObstacles
-  If numTeleporters > 0 Then UpdateTeleporters
    
   For t = 1 To MaxRobs 'Panda 8/14/2013 to figure out how much vegys to repopulate across all robots
    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then 'Botsareus 8/14/2013 We have to make sure the robot is alive first
@@ -467,8 +434,7 @@ Mode:
 
   'Botsareus 5/6/2013 The safemode system
   If UseSafeMode Then 'special modes does not apply, may need to expended to other restart modes
-    If IIf(UseIntRnd, savenow, SimOpts.TotRunCycle Mod 2000 = 0 And SimOpts.TotRunCycle > 0) Then 'Botsareus 10/19/2015 Safe mode uses different logic under use internet as randomizer
-      If x_restartmode = 0 Or x_restartmode = 4 Or x_restartmode = 5 Or x_restartmode = 7 Or x_restartmode = 8 Then 'Botsareus 10/5/2015 restartmodes 1, 2, 3, 6 and 9 are test only and do not need autosaves
+    If SimOpts.TotRunCycle Mod 2000 = 0 And SimOpts.TotRunCycle > 0 Then  'Botsareus 10/19/2015 Safe mode uses different logic under use internet as randomizer
         SaveSimulation MDIForm1.MainDir + "\saves\lastautosave.sim"
         'Botsareus 5/13/2013 delete local copy
         If dir(MDIForm1.MainDir + "\saves\localcopy.sim") <> "" Then Kill (MDIForm1.MainDir + "\saves\localcopy.sim")
@@ -476,80 +442,12 @@ Mode:
          Write #1, True
         Close #1
         savenow = False
-      End If
     End If
   End If
 
-  'R E S T A R T  N E X T
-  'Botsareus 1/31/2014 seeding
-  If x_restartmode = 1 Then
-    If SimOpts.TotRunCycle = 2000 Then
-        FileCopy MDIForm1.MainDir & "\league\Test.txt", NamefileRecursive(MDIForm1.MainDir & "\league\seeded\" & totnvegsDisplayed & ".txt")
-        Open App.path & "\restartmode.gset" For Output As #1
-         Write #1, x_restartmode
-         Write #1, x_filenumber
-        Close #1
-        Open App.path & "\Safemode.gset" For Output As #1
-         Write #1, False
-        Close #1
-        Call restarter
-    End If
-  End If
- 
-  'Z E R O B O T
-'evo mode
-If x_restartmode = 7 Or x_restartmode = 8 Then
-  If SimOpts.TotRunCycle Mod 50 = 0 And SimOpts.TotRunCycle > 0 Then
-      Form1.fittest
-  End If
-  Mutate_count = 0
-  'Botsareus 10/192015 count robots to see if time to restart zb evo
-  For t = 1 To MaxRobs
-      If rob(t).exist Then
-          If rob(t).FName = "Mutate.txt" Then Mutate_count = Mutate_count + 1
-      End If
-  Next t
-  If Mutate_count = 0 Then
-    'Restart
-    logevo "A restart is needed."
-        
-    DisplayActivations = False
-    Form1.Active = False
-    Form1.SecTimer.Enabled = False
-    '
-    Open App.path & "\Safemode.gset" For Output As #1
-     Write #1, False
-    Close #1
-    Open App.path & "\autosaved.gset" For Output As #1
-     Write #1, False
-    Close #1
-    Call restarter
-  End If
-End If
 
 Static totnrgnvegs As Double
 Dim cmptotnrgnvegs As Double
 
-'test mode
-If x_restartmode = 9 Then
-  If SimOpts.TotRunCycle = 1 Then 'record starting energy
-    For t = 1 To MaxRobs
-        If rob(t).exist Then
-            If rob(t).FName = "Test.txt" Then totnrgnvegs = totnrgnvegs + rob(t).nrg + rob(t).body * 10
-        End If
-    Next t
-  End If
-  If SimOpts.TotRunCycle = 8000 Then 'ending energy must be more
-    For t = 1 To MaxRobs
-        If rob(t).exist Then
-            If rob(t).FName = "Test.txt" Then cmptotnrgnvegs = cmptotnrgnvegs + rob(t).nrg + rob(t).body * 10
-        End If
-    Next t
-    If totnvegsDisplayed > 10 And cmptotnrgnvegs > totnrgnvegs * 2 Then 'did population and energy x2?
-        ZBpassedtest
-    Else
-        ZBfailedtest
-    End If
-  End If
-End If
+
 End Sub
