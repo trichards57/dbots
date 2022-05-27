@@ -6,13 +6,7 @@ Public PopulationLast10Cycles(10) As Integer
 Public Declare Function GetAsyncKeyState Lib "user32" (ByVal vKey As Long) As Integer 'Botsareus 12/11/2012 Pause Break Key to Pause code
 '
 
-Public energydif As Double 'Total last hide pred
-Public energydifX As Double 'Avg last hide pred
-Public energydifXP As Double 'The actual handycap
 
-Public energydif2 As Double 'Total last hide pred
-Public energydifX2 As Double 'Avg last hide pred
-Public energydifXP2 As Double 'The actual handycap
 
 Public stopflag As Boolean
 
@@ -46,11 +40,9 @@ Public Sub UpdateSim()
       MDIForm1.unpause.Enabled = True
   End If
   
-  ModeChangeCycles = ModeChangeCycles + 1
   SimOpts.TotRunCycle = SimOpts.TotRunCycle + 1
   
-  'Botsareus 3/22/2014 Main hidepred logic (hide pred means hide base robot a.k.a. Predator)
-  Dim usehidepred As Boolean
+
   '
   'Dim avgsize As Long
   Dim k As Long 'robots moved last attempt
@@ -60,142 +52,7 @@ Public Sub UpdateSim()
   Dim newpoz As vector
   Dim posdif As vector
   '
-  If usehidepred Then
-    'Count species for end of evo
-    Base_count = 0
-    Mutate_count = 0
-    For t = 1 To MaxRobs
-      If rob(t).exist Then
-          If rob(t).FName = "Base.txt" Then Base_count = Base_count + 1
-          If rob(t).FName = "Mutate.txt" Then Mutate_count = Mutate_count + 1
-      End If
-    Next t
-    If Base_count > Mutate_count Then stagnent = False 'Botsareus 10/20/2015 Base went above mutate, reset stagnent flag
-    'See if end of evo
-    If Mutate_count = 0 Then
-        DisplayActivations = False
-        Form1.Active = False
-        Form1.SecTimer.Enabled = False
-        stopflag = True 'Botsareus 9/2/2014 A bug fix from Spork22
-    End If
-    If Base_count = 0 And Not stopflag Then
-        DisplayActivations = False
-        Form1.Active = False
-        Form1.SecTimer.Enabled = False
-    End If
-    'Botsareus 10/19/2015 Prevents simulation from running too long
-    If SimOpts.TotRunCycle = 1000000 Then stagnent = True 'Set the stagnent flag now and see what happens
-'    If SimOpts.TotRunCycle = 3000000 And stagnent Then 'Botsareus 1/9/2016 Rule no longer required as I am no longer evolving plants
-'        DisplayActivations = False
-'        Form1.Active = False
-'        Form1.SecTimer.Enabled = False
-'        UpdateWonEvo Form1.fittest
-'    End If
-    
-Mode:
-    If ModeChangeCycles > (hidePredCycl / 1.2 + hidePredOffset) Then
-      'Botsareus 11/5/2015 If lfor max lower limit wait for mutate pop to match base pop
-      If LFOR = 150 And Mutate_count < Base_count And hidepred Then
-            ModeChangeCycles = ModeChangeCycles - 100
-            GoTo Mode
-      End If
-      'calculate new energy handycap
-      energydif2 = energydif2 + energydif / ModeChangeCycles 'inverse handycap
-      If hidepred Then
-        Dim holdXP As Double
-        holdXP = (energydifX - (energydif / ModeChangeCycles)) / LFOR
-        If holdXP < energydifXP Then energydifXP = holdXP Else energydifXP = (energydifXP * 9 + holdXP) / 10
-        
-        'inverse handycap
-        energydifXP2 = (energydifX2 - energydif2) / LFOR
-        If energydifXP2 > 0 Then energydifXP2 = 0
-        If (energydifXP - energydifXP2) > 0.1 Then energydifXP2 = energydifXP - 0.1
-        energydifX2 = energydif2
-        energydif2 = 0
-      End If
-      energydifX = energydif / ModeChangeCycles
-      energydif = 0
-      'Botsareus 6/12/2016 An attempt to get rid of 'chasers' without using any reposition code:
-      If hidepred Then
-      
-        'Erase offensive shots
-        For t = 1 To maxshotarray
-          With Shots(t)
-            If .shottype = -1 Or .shottype = -6 Then
-                .exist = False
-                .flash = False
-            End If
-          End With
-        Next t
-        
-        'Reposition robots the safe way
-        k2 = 0
-        Do
-        k = 0
-        For t = 1 To MaxRobs
-             If rob(t).exist And rob(t).FName = "Base.txt" Then
-                  For i = 1 To MaxRobs
-                      If rob(i).exist And rob(i).FName = "Mutate.txt" Then
-                      
-                        'calculate ingagment distance
-                        If rob(t).body > rob(i).body Then
-                            If rob(t).body > 10 Then
-                                ingdist = Log(rob(t).body) * 60 + 41
-                            Else
-                                ingdist = 40
-                            End If
-                        Else
-                            If rob(i).body > 10 Then
-                                ingdist = Log(rob(i).body) * 60 + 41
-                            Else
-                                ingdist = 40
-                            End If
-                        End If
-                        ingdist = rob(t).radius + rob(i).radius + ingdist + 40 'both radii plus shot dist plus offset 1 shot travel dist
-                            
-                        posdif = VectorSub(rob(t).pos, rob(i).pos)
-                        If VectorMagnitude(posdif) < ingdist Then
-                        'if the distance between the robots is less then ingagment distance
-                            With rob(i)
-                                ingdist = ingdist - VectorMagnitude(posdif) 'ingdist becomes offset dist
-                                newpoz = VectorSub(.pos, VectorScalar(VectorUnit(posdif), ingdist)) 'offset the multibot by ingagment distance
-                                
-                                pozdif.X = newpoz.X - .pos.X
-                                pozdif.Y = newpoz.Y - .pos.Y
-                                If .numties > 0 Then
-                                    Dim clist(50) As Integer, tk As Integer
-                                    clist(0) = i
-                                    ListCells clist()
-                                    'move multibot
-                                    tk = 1
-                                    While clist(tk) > 0
-                                        'Botsareus 7/15/2016 Only own species
-                                        If rob(clist(tk)).FName = "Mutate.txt" Then
-                                            rob(clist(tk)).pos.X = rob(clist(tk)).pos.X + pozdif.X
-                                            rob(clist(tk)).pos.Y = rob(clist(tk)).pos.Y + pozdif.Y
-                                        End If
-                                        tk = tk + 1
-                                    Wend
-                                End If
-                                .pos.X = .pos.X + pozdif.X
-                                .pos.Y = .pos.Y + pozdif.Y
-                            End With
-                            k = k + 1
-                            k2 = k2 + 1
-                        End If
-                      End If
-                  Next
-             End If
-        Next t
-        Loop Until k = 0 Or k2 > (3200 + Mutate_count * 0.9) 'Scales as mutate_count scales
-        
-      End If
-      'change hide pred
-      hidepred = Not hidepred
-      hidePredOffset = hidePredCycl / 3 * rndy
-      ModeChangeCycles = 0
-    End If
-  End If
+  
   
   'provides the mutation rates oscillation Botsareus 8/3/2013 moved to UpdateSim)
   Dim fullrange As Long
@@ -295,23 +152,6 @@ Mode:
     CostsWereZeroed = False ' Set the flag so we don't do this again unless they get zeored again
     SimOpts.Costs(COSTMULTIPLIER) = SimOpts.oldCostX
   End If
-
-  If usehidepred Then
-  'Calculate average energy before sim update
-  avrnrgStart = 0
-  i = 0
-  For t = 1 To MaxRobs
-        If rob(t).FName = "Mutate.txt" And rob(t).exist Then
-            If rob(t).LastMut > 0 Then '4/17/2014 New rule from Botsareus, only handycap fresh robots
-                i = i + 1
-                avrnrgStart = avrnrgStart + rob(t).nrg
-            End If
-        End If
-  Next t
-   If i > 0 Then
-    avrnrgStart = avrnrgStart / i
-   End If
-  End If
   
   ExecRobs
   If datirob.Visible And datirob.ShowMemoryEarlyCycle Then
@@ -331,7 +171,7 @@ Mode:
   
     'Botsareus 6/22/2016 to figure out actual velocity of the bot incase there is a collision event
     For t = 1 To MaxRobs
-        If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+        If rob(t).exist Then
             rob(t).opos = rob(t).pos
         End If
     Next
@@ -340,7 +180,7 @@ Mode:
   
     'to figure out actual velocity of the bot incase there is a collision event
     For t = 1 To MaxRobs
-        If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+        If rob(t).exist Then
             'Only if the robots position was already configured
             If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then rob(t).actvel = VectorSub(rob(t).pos, rob(t).opos)
         End If
@@ -349,7 +189,7 @@ Mode:
   If numObstacles > 0 Then MoveObstacles
    
   For t = 1 To MaxRobs 'Panda 8/14/2013 to figure out how much vegys to repopulate across all robots
-   If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then 'Botsareus 8/14/2013 We have to make sure the robot is alive first
+   If rob(t).exist Then  'Botsareus 8/14/2013 We have to make sure the robot is alive first
     AllChlr = AllChlr + rob(t).chloroplasts
    End If
   Next t
@@ -361,24 +201,6 @@ Mode:
   End If
   
   feedvegs SimOpts.MaxEnergy
-  
-  If usehidepred Then
-  'Calculate average energy after sim update
-  avrnrgEnd = 0
-  i = 0
-  For t = 1 To MaxRobs
-        If rob(t).FName = "Mutate.txt" And rob(t).exist Then
-            If rob(t).LastMut > 0 Then '4/17/2014 New rule from Botsareus, only handycap fresh robots
-                i = i + 1
-                avrnrgEnd = avrnrgEnd + rob(t).nrg
-            End If
-        End If
-  Next t
-   If i > 0 Then
-    avrnrgEnd = avrnrgEnd / i
-    energydif = energydif - avrnrgStart + avrnrgEnd
-   End If
-  End If
   
   'okay, time to store some values for RGB monitor
   If MDIForm1.MonitorOn Then
@@ -399,11 +221,6 @@ Mode:
   For t = 1 To MaxRobs
     If rob(t).exist Then
         totlen = totlen + rob(t).DnaLen
-'        On Error GoTo b:     'Botsareus 10/5/2015 Replaced with something better
-'        For i = 0 To UBound(rob(t).delgenes) 'Botsareus 9/16/2014 More overflow prevention stuff
-'         totlen = totlen + UBound(rob(t).delgenes(i).dna)
-'        Next
-'b:
     End If
   Next t
   If totlen > 4000000 Then

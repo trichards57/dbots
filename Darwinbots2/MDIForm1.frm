@@ -1149,7 +1149,7 @@ Dim OldSpeciesName As String
  
   rob(n).FName = Left(rob(n).FName, 28) + Str(Random(1, 10000))
     
-  AddSpecie n, False ' Species is forked in this sim so it's native
+  AddSpecie n
   ChangeNameOfAllChildren n, OldSpeciesName
 End Function
 
@@ -1743,7 +1743,7 @@ Private Sub simload(Optional path As String)
 fine:
 
   If Err.Number <> 32755 Then
-    MsgBox "An Error Occurred.  Darwinbots cannot continue.  Sorry.  " + Err.Description + " " + Err.source + " " + Str$(Err.Number) + " " + Str$(Err.LastDllError) + ".", vbOKOnly
+    MsgBox "An Error Occurred.  Darwinbots cannot continue.  Sorry.  " + Err.Description + " " + Err.Source + " " + Str$(Err.Number) + " " + Str$(Err.LastDllError) + ".", vbOKOnly
   Else
     Exit Sub
   End If
@@ -2331,11 +2331,7 @@ Public Sub enablesim()
 End Sub
 
 Private Sub y_info_Click()
-MsgBox "Target DNA size: N/A" & vbCrLf & _
-        "Next DNA size change: N/A" & vbCrLf & _
-        "Reduction unit: " & LFOR & vbCrLf & _
-        "On/Off cycles: " & hidePredCycl _
-        , vbInformation, "Survival information"
+MsgBox "Target DNA size: N/A" & vbCrLf & "Next DNA size change: N/A" & vbCrLf, vbInformation, "Survival information"
 End Sub
 
 Private Sub ZoomLock_Click()

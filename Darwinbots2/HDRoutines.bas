@@ -6,83 +6,81 @@ Option Explicit
 '
 
 Public Function FolderExists(sFullPath As String) As Boolean
-  Dim myFSO As Object
-  Set myFSO = CreateObject("Scripting.FileSystemObject")
+  Dim myFSO As New FileSystemObject
   FolderExists = myFSO.FolderExists(sFullPath)
 End Function
 
 Public Function RecursiveMkDir(destDir As String) As Boolean
+  Dim i As Long, prevDir As String
    
-   Dim i As Long
-   Dim prevDir As String
+  On Error Resume Next
    
-   On Error Resume Next
+  For i = Len(destDir) To 1 Step -1
+    If Mid(destDir, i, 1) = "\" Then
+      prevDir = Left(destDir, i - 1)
+      Exit For
+    End If
+  Next
    
-   For i = Len(destDir) To 1 Step -1
-       If Mid(destDir, i, 1) = "\" Then
-           prevDir = Left(destDir, i - 1)
-           Exit For
-       End If
-   Next i
+  If prevDir = "" Then
+    RecursiveMkDir = False
+    Exit Function
+  End If
+  If Not Len(dir(prevDir & "\", vbDirectory)) > 0 And Not RecursiveMkDir(prevDir) Then
+    RecursiveMkDir = False
+    Exit Function
+  End If
    
-   If prevDir = "" Then RecursiveMkDir = False: Exit Function
-   If Not Len(dir(prevDir & "\", vbDirectory)) > 0 Then
-       If Not RecursiveMkDir(prevDir) Then RecursiveMkDir = False: Exit Function
-   End If
-   
-   On Error GoTo errDirMake
-   MkDir destDir
-   RecursiveMkDir = True
-   Exit Function
+  On Error GoTo errDirMake
+  MkDir destDir
+  RecursiveMkDir = True
+  Exit Function
    
 errDirMake:
-   RecursiveMkDir = False
-
+  RecursiveMkDir = False
 End Function
 
 ' inserts organism file in the simulation
 ' remember that organisms could be made of more than one robot
 Public Sub InsertOrganism(path As String)
-  Dim x As Single, y As Single
-  Dim n As Integer
+  Dim x As Single, y As Single, n As Integer
+  
   x = Random(60, SimOpts.FieldWidth - 60) 'Botsareus 2/24/2013 bug fix: robots location within screen limits
   y = Random(60, SimOpts.FieldHeight - 60)
   n = LoadOrganism(path, x, y)
-  'rob(n).BucketPos.x = -2
-  'rob(n).BucketPos.Y = -2
-  'UpdateBotBucket n
 End Sub
 
 ' saves organism file
 Public Sub SaveOrganism(path As String, r As Integer)
-  Dim clist(50) As Integer
-  Dim k As Integer, cnum As Integer
+  Dim clist(50) As Integer, k As Integer, cnum As Integer
+  
   k = 0
   clist(0) = r
   ListCells clist()
+  
   While clist(cnum) > 0
     cnum = cnum + 1
   Wend
+  
   On Error GoTo problem
+  
   Close #401
+  
   Open path For Binary As #401
-    Put #401, , cnum
-    For k = 0 To cnum - 1
-      SaveRobotBody 401, clist(k)
-    Next k
+  Put #401, , cnum
+  For k = 0 To cnum - 1
+    SaveRobotBody 401, clist(k)
+  Next
+  
   Close #401
   Exit Sub
 problem:
-
- ' MsgBox ("Error saving organism.")
   Close #401
 End Sub
 
 'Adds a record to the species array when a bot with a new species is loaded or teleported in
-Public Function AddSpecie(n As Integer, IsNative As Boolean) As Integer
-  Dim k As Integer
-  Dim fso As New FileSystemObject
-  Dim robotFile As file
+Public Function AddSpecie(n As Integer) As Integer
+  Dim k As Integer, fso As New FileSystemObject, robotFile As file
   
   If rob(n).Corpse Or rob(n).FName = "Corpse" Or rob(n).exist = False Then
     AddSpecie = 0
@@ -124,28 +122,26 @@ Public Function LoadOrganism(path As String, x As Single, y As Single) As Intege
   Dim nuovo As Integer
   Dim foundSpecies As Boolean
   
-tryagain:
   On Error GoTo problem
   Close #402
   Open path For Binary As #402
-    Get #402, , cnum
-    For k = 0 To cnum - 1
-      nuovo = posto()
-      clist(k) = nuovo
-      LoadRobot 402, nuovo
-      LoadOrganism = nuovo
-      i = SimOpts.SpeciesNum
-      foundSpecies = False
-      While i > 0
-        i = i - 1
-        If rob(nuovo).FName = SimOpts.Specie(i).Name Then
-          foundSpecies = True
-          i = 0
-        End If
-      Wend
-      If Not foundSpecies Then AddSpecie nuovo, False
-      
-    Next k
+  Get #402, , cnum
+  For k = 0 To cnum - 1
+    nuovo = posto()
+    clist(k) = nuovo
+    LoadRobot 402, nuovo
+    LoadOrganism = nuovo
+    i = SimOpts.SpeciesNum
+    foundSpecies = False
+    While i > 0
+      i = i - 1
+      If rob(nuovo).FName = SimOpts.Specie(i).Name Then
+        foundSpecies = True
+        i = 0
+      End If
+    Wend
+    If Not foundSpecies Then AddSpecie nuovo
+  Next k
   Close #402
   If x > -1 And y > -1 Then
     PlaceOrganism clist(), x, y
@@ -160,8 +156,6 @@ problem:
     rob(nuovo).exist = False
     UpdateBotBucket nuovo
   End If
- ' MsgBox ("Error Loading Organism.  Will try next cycle.")
-  'GoTo TryAgain
 End Function
 
 ' places an organism (made of robots listed in clist())
@@ -219,38 +213,33 @@ Public Sub RemapTies(clist() As Integer, OList() As Integer, cnum As Integer)
 End Sub
 
 Public Function RemapAllTies(numOfBots As Integer)
-Dim i As Integer
-Dim j As Integer
-Dim k As Integer
+  Dim i As Integer, j As Integer, k As Integer
   
   For i = 1 To numOfBots
-      j = 1
-      While rob(i).Ties(j).pnt > 0  ' Loop through each tie
-        For k = 1 To numOfBots
-          If rob(i).Ties(j).pnt = rob(k).oldBotNum Then
-            rob(i).Ties(j).pnt = k
-            GoTo nexttie
-          End If
-        Next k
+    j = 1
+    While rob(i).Ties(j).pnt > 0  ' Loop through each tie
+      For k = 1 To numOfBots
+        If rob(i).Ties(j).pnt = rob(k).oldBotNum Then
+          rob(i).Ties(j).pnt = k
+          GoTo nexttie
+        End If
+      Next k
 nexttie:
-        j = j + 1
-      Wend
+      j = j + 1
+    Wend
   Next i
 End Function
 
 Public Function RemapAllShots(numOfShots As Long)
-Dim i As Long
-Dim j As Integer
+  Dim i As Long, j As Integer
   
   For i = 1 To numOfShots
     If Shots(i).exist Then
       For j = 1 To MaxRobs
-        If rob(j).exist Then
-          If Shots(i).parent = rob(j).oldBotNum Then
-            Shots(i).parent = j
-            If Shots(i).stored Then rob(j).virusshot = i
-            GoTo nextshot
-          End If
+        If rob(j).exist And Shots(i).parent = rob(j).oldBotNum Then
+          Shots(i).parent = j
+          If Shots(i).stored Then rob(j).virusshot = i
+          GoTo nextshot
         End If
       Next j
       Shots(i).stored = False ' Could not find parent.  Should probalby never happen but if it does, release the shot
@@ -260,31 +249,25 @@ nextshot:
 End Function
 
 Public Function GetFilePath(FileName As String) As String
-    Dim i As Long
-    For i = Len(FileName) To 1 Step -1
-        Select Case Mid$(FileName, i, 1)
-            Case ":"
-                ' colons are always included in the result
-                GetFilePath = Left$(FileName, i)
-                Exit For
-            Case "\"
-                ' backslash aren't included in the result
-                GetFilePath = Left$(FileName, i - 1)
-                Exit For
-        End Select
-    Next
+  Dim i As Long
+  For i = Len(FileName) To 1 Step -1
+    Select Case Mid$(FileName, i, 1)
+      Case ":"
+        ' colons are always included in the result
+        GetFilePath = Left$(FileName, i)
+        Exit For
+      Case "\"
+        ' backslash aren't included in the result
+        GetFilePath = Left$(FileName, i - 1)
+        Exit For
+    End Select
+  Next
 End Function
 
 ' saves a whole simulation
 Public Sub SaveSimulation(path As String)
-On Error GoTo tryagain
-  Dim t As Integer
-  Dim n As Integer
-  Dim x As Integer
-  Dim j As Long
-  Dim s2 As String
-  Dim temp As String
-  Dim numOfExistingBots As Integer
+  On Error GoTo tryagain
+  Dim t As Integer, n As Integer, x As Integer, j As Long, s2 As String, temp As String, numOfExistingBots As Integer
   
   Form1.MousePointer = vbHourglass
   
@@ -301,898 +284,623 @@ On Error GoTo tryagain
   
   Close #1
   Open path For Binary As #1
+  Put #1, , numOfExistingBots
+  
+  Form1.lblSaving.Visible = True 'Botsareus 1/14/2014 New code to display save status
+  
+  For t = 1 To MaxRobs
+    If rob(t).exist Then
+      SaveRobotBody 1, t
+    End If
+    If t Mod 20 = 0 Then
+      Form1.lblSaving.Caption = "Saving... (" & Int(t / MaxRobs * 100) & "%)" 'Botsareus 1/14/2014
+      DoEvents
+    End If
+  Next t
+  
+  Put #1, , SimOpts.BlockedVegs
+  Put #1, , SimOpts.Costs(SHOTCOST)
+  Put #1, , SimOpts.CostExecCond
+  Put #1, , SimOpts.Costs(COSTSTORE)
+  Put #1, , SimOpts.DeadRobotSnp
+  Put #1, , SimOpts.SnpExcludeVegs
+  Put #1, , SimOpts.DisableTies
+  Put #1, , SimOpts.EnergyExType
+  Put #1, , SimOpts.EnergyFix
+  Put #1, , SimOpts.EnergyProp
+  Put #1, , SimOpts.FieldHeight
+  Put #1, , SimOpts.FieldSize
+  Put #1, , SimOpts.FieldWidth
+  Put #1, , SimOpts.KillDistVegs
+  Put #1, , SimOpts.MaxEnergy
+  Put #1, , SimOpts.MaxPopulation
+  Put #1, , SimOpts.MinVegs
+  Put #1, , SimOpts.MutCurrMult
+  Put #1, , SimOpts.MutCycMax
+  Put #1, , SimOpts.MutCycMin
+  Put #1, , SimOpts.MutOscill
+  Put #1, , SimOpts.PhysBrown
+  Put #1, , SimOpts.Ygravity
+  Put #1, , SimOpts.Zgravity
+  Put #1, , SimOpts.PhysMoving
+  Put #1, , SimOpts.PhysSwim
+  Put #1, , SimOpts.PopLimMethod
+  Put #1, , Len(SimOpts.SimName)
+  Put #1, , SimOpts.SimName
+  Put #1, , SimOpts.SpeciesNum
+  Put #1, , SimOpts.Toroidal
+  Put #1, , SimOpts.TotBorn
+  Put #1, , SimOpts.TotRunCycle
+  Put #1, , SimOpts.TotRunTime
+  Put #1, , SimOpts.Pondmode
+  Put #1, , SimOpts.LightIntensity
+  Put #1, , SimOpts.CorpseEnabled
+  Put #1, , SimOpts.Decay
+  Put #1, , SimOpts.Gradient
+  Put #1, , SimOpts.DayNight
+  Put #1, , SimOpts.CycleLength
+  Put #1, , SimOpts.Decaydelay
+  Put #1, , SimOpts.DecayType
+  Put #1, , SimOpts.Costs(MOVECOST)
+  Put #1, , SimOpts.Restart
+  Put #1, , SimOpts.Dxsxconnected
+  Put #1, , SimOpts.Updnconnected
+  Put #1, , SimOpts.RepopAmount
+  Put #1, , SimOpts.RepopCooldown
+  Put #1, , SimOpts.ZeroMomentum
+  Put #1, , SimOpts.UserSeedNumber
+  Put #1, , SimOpts.SpeciesNum
+  
+  Dim k As Integer
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Put #1, , SimOpts.Specie(k).Colind
+    Put #1, , SimOpts.Specie(k).color
+    Put #1, , SimOpts.Specie(k).Fixed
+    Put #1, , SimOpts.Specie(k).Mutables.mutarray
+    Put #1, , SimOpts.Specie(k).Mutables.Mutations
+    Put #1, , Len(SimOpts.Specie(k).Name)
+    Put #1, , SimOpts.Specie(k).Name
+    Put #1, , Len(SimOpts.Specie(k).path)
+    Put #1, , SimOpts.Specie(k).path
+    Put #1, , SimOpts.Specie(k).qty
+    Put #1, , SimOpts.Specie(k).Skin
+    Put #1, , SimOpts.Specie(k).Stnrg
+    Put #1, , SimOpts.Specie(k).Veg
+  Next k
+  
+  Put #1, , SimOpts.VegFeedingToBody
+  Put #1, , SimOpts.CoefficientStatic
+  Put #1, , SimOpts.CoefficientKinetic
+  Put #1, , SimOpts.PlanetEaters
+  Put #1, , SimOpts.PlanetEatersG
+  Put #1, , SimOpts.Viscosity
+  Put #1, , SimOpts.Density
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Put #1, , SimOpts.Specie(k).Mutables.CopyErrorWhatToChange
+    Put #1, , SimOpts.Specie(k).Mutables.PointWhatToChange
     
-    Put #1, , numOfExistingBots
+    Dim h As Integer
     
-    Form1.lblSaving.Visible = True 'Botsareus 1/14/2014 New code to display save status
+    For h = 0 To 20
+      Put #1, , SimOpts.Specie(k).Mutables.Mean(h)
+      Put #1, , SimOpts.Specie(k).Mutables.StdDev(h)
+    Next h
+  Next k
+  
+  For k = 0 To 70
+    Put #1, , SimOpts.Costs(k)
+  Next k
+  
+  'EricL 4/1/2006 Fixed bug below by added -1.  Loop was executing one too many times...
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Put #1, , SimOpts.Specie(k).Poslf
+    Put #1, , SimOpts.Specie(k).Posrg
+    Put #1, , SimOpts.Specie(k).Postp
+    Put #1, , SimOpts.Specie(k).Posdn
+  Next k
+  
+  Put #1, , SimOpts.BadWastelevel    'EricL 4/1/2006 Added this
+  Put #1, , SimOpts.chartingInterval 'EricL 4/1/2006 Added this
+  Put #1, , SimOpts.CoefficientElasticity 'EricL 4/29/2006 Added this
+  Put #1, , SimOpts.FluidSolidCustom ' EricL 5/7/2006
+  Put #1, , SimOpts.CostRadioSetting ' EricL 5/7/2006
+  Put #1, , SimOpts.MaxVelocity ' EricL 5/15/2006
+  Put #1, , SimOpts.NoShotDecay ' EricL 6/8/2006
+  Put #1, , SimOpts.SunUpThreshold 'EricL 6/8/2006 Added this
+  Put #1, , SimOpts.SunUp 'EricL 6/8/2006 Added this
+  Put #1, , SimOpts.SunDownThreshold 'EricL 6/8/2006 Added this
+  Put #1, , SimOpts.SunDown 'EricL 6/8/2006 Added this
+  Put #1, , SimOpts.FixedBotRadii
+  Put #1, , SimOpts.DayNightCycleCounter
+  Put #1, , SimOpts.Daytime
+  Put #1, , SimOpts.SunThresholdMode
+  Put #1, , numObstacles
+  
+  For x = 1 To numObstacles
+    SaveObstacle 1, x
+  Next x
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Put #1, , SimOpts.Specie(k).CantSee
+    Put #1, , SimOpts.Specie(k).DisableDNA
+    Put #1, , SimOpts.Specie(k).DisableMovementSysvars
+  Next k
+  
+  Put #1, , SimOpts.shapesAreVisable
+  Put #1, , SimOpts.allowVerticalShapeDrift
+  Put #1, , SimOpts.allowHorizontalShapeDrift
+  Put #1, , SimOpts.shapesAreSeeThrough
+  Put #1, , SimOpts.shapesAbsorbShots
+  Put #1, , SimOpts.shapeDriftRate
+  Put #1, , SimOpts.makeAllShapesTransparent
+  Put #1, , SimOpts.makeAllShapesBlack
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Put #1, , SimOpts.Specie(k).CantReproduce
+  Next k
+  
+  Put #1, , maxshotarray
+  
+  For j = 1 To maxshotarray
+    SaveShot 1, j
+  Next j
+  
+  Put #1, , SimOpts.MaxAbsNum
     
-    For t = 1 To MaxRobs
-      If rob(t).exist Then
-        SaveRobotBody 1, t
-      End If
-      If t Mod 20 = 0 Then
-        Form1.lblSaving.Caption = "Saving... (" & Int(t / MaxRobs * 100) & "%)" 'Botsareus 1/14/2014
-        DoEvents
-      End If
-    Next t
-    
-    Put #1, , Len("null")
-    Put #1, , "null"
-    Put #1, , 0
-    Put #1, , Len("null")
-    Put #1, , "null"
-    Put #1, , 0
-    Put #1, , SimOpts.BlockedVegs
-    Put #1, , SimOpts.Costs(SHOTCOST)
-    Put #1, , SimOpts.CostExecCond
-    Put #1, , SimOpts.Costs(COSTSTORE)
-    Put #1, , SimOpts.DeadRobotSnp
-    Put #1, , SimOpts.SnpExcludeVegs
-    Put #1, , Len("null")
-    Put #1, , "null"
-    Put #1, , False
-    Put #1, , SimOpts.DisableTies
-    Put #1, , SimOpts.EnergyExType
-    Put #1, , SimOpts.EnergyFix
-    Put #1, , SimOpts.EnergyProp
-    Put #1, , SimOpts.FieldHeight
-    Put #1, , SimOpts.FieldSize
-    Put #1, , SimOpts.FieldWidth
-    Put #1, , SimOpts.KillDistVegs
-    Put #1, , SimOpts.MaxEnergy
-    Put #1, , SimOpts.MaxPopulation
-    Put #1, , SimOpts.MinVegs
-    Put #1, , SimOpts.MutCurrMult
-    Put #1, , SimOpts.MutCycMax
-    Put #1, , SimOpts.MutCycMin
-    Put #1, , SimOpts.MutOscill
-    Put #1, , SimOpts.PhysBrown
-    Put #1, , SimOpts.Ygravity
-    Put #1, , SimOpts.Zgravity
-    Put #1, , SimOpts.PhysMoving
-    Put #1, , SimOpts.PhysSwim
-    Put #1, , SimOpts.PopLimMethod
-    Put #1, , Len(SimOpts.SimName)
-    Put #1, , SimOpts.SimName
-    Put #1, , SimOpts.SpeciesNum
-    Put #1, , SimOpts.Toroidal
-    Put #1, , SimOpts.TotBorn
-    Put #1, , SimOpts.TotRunCycle
-    Put #1, , SimOpts.TotRunTime
-    
-    'new stuff
-    
-    Put #1, , SimOpts.Pondmode
-    
-    'Put #1, , SimOpts.KineticEnergy
-    Put #1, , False
-    
-    Put #1, , SimOpts.LightIntensity
-    Put #1, , SimOpts.CorpseEnabled
-    Put #1, , SimOpts.Decay
-    Put #1, , SimOpts.Gradient
-    Put #1, , SimOpts.DayNight
-    Put #1, , SimOpts.CycleLength
-    
-    'new new stuff
-    
-    Put #1, , SimOpts.Decaydelay
-    Put #1, , SimOpts.DecayType
-    
-    'obsolete
-    Put #1, , SimOpts.Costs(MOVECOST)
-    
-    Put #1, , False
-    Put #1, , SimOpts.Restart
-    
-    'even even newer newer stuff
-    Put #1, , SimOpts.Dxsxconnected
-    Put #1, , SimOpts.Updnconnected
-    Put #1, , SimOpts.RepopAmount
-    Put #1, , SimOpts.RepopCooldown
-    Put #1, , SimOpts.ZeroMomentum
-    Put #1, , SimOpts.UserSeedNumber
-    Put #1, , True
-    
-    Put #1, , SimOpts.SpeciesNum
-    
-    Dim k As Integer
-    For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).Colind
-      Put #1, , SimOpts.Specie(k).color
-      Put #1, , SimOpts.Specie(k).Fixed
-      Put #1, , SimOpts.Specie(k).Mutables.mutarray
-      Put #1, , SimOpts.Specie(k).Mutables.Mutations
-      Put #1, , Len(SimOpts.Specie(k).Name)
-      Put #1, , SimOpts.Specie(k).Name
-      
-      'obsolete, so we do this instead
-      'Put #1, , SimOpts.Specie(k).omnifeed
-      Put #1, , 8
-      
-      Put #1, , Len(SimOpts.Specie(k).path)
-      Put #1, , SimOpts.Specie(k).path
-      
-      Put #1, , CLng(SimOpts.FieldHeight)
-      Put #1, , CLng(0)
-      Put #1, , CLng(SimOpts.FieldWidth)
-      Put #1, , CLng(0)
-      
-      'Put #1, , SimOpts.Specie(k).Posdn
-      'Put #1, , SimOpts.Specie(k).Poslf
-      'Put #1, , SimOpts.Specie(k).Posrg
-      'Put #1, , SimOpts.Specie(k).Postp
-      
-      Put #1, , SimOpts.Specie(k).qty
-      Put #1, , SimOpts.Specie(k).Skin
-      Put #1, , SimOpts.Specie(k).Stnrg
-      Put #1, , SimOpts.Specie(k).Veg
-    Next k
-    
-    Put #1, , CInt(0)
-    Put #1, , SimOpts.VegFeedingToBody
-    Put #1, , SimOpts.CoefficientStatic
-    Put #1, , SimOpts.CoefficientKinetic
-    Put #1, , SimOpts.PlanetEaters
-    Put #1, , SimOpts.PlanetEatersG
-    Put #1, , SimOpts.Viscosity
-    Put #1, , SimOpts.Density
-    
-    'New for 2.4:
-    For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).Mutables.CopyErrorWhatToChange
-      Put #1, , SimOpts.Specie(k).Mutables.PointWhatToChange
-      
-      Dim h As Integer
-      
-      For h = 0 To 20
-        Put #1, , SimOpts.Specie(k).Mutables.Mean(h)
-        Put #1, , SimOpts.Specie(k).Mutables.StdDev(h)
-      Next h
-      
-      'Put #1, , SimOpts.p
-    Next k
-    
-    For k = 0 To 70
-      Put #1, , SimOpts.Costs(k)
-    Next k
-    
-    'EricL 4/1/2006 Fixed bug below by added -1.  Loop was executing one too many times...
-    For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).Poslf
-      Put #1, , SimOpts.Specie(k).Posrg
-      Put #1, , SimOpts.Specie(k).Postp
-      Put #1, , SimOpts.Specie(k).Posdn
-    Next k
-    
-    Put #1, , SimOpts.BadWastelevel    'EricL 4/1/2006 Added this
-    Put #1, , SimOpts.chartingInterval 'EricL 4/1/2006 Added this
-    Put #1, , SimOpts.CoefficientElasticity 'EricL 4/29/2006 Added this
-    Put #1, , SimOpts.FluidSolidCustom ' EricL 5/7/2006
-    Put #1, , SimOpts.CostRadioSetting ' EricL 5/7/2006
-    Put #1, , SimOpts.MaxVelocity ' EricL 5/15/2006
-    Put #1, , SimOpts.NoShotDecay ' EricL 6/8/2006
-    Put #1, , SimOpts.SunUpThreshold 'EricL 6/8/2006 Added this
-    Put #1, , SimOpts.SunUp 'EricL 6/8/2006 Added this
-    Put #1, , SimOpts.SunDownThreshold 'EricL 6/8/2006 Added this
-    Put #1, , SimOpts.SunDown 'EricL 6/8/2006 Added this
-    Put #1, , False
-    Put #1, , False
-    Put #1, , SimOpts.FixedBotRadii
-    Put #1, , SimOpts.DayNightCycleCounter
-    Put #1, , SimOpts.Daytime
-    Put #1, , SimOpts.SunThresholdMode
-    
-    Put #1, , 0
-                
-    Put #1, , numObstacles
-    
-    For x = 1 To numObstacles
-      SaveObstacle 1, x
-    Next x
-    
-    Put #1, , False
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).CantSee
-      Put #1, , SimOpts.Specie(k).DisableDNA
-      Put #1, , SimOpts.Specie(k).DisableMovementSysvars
-    Next k
-    
-    Put #1, , SimOpts.shapesAreVisable
-    Put #1, , SimOpts.allowVerticalShapeDrift
-    Put #1, , SimOpts.allowHorizontalShapeDrift
-    Put #1, , SimOpts.shapesAreSeeThrough
-    Put #1, , SimOpts.shapesAbsorbShots
-    Put #1, , SimOpts.shapeDriftRate
-    Put #1, , SimOpts.makeAllShapesTransparent
-    Put #1, , SimOpts.makeAllShapesBlack
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).CantReproduce
-    Next k
-    
-    Put #1, , maxshotarray
-    
-    For j = 1 To maxshotarray
-      SaveShot 1, j
-    Next j
-    
-    Put #1, , SimOpts.MaxAbsNum
-    
-   For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).VirusImmune
-    Next k
-    
-   For k = 0 To SimOpts.SpeciesNum - 1
-      Put #1, , SimOpts.Specie(k).population
-      Put #1, , SimOpts.Specie(k).SubSpeciesCounter
+  For k = 0 To SimOpts.SpeciesNum - 1
+     Put #1, , SimOpts.Specie(k).VirusImmune
    Next k
    
-   Put #1, , SimOpts.EGridWidth
-   Put #1, , SimOpts.EGridEnabled
-   Put #1, , SimOpts.oldCostX
-   Put #1, , SimOpts.DisableMutations
-   Put #1, , SimOpts.SimGUID
-   Put #1, , SimOpts.SpeciationGenerationalDistance
-   Put #1, , SimOpts.SpeciationGeneticDistance
-   Put #1, , SimOpts.EnableAutoSpeciation
-   Put #1, , SimOpts.SpeciationMinimumPopulation
-   Put #1, , SimOpts.SpeciationForkInterval
-   
-   'Botsareus 4/17/2013
-   Put #1, , SimOpts.DisableTypArepro
-       
-   'Botsareus 5/31/2013 Save all graph data
-   'strings
-   Put #1, , Len(strGraphQuery1)
-   Put #1, , strGraphQuery1
-   Put #1, , Len(strGraphQuery2)
-   Put #1, , strGraphQuery2
-   Put #1, , Len(strGraphQuery3)
-   Put #1, , strGraphQuery3
-   Put #1, , Len(strSimStart)
-   Put #1, , strSimStart
+  For k = 0 To SimOpts.SpeciesNum - 1
+     Put #1, , SimOpts.Specie(k).population
+     Put #1, , SimOpts.Specie(k).SubSpeciesCounter
+  Next k
+  
+  Put #1, , SimOpts.oldCostX
+  Put #1, , SimOpts.DisableMutations
+  Put #1, , SimOpts.SimGUID
+  Put #1, , SimOpts.SpeciationGenerationalDistance
+  Put #1, , SimOpts.SpeciationGeneticDistance
+  Put #1, , SimOpts.EnableAutoSpeciation
+  Put #1, , SimOpts.SpeciationMinimumPopulation
+  Put #1, , SimOpts.SpeciationForkInterval
+  Put #1, , SimOpts.DisableTypArepro
+  Put #1, , Len(strGraphQuery1)
+  Put #1, , strGraphQuery1
+  Put #1, , Len(strGraphQuery2)
+  Put #1, , strGraphQuery2
+  Put #1, , Len(strGraphQuery3)
+  Put #1, , strGraphQuery3
+  Put #1, , Len(strSimStart)
+  Put #1, , strSimStart
 
-   'the graphs themselfs
-   For k = 1 To NUMGRAPHS
-     Put #1, , graphfilecounter(k)
-     Put #1, , graphvisible(k)
-     Put #1, , graphleft(k)
-     Put #1, , graphtop(k)
-     Put #1, , graphsave(k)
-   Next k
-   
-   Put #1, , SimOpts.NoWShotDecay 'Botsareus 9/28/2013
-   
-   'evo stuff
-   Put #1, , energydif
-   Put #1, , energydifX
-   Put #1, , energydifXP
-   Put #1, , ModeChangeCycles
-   Put #1, , hidePredOffset
-   Put #1, , hidepred
-   Put #1, , energydif2
-   Put #1, , energydifX2
-   Put #1, , energydifXP2
-   
-   'Botsareus 8/5/2014
-   Put #1, , SimOpts.DisableFixing
-   
-   'Botsareus 8/16/2014
-   Put #1, , SunPosition
-   Put #1, , SunRange
-   Put #1, , SunChange
-   
-   'Botsareus 10/13/2014
-   Put #1, , SimOpts.Tides
-   Put #1, , SimOpts.TidesOf
-   
-   'Botsareus 10/8/2015
-   Put #1, , SimOpts.MutOscillSine
-   
-   'Botsareus 10/20/2015
-   Put #1, , stagnent
+  'the graphs themselfs
+  For k = 1 To NUMGRAPHS
+    Put #1, , graphfilecounter(k)
+    Put #1, , graphvisible(k)
+    Put #1, , graphleft(k)
+    Put #1, , graphtop(k)
+    Put #1, , graphsave(k)
+  Next k
+  
+  Put #1, , SimOpts.NoWShotDecay 'Botsareus 9/28/2013
+  
+  'Botsareus 8/5/2014
+  Put #1, , SimOpts.DisableFixing
+  
+  'Botsareus 8/16/2014
+  Put #1, , SunPosition
+  Put #1, , SunRange
+  Put #1, , SunChange
+  
+  'Botsareus 10/13/2014
+  Put #1, , SimOpts.Tides
+  Put #1, , SimOpts.TidesOf
+  
+  'Botsareus 10/8/2015
+  Put #1, , SimOpts.MutOscillSine
+  
+  'Botsareus 10/20/2015
+  Put #1, , stagnent
        
-    Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
+  Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
     
   Close #1
   Form1.MousePointer = vbArrow
-Exit Sub
+  Exit Sub
 tryagain:
-SaveSimulation path
+  SaveSimulation path
 End Sub
 
 'Botsareus 3/15/2013 load global settings
 Public Sub LoadGlobalSettings()
-'defaults
-bodyfix = 32100
-chseedstartnew = True
-chseedloadsim = True
-GraphUp = False
-HideDB = False
-MDIForm1.MainDir = App.path
-UseSafeMode = True 'Botsareus 10/5/2015
-UseEpiGene = False 'Botsareus 10/8/2015
-intFindBestV2 = 100
-UseOldColor = True
-'mutations tab
-epiresetemp = 1.3
-epiresetOP = 17
-'Delta2
-Delta2 = False
-DeltaMainExp = 1
-DeltaMainLn = 0
-DeltaDevExp = 7
-DeltaDevLn = 1
-DeltaPM = 3000
-DeltaWTC = 15
-DeltaMainChance = 100
-DeltaDevChance = 30
-'Normailize mutation rates
-NormMut = False
-valNormMut = 1071
-valMaxNormMut = 1071
-Dim holdmaindir As String
+  Dim holdmaindir As String
+  
+  'defaults
+  bodyfix = 32100
+  chseedstartnew = True
+  chseedloadsim = True
+  GraphUp = False
+  HideDB = False
+  MDIForm1.MainDir = App.path
+  UseSafeMode = True 'Botsareus 10/5/2015
+  UseEpiGene = False 'Botsareus 10/8/2015
+  intFindBestV2 = 100
+  UseOldColor = True
+  'mutations tab
+  epiresetemp = 1.3
+  epiresetOP = 17
+  'Delta2
+  Delta2 = False
+  DeltaMainExp = 1
+  DeltaMainLn = 0
+  DeltaDevExp = 7
+  DeltaDevLn = 1
+  DeltaPM = 3000
+  DeltaWTC = 15
+  DeltaMainChance = 100
+  DeltaDevChance = 30
+  'Normailize mutation rates
+  NormMut = False
+  valNormMut = 1071
+  valMaxNormMut = 1071
 
-'see if maindir overwrite exisits
-If dir(App.path & "\Maindir.gset") <> "" Then
+  'see if maindir overwrite exisits
+  If dir(App.path & "\Maindir.gset") <> "" Then
     'load the new maindir
     Open App.path & "\Maindir.gset" For Input As #1
       Input #1, holdmaindir
     Close #1
-    If dir(holdmaindir & "\", vbDirectory) <> "" Then 'Botsareus 6/11/2013 small bug fix to do with no longer finding a main directory
+    If dir(holdmaindir & "\", vbDirectory) <> "" Then
         MDIForm1.MainDir = holdmaindir
     End If
-End If
+  End If
 
-'see if settings exsist
-If dir(MDIForm1.MainDir & "\Global.gset") <> "" Then
+  'see if settings exsist
+  If dir(MDIForm1.MainDir & "\Global.gset") <> "" Then
     'load all settings
     Open MDIForm1.MainDir & "\Global.gset" For Input As #1
-      Input #1, screenratiofix
-      If Not EOF(1) Then Input #1, bodyfix
-      If Not EOF(1) Then Input #1, reprofix
-      If Not EOF(1) Then Input #1, chseedstartnew
-      If Not EOF(1) Then Input #1, chseedloadsim
-      If Not EOF(1) Then Input #1, UseSafeMode
-      If Not EOF(1) Then Input #1, intFindBestV2
-      If Not EOF(1) Then Input #1, UseOldColor
-      If Not EOF(1) Then Input #1, boylabldisp
-      If Not EOF(1) Then Input #1, startnovid
-      If Not EOF(1) Then Input #1, epireset
-      If Not EOF(1) Then Input #1, epiresetemp
-      If Not EOF(1) Then Input #1, epiresetOP
-      If Not EOF(1) Then Input #1, sunbelt
-      '
-      If Not EOF(1) Then Input #1, Delta2
-      If Not EOF(1) Then Input #1, DeltaMainExp
-      If Not EOF(1) Then Input #1, DeltaMainLn
-      If Not EOF(1) Then Input #1, DeltaDevExp
-      If Not EOF(1) Then Input #1, DeltaDevLn
-      If Not EOF(1) Then Input #1, DeltaPM
-      '
-      If Not EOF(1) Then Input #1, NormMut
-      If Not EOF(1) Then Input #1, valNormMut
-      If Not EOF(1) Then Input #1, valMaxNormMut
-      If Not EOF(1) Then Input #1, DeltaWTC
-      If Not EOF(1) Then Input #1, DeltaMainChance
-      If Not EOF(1) Then Input #1, DeltaDevChance
-      If Not EOF(1) Then Input #1, StartChlr
-      If Not EOF(1) Then Input #1, GraphUp
-      If Not EOF(1) Then Input #1, HideDB
-      If Not EOF(1) Then Input #1, UseEpiGene
+    Input #1, screenratiofix
+    If Not EOF(1) Then Input #1, bodyfix
+    If Not EOF(1) Then Input #1, reprofix
+    If Not EOF(1) Then Input #1, chseedstartnew
+    If Not EOF(1) Then Input #1, chseedloadsim
+    If Not EOF(1) Then Input #1, UseSafeMode
+    If Not EOF(1) Then Input #1, intFindBestV2
+    If Not EOF(1) Then Input #1, UseOldColor
+    If Not EOF(1) Then Input #1, boylabldisp
+    If Not EOF(1) Then Input #1, startnovid
+    If Not EOF(1) Then Input #1, epireset
+    If Not EOF(1) Then Input #1, epiresetemp
+    If Not EOF(1) Then Input #1, epiresetOP
+    If Not EOF(1) Then Input #1, sunbelt
+    '
+    If Not EOF(1) Then Input #1, Delta2
+    If Not EOF(1) Then Input #1, DeltaMainExp
+    If Not EOF(1) Then Input #1, DeltaMainLn
+    If Not EOF(1) Then Input #1, DeltaDevExp
+    If Not EOF(1) Then Input #1, DeltaDevLn
+    If Not EOF(1) Then Input #1, DeltaPM
+    '
+    If Not EOF(1) Then Input #1, NormMut
+    If Not EOF(1) Then Input #1, valNormMut
+    If Not EOF(1) Then Input #1, valMaxNormMut
+    If Not EOF(1) Then Input #1, DeltaWTC
+    If Not EOF(1) Then Input #1, DeltaMainChance
+    If Not EOF(1) Then Input #1, DeltaDevChance
+    If Not EOF(1) Then Input #1, StartChlr
+    If Not EOF(1) Then Input #1, GraphUp
+    If Not EOF(1) Then Input #1, HideDB
+    If Not EOF(1) Then Input #1, UseEpiGene
     Close #1
-End If
+  End If
 
-'some global settings change during simulation (copy is here)
-loadboylabldisp = boylabldisp
-loadstartnovid = startnovid
+  'some global settings change during simulation (copy is here)
+  loadboylabldisp = boylabldisp
+  loadstartnovid = startnovid
 
-'see if safemode settings exisit
-If dir(App.path & "\Safemode.gset") <> "" Then
+  'see if safemode settings exisit
+  If dir(App.path & "\Safemode.gset") <> "" Then
     'load all settings
     Open App.path & "\Safemode.gset" For Input As #1
-      Input #1, simalreadyrunning
+    Input #1, simalreadyrunning
     Close #1
-End If
+  End If
 
-
-'see if autosaved file exisit
-If dir(App.path & "\autosaved.gset") <> "" Then
+  'see if autosaved file exisit
+  If dir(App.path & "\autosaved.gset") <> "" Then
     'load all settings
     Open App.path & "\autosaved.gset" For Input As #1
-      Input #1, autosaved
+    Input #1, autosaved
     Close #1
-End If
+  End If
 
-'Botsareus  10/31/2015 Moved for bug fix
-'If we are not using safe mode assume simulation is not runnin'
-If UseSafeMode = False Then simalreadyrunning = False
-
-If simalreadyrunning = False Then autosaved = False
-
-'Botsareus 3/16/2014 If autosaved, we change restartmode, this forces system to run in diagnostic mode
-'The difference between x_restartmode 0 and 5 is that 5 uses hidepred settings
-
-'Botsareus 3/19/2014 Load data for evo mode
-
-'Botsareus 3/22/2014 Initial hidepred offset is normal
-
-hidePredOffset = hidePredCycl / 6
-
+  'If we are not using safe mode assume simulation is not runnin'
+  If UseSafeMode = False Then simalreadyrunning = False
+  If simalreadyrunning = False Then autosaved = False
 End Sub
 
 
 ' loads a whole simulation
 Public Sub LoadSimulation(path As String)
-Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is normailized
-
-  'Because of the way that loadrobot and saverobot work, all save and load
-  'sim routines are backwards and forwards compatible after 2.37.2
-  '(not 2.37.2, but everything that comes after)
   Dim j As Long
   Dim k As Long
   Dim x As Integer
-  Dim t As Integer
-  Dim s As Single 'EricL 4/1/2006 Use this to read in single values
   Dim tempbool As Boolean
   Dim tempint As Integer
   Dim temp As String
   Dim s2 As String
   
-  
+  Form1.camfix = False 'Botsareus 2/23/2013 When simulation starts the screen is normailized
   Form1.MousePointer = vbHourglass
-    
-  'For k = 0 To MaxRobs
-  '  Erase rob(k).DNA()
-  '  ReDim rob(k).DNA(1)
-  '  rob(k).exist = False
-  'Next k
-  'Erase rob()
-  'Init_Buckets
   
   Open path For Binary As 1
-    
-    'As of 2.42.8, indicates a value less than the "real" MaxRobs, not a high water mark, since only existing bots are stored post 2.42.8
-    Get #1, , MaxRobs
-    
-    'Round up to the next multiple of 500
-    ReDim rob(MaxRobs + (500 - (MaxRobs Mod 500)))
-    
-    Form1.lblSaving.Visible = True 'Botsareus 1/14/2014 New code to display load status
-    Form1.Visible = True
-    
-    For k = 1 To MaxRobs
-     LoadRobot 1, k
-      If k Mod 20 = 0 Then
-        Form1.lblSaving.Caption = "Loading... (" & Int(k / MaxRobs * 100) & "%)" 'Botsareus 1/14/2014
-        DoEvents
-      End If
-    Next k
-    
-    ' As of 2.42.8, the sim file is packed.  Every bot stored is guarenteed to exist, yet their bot numbers, when loaded, may be
-    ' different from the sim they came from.  Thus, we remap all the ties from all the loaded bots.
-    RemapAllTies MaxRobs
+  Get #1, , MaxRobs
+  
+  'Round up to the next multiple of 500
+  ReDim rob(MaxRobs + (500 - (MaxRobs Mod 500)))
+  
+  Form1.lblSaving.Visible = True 'Botsareus 1/14/2014 New code to display load status
+  Form1.Visible = True
+  
+  For k = 1 To MaxRobs
+   LoadRobot 1, k
+    If k Mod 20 = 0 Then
+      Form1.lblSaving.Caption = "Loading... (" & Int(k / MaxRobs * 100) & "%)" 'Botsareus 1/14/2014
+      DoEvents
+    End If
+  Next k
+  
+  ' As of 2.42.8, the sim file is packed.  Every bot stored is guarenteed to exist, yet their bot numbers, when loaded, may be
+  ' different from the sim they came from.  Thus, we remap all the ties from all the loaded bots.
+  RemapAllTies MaxRobs
 
+  Get #1, , SimOpts.BlockedVegs
+  Get #1, , SimOpts.Costs(SHOTCOST)
+  Get #1, , SimOpts.CostExecCond
+  Get #1, , SimOpts.Costs(COSTSTORE)
+  Get #1, , SimOpts.DeadRobotSnp
+  Get #1, , SimOpts.SnpExcludeVegs
+  Get #1, , SimOpts.DisableTies
+  Get #1, , SimOpts.EnergyExType
+  Get #1, , SimOpts.EnergyFix
+  Get #1, , SimOpts.EnergyProp
+  Get #1, , SimOpts.FieldHeight
+  Get #1, , SimOpts.FieldSize
+  Get #1, , SimOpts.FieldWidth
+  Get #1, , SimOpts.KillDistVegs
+  Get #1, , SimOpts.MaxEnergy
+  Get #1, , SimOpts.MaxPopulation
+  Get #1, , SimOpts.MinVegs
+  Get #1, , SimOpts.MutCurrMult
+  Get #1, , SimOpts.MutCycMax
+  Get #1, , SimOpts.MutCycMin
+  Get #1, , SimOpts.MutOscill
+  Get #1, , SimOpts.PhysBrown
+  Get #1, , SimOpts.Ygravity
+  Get #1, , SimOpts.Zgravity
+  Get #1, , SimOpts.PhysMoving
+  Get #1, , SimOpts.PhysSwim
+  Get #1, , SimOpts.PopLimMethod
+  Get #1, , k: SimOpts.SimName = Space(Abs(k))
+  Get #1, , SimOpts.SimName
+  Get #1, , SimOpts.SpeciesNum
+  Get #1, , SimOpts.Toroidal
+  Get #1, , SimOpts.TotBorn
+  Get #1, , SimOpts.TotRunCycle
+  Get #1, , SimOpts.TotRunTime
+  Get #1, , SimOpts.Pondmode
+  Get #1, , SimOpts.LightIntensity
+  Get #1, , SimOpts.CorpseEnabled
+  Get #1, , SimOpts.Decay
+  Get #1, , SimOpts.Gradient
+  Get #1, , SimOpts.DayNight
+  Get #1, , SimOpts.CycleLength
+  Get #1, , SimOpts.Decaydelay
+  Get #1, , SimOpts.DecayType
+  Get #1, , SimOpts.Costs(MOVECOST)
+  Get #1, , SimOpts.Restart
+  Get #1, , SimOpts.Dxsxconnected
+  Get #1, , SimOpts.Updnconnected
+  Get #1, , SimOpts.RepopAmount
+  Get #1, , SimOpts.RepopCooldown
+  Get #1, , SimOpts.ZeroMomentum
+  Get #1, , SimOpts.UserSeedNumber
+  Get #1, , SimOpts.SpeciesNum
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).Colind
+    Get #1, , SimOpts.Specie(k).color
+    Get #1, , SimOpts.Specie(k).Fixed
+    Get #1, , SimOpts.Specie(k).Mutables.mutarray
+    Get #1, , SimOpts.Specie(k).Mutables.Mutations
+    Get #1, , j: SimOpts.Specie(k).Name = Space(Abs(j))
+    Get #1, , SimOpts.Specie(k).Name
+    Get #1, , j: SimOpts.Specie(k).path = Space(j)
+    Get #1, , SimOpts.Specie(k).path
+    Get #1, , SimOpts.Specie(k).qty
+    Get #1, , SimOpts.Specie(k).Skin
+    Get #1, , SimOpts.Specie(k).Stnrg
+    Get #1, , SimOpts.Specie(k).Veg
+  Next k
+  
+  Get #1, , SimOpts.VegFeedingToBody
+  Get #1, , SimOpts.CoefficientStatic
+  Get #1, , SimOpts.CoefficientKinetic
+  Get #1, , SimOpts.PlanetEaters
+  Get #1, , SimOpts.PlanetEatersG
+  Get #1, , SimOpts.Viscosity
+  Get #1, , SimOpts.Density
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).Mutables.CopyErrorWhatToChange
+    Get #1, , SimOpts.Specie(k).Mutables.PointWhatToChange
     
-    Get #1, , k: temp = Space(k)
-    Get #1, , temp
-    Get #1, , tempint
-    Get #1, , k: temp = Space(k)
-    Get #1, , temp
-    Get #1, , tempint
-    Get #1, , SimOpts.BlockedVegs
-    Get #1, , SimOpts.Costs(SHOTCOST)
-    Get #1, , SimOpts.CostExecCond
-    Get #1, , SimOpts.Costs(COSTSTORE)
-    Get #1, , SimOpts.DeadRobotSnp
-    Get #1, , SimOpts.SnpExcludeVegs
-    Get #1, , k: temp = Space(k)
-    Get #1, , temp
-    Get #1, , tempbool
-    Get #1, , SimOpts.DisableTies
-    Get #1, , SimOpts.EnergyExType
-    Get #1, , SimOpts.EnergyFix
-    Get #1, , SimOpts.EnergyProp
-    Get #1, , SimOpts.FieldHeight
-    Get #1, , SimOpts.FieldSize
-    Get #1, , SimOpts.FieldWidth
-    Get #1, , SimOpts.KillDistVegs
-    Get #1, , SimOpts.MaxEnergy
-    Get #1, , SimOpts.MaxPopulation
-    Get #1, , SimOpts.MinVegs
-    Get #1, , SimOpts.MutCurrMult
-    Get #1, , SimOpts.MutCycMax
-    Get #1, , SimOpts.MutCycMin
-    Get #1, , SimOpts.MutOscill
-    Get #1, , SimOpts.PhysBrown
-    Get #1, , SimOpts.Ygravity
-    Get #1, , SimOpts.Zgravity
-    Get #1, , SimOpts.PhysMoving
-    Get #1, , SimOpts.PhysSwim
-    Get #1, , SimOpts.PopLimMethod
-    Get #1, , k: SimOpts.SimName = Space(Abs(k))
-    Get #1, , SimOpts.SimName
-    Get #1, , SimOpts.SpeciesNum
-    Get #1, , SimOpts.Toroidal
-    Get #1, , SimOpts.TotBorn
-    Get #1, , SimOpts.TotRunCycle
-    Get #1, , SimOpts.TotRunTime
-    Get #1, , SimOpts.Pondmode
-    'Get #1, , SimOpts.KineticEnergy
-    Get #1, , SimOpts.CorpseEnabled 'dummy variable
-    Get #1, , SimOpts.LightIntensity
-    Get #1, , SimOpts.CorpseEnabled
-    Get #1, , SimOpts.Decay
-    Get #1, , SimOpts.Gradient
-    Get #1, , SimOpts.DayNight
-    Get #1, , SimOpts.CycleLength
-    Get #1, , SimOpts.Decaydelay
-    Get #1, , SimOpts.DecayType
-    
-    'obsolete
-    Get #1, , SimOpts.Costs(MOVECOST)
-    
-    Dim disc As Boolean
-    
-    Get #1, , disc
-    Get #1, , SimOpts.Restart
-    
-    'newer stuff
-    If Not EOF(1) Then Get #1, , SimOpts.Dxsxconnected
-    If Not EOF(1) Then Get #1, , SimOpts.Updnconnected
-    If Not EOF(1) Then Get #1, , SimOpts.RepopAmount
-    If Not EOF(1) Then Get #1, , SimOpts.RepopCooldown
-    If Not EOF(1) Then Get #1, , SimOpts.ZeroMomentum
-    If Not EOF(1) Then Get #1, , SimOpts.UserSeedNumber
-    If Not EOF(1) Then Get #1, , tempbool
-    
-    If Not EOF(1) Then Get #1, , SimOpts.SpeciesNum
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Colind
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).color
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Fixed
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.mutarray
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.Mutations
-      If Not EOF(1) Then Get #1, , j: SimOpts.Specie(k).Name = Space(Abs(j))
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Name
-      
-      'obsolete
-      'If Not EOF(1) Then Get #1, , SimOpts.Specie(k).omnifeed
-      If Not EOF(1) Then Get #1, , tempbool
-      
-      If Not EOF(1) Then Get #1, , j: SimOpts.Specie(k).path = Space(j)
-      If Not EOF(1) Then
-        Get #1, , SimOpts.Specie(k).path
-        
-        'Botsareus 8/21/2012 Had to dump this, VERY BUGY!
-'        'New for 2.42.5.  Insure the path points to our main directory. It might be a sim that was saved before hand on a different machine.
-'        'First, we strip off the working directory portion of the robot path
-'        'We have to do it this way since the sim could have come from a different machine with a different install directory
-'        temp = SimOpts.Specie(k).path
-'        s2 = Left(temp, 7)
-'        While s2 <> "\Robots" And Len(temp) > 7
-'          temp = Right(temp, Len(temp) - 1)
-'          s2 = Left(temp, 7)
-'        Wend
-'        SimOpts.Specie(k).path = temp
-'
-'        'Now we add on the main directory to get the full path.  The sim may have come from a different machine, but at least
-'        'now the path points to the right main directory...
-'        SimOpts.Specie(k).path = MDIForm1.MainDir + SimOpts.Specie(k).path
-      End If
-      
-      If Not EOF(1) Then Get #1, , s 'SimOpts.Specie(k).Posdn 'EricL 4/1/06 Changed these to use the variable s
-      If Not EOF(1) Then Get #1, , s 'SimOpts.Specie(k).Poslf
-      If Not EOF(1) Then Get #1, , s 'SimOpts.Specie(k).Posrg
-      If Not EOF(1) Then Get #1, , s 'SimOpts.Specie(k).Postp
-      
-      SimOpts.Specie(k).Posdn = 1
-      SimOpts.Specie(k).Posrg = 1
-      SimOpts.Specie(k).Poslf = 0
-      SimOpts.Specie(k).Postp = 0
-      
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).qty
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Skin
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Stnrg
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Veg
-    Next k
-    
-    If Not EOF(1) Then Get #1, , tempint
-    If Not EOF(1) Then Get #1, , SimOpts.VegFeedingToBody
-    
-    'New for 2.4
-    If Not EOF(1) Then Get #1, , SimOpts.CoefficientStatic
-    If Not EOF(1) Then Get #1, , SimOpts.CoefficientKinetic
-    If Not EOF(1) Then Get #1, , SimOpts.PlanetEaters
-    If Not EOF(1) Then Get #1, , SimOpts.PlanetEatersG
-    If Not EOF(1) Then Get #1, , SimOpts.Viscosity
-    If Not EOF(1) Then Get #1, , SimOpts.Density
-    
-    'EricL - 4/1/06 Fixed bug by adding -1.  Loop was executing one too many times...
-    For k = 0 To SimOpts.SpeciesNum - 1
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.CopyErrorWhatToChange
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.PointWhatToChange
-      
-      For j = 0 To 20
-        If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.Mean(j)
-        If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Mutables.StdDev(j)
-      Next j
-    Next k
-    
-    For k = 0 To 70
-      If Not EOF(1) Then Get #1, , SimOpts.Costs(k)
-    Next k
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Poslf
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Posrg
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Postp
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).Posdn
-    Next k
-    
-    If Not EOF(1) Then Get #1, , SimOpts.BadWastelevel 'EricL 4/1/2006 Added this
-    'EricL 4/1/2006 Default value so as to avoid divide by zero problems when loading older saved sim files
-    If SimOpts.BadWastelevel = 0 Then SimOpts.BadWastelevel = 400
-    
-    If Not EOF(1) Then Get #1, , SimOpts.chartingInterval 'EricL 4/1/2006 Added this
-    'EricL May be cases where 0 is read from old format files which can cause divide by 0 problems later
-    If SimOpts.chartingInterval <= 0 Or SimOpts.chartingInterval > 32000 Then SimOpts.chartingInterval = 200
-     
-    SimOpts.CoefficientElasticity = 0 'Set a reasonable value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.CoefficientElasticity 'EricL 4/29/2006 Added this
-        
-    SimOpts.FluidSolidCustom = 2 'Set to custom as a default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.FluidSolidCustom 'EricL 5/7/2006 Added this for UI initialization
-    If SimOpts.FluidSolidCustom < 0 Or SimOpts.FluidSolidCustom > 2 Then SimOpts.FluidSolidCustom = 2
-    
-    SimOpts.CostRadioSetting = 2 'Set to custom as a default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.CostRadioSetting 'EricL 5/7/2006 Added this for UI initialization
-    If SimOpts.CostRadioSetting < 0 Or SimOpts.CostRadioSetting > 2 Then SimOpts.CostRadioSetting = 2
-    
-    SimOpts.MaxVelocity = 40     'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.MaxVelocity 'EricL 5/16/2006 Added this - was not saved before
-    If SimOpts.MaxVelocity <= 0 Or SimOpts.MaxVelocity > 200 Then SimOpts.MaxVelocity = 40
-    
-    SimOpts.NoShotDecay = False   'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.NoShotDecay 'EricL 6/8/2006 Added this
-    
-    SimOpts.SunUpThreshold = 500000   'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.SunUpThreshold 'EricL 6/8/2006 Added this
-    
-    SimOpts.SunUp = False   'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.SunUp 'EricL 6/8/2006 Added this
-    
-    SimOpts.SunDownThreshold = 1000000   'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.SunDownThreshold 'EricL 6/8/2006 Added this
-    
-    SimOpts.SunDown = False   'Set to a reasonable default value for older saved sim files
-    If Not EOF(1) Then Get #1, , SimOpts.SunDown 'EricL 6/8/2006 Added this
-    
-    If Not EOF(1) Then Get #1, , tempbool
-    If Not EOF(1) Then Get #1, , tempbool
-    
-    SimOpts.FixedBotRadii = False
-    If Not EOF(1) Then Get #1, , SimOpts.FixedBotRadii
-    
-    SimOpts.DayNightCycleCounter = 0
-    If Not EOF(1) Then Get #1, , SimOpts.DayNightCycleCounter
-    
-    SimOpts.Daytime = True
-    If Not EOF(1) Then Get #1, , SimOpts.Daytime
-    
-    SimOpts.SunThresholdMode = 0
-    If Not EOF(1) Then Get #1, , SimOpts.SunThresholdMode
-      
-    Dim discard As Integer
-    If Not EOF(1) Then Get #1, , discard
-    
-    numObstacles = 0
-    If Not EOF(1) Then Get #1, , numObstacles
-           
-    For x = 1 To numObstacles
-      LoadObstacle 1, x
-    Next x
-    
-    If Not EOF(1) Then Get #1, , tempbool
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      SimOpts.Specie(k).CantSee = False
-      SimOpts.Specie(k).DisableDNA = False
-      SimOpts.Specie(k).DisableMovementSysvars = False
-    
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).CantSee
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).DisableDNA
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).DisableMovementSysvars
-    Next k
-    
-    SimOpts.shapesAreVisable = False
-    If Not EOF(1) Then Get #1, , SimOpts.shapesAreVisable
-    
-    SimOpts.allowVerticalShapeDrift = False
-    If Not EOF(1) Then Get #1, , SimOpts.allowVerticalShapeDrift
-    
-    SimOpts.allowHorizontalShapeDrift = False
-    If Not EOF(1) Then Get #1, , SimOpts.allowHorizontalShapeDrift
-    
-    SimOpts.shapesAreSeeThrough = False
-    If Not EOF(1) Then Get #1, , SimOpts.shapesAreSeeThrough
-    
-    SimOpts.shapesAbsorbShots = False
-    If Not EOF(1) Then Get #1, , SimOpts.shapesAbsorbShots
-    
-    SimOpts.shapeDriftRate = 0
-    If Not EOF(1) Then Get #1, , SimOpts.shapeDriftRate
-    
-    SimOpts.makeAllShapesTransparent = False
-    If Not EOF(1) Then Get #1, , SimOpts.makeAllShapesTransparent
-    
-    SimOpts.makeAllShapesBlack = False
-    If Not EOF(1) Then Get #1, , SimOpts.makeAllShapesBlack
-     
-    For k = 0 To SimOpts.SpeciesNum - 1
-      SimOpts.Specie(k).CantReproduce = False
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).CantReproduce
-    Next k
-    
-    maxshotarray = 0
-    If Not EOF(1) Then Get #1, , maxshotarray
-        
-    If maxshotarray <> 0 And maxshotarray > 0 And maxshotarray < 1000000 Then
-      ReDim Shots(maxshotarray)
-               
-      For j = 1 To maxshotarray
-        LoadShot 1, j
-      Next j
-      RemapAllShots maxshotarray
-    Else
-      ' Old sim with no saved shots
-      ' Init the shots array (this used to be done in StartLoaded
-      maxshotarray = 100
-      ReDim Shots(maxshotarray)
-      For j = 1 To maxshotarray
-        Shots(j).stored = False
-        Shots(j).exist = False
-        Shots(j).parent = 0
-      Next j
-    End If
-    
-    SimOpts.MaxAbsNum = MaxRobs
-    If Not EOF(1) Then Get #1, , SimOpts.MaxAbsNum
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      SimOpts.Specie(k).VirusImmune = False
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).VirusImmune
-    Next k
-    
-    For k = 0 To SimOpts.SpeciesNum - 1
-      SimOpts.Specie(k).population = 0
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).population
-      
-      SimOpts.Specie(k).SubSpeciesCounter = 0
-      If Not EOF(1) Then Get #1, , SimOpts.Specie(k).SubSpeciesCounter
-    Next k
-        
-    If Not EOF(1) Then Get #1, , SimOpts.EGridWidth
-    
-    SimOpts.EGridEnabled = False
-    If Not EOF(1) Then Get #1, , SimOpts.EGridEnabled
-    
-    If Not EOF(1) Then Get #1, , SimOpts.oldCostX
-    
-    SimOpts.DisableMutations = False
-    If Not EOF(1) Then Get #1, , SimOpts.DisableMutations
-    If CInt(SimOpts.DisableMutations) > 1 Or CInt(SimOpts.DisableMutations) < 0 Then
-      SimOpts.DisableMutations = False
-    End If
-              
-    SimOpts.SimGUID = CLng(Rnd)
-    If Not EOF(1) Then Get #1, , SimOpts.SimGUID
-    If Not EOF(1) Then Get #1, , SimOpts.SpeciationGenerationalDistance
-    If Not EOF(1) Then Get #1, , SimOpts.SpeciationGeneticDistance
-    If Not EOF(1) Then Get #1, , SimOpts.EnableAutoSpeciation
-    If Not EOF(1) Then Get #1, , SimOpts.SpeciationMinimumPopulation
-    
-    SimOpts.SpeciationForkInterval = 5000
-    If Not EOF(1) Then Get #1, , SimOpts.SpeciationForkInterval
-    
-    'Botsareus 4/17/2013
-    SimOpts.DisableTypArepro = False
-    If Not EOF(1) Then Get #1, , SimOpts.DisableTypArepro
-    
-    'Botsareus 5/31/2013 Load all graph data
-    'strings
-    If Not EOF(1) Then Get #1, , j: strGraphQuery1 = Space(j)
-    If Not EOF(1) Then Get #1, , strGraphQuery1
-    If Not EOF(1) Then Get #1, , j: strGraphQuery2 = Space(j)
-    If Not EOF(1) Then Get #1, , strGraphQuery2
-    If Not EOF(1) Then Get #1, , j: strGraphQuery3 = Space(j)
-    If Not EOF(1) Then Get #1, , strGraphQuery3
-    If Not EOF(1) Then Get #1, , j: strSimStart = Space(j)
-    If Not EOF(1) Then Get #1, , strSimStart
-    'the graphs themselfs
-    For k = 1 To NUMGRAPHS
-     If Not EOF(1) Then Get #1, , graphfilecounter(k)
-     If Not EOF(1) Then Get #1, , graphvisible(k)
-     If Not EOF(1) Then Get #1, , graphleft(k)
-     If Not EOF(1) Then Get #1, , graphtop(k)
-     If Not EOF(1) Then Get #1, , graphsave(k)
-     If graphvisible(k) Then
-       Select Case k
-        Case 1
-          Form1.NewGraph POPULATION_GRAPH, "Populations"
-        Case 2
-          Form1.NewGraph MUTATIONS_GRAPH, "Average_Mutations"
-        Case 3
-          Form1.NewGraph AVGAGE_GRAPH, "Average_Age"
-        Case 4
-          Form1.NewGraph OFFSPRING_GRAPH, "Average_Offspring"
-        Case 5
-          Form1.NewGraph ENERGY_GRAPH, "Average_Energy"
-        Case 6
-          Form1.NewGraph DNALENGTH_GRAPH, "Average_DNA_length"
-        Case 7
-          Form1.NewGraph DNACOND_GRAPH, "Average_DNA_Cond_statements"
-        Case 8
-          Form1.NewGraph MUT_DNALENGTH_GRAPH, "Average_Mutations_per_DNA_length_x1000-"
-        Case 9
-          Form1.NewGraph ENERGY_SPECIES_GRAPH, "Total_Energy_per_Species_x1000-"
-        Case 10
-          Form1.NewGraph DYNAMICCOSTS_GRAPH, "Dynamic_Costs"
-        Case 11
-          Form1.NewGraph SPECIESDIVERSITY_GRAPH, "Species_Diversity"
-        Case 12
-          Form1.NewGraph AVGCHLR_GRAPH, "Average_Chloroplasts"
-        Case 13
-          Form1.NewGraph GENETIC_DIST_GRAPH, "Genetic_Distance_x1000-"
-        Case 14
-          Form1.NewGraph GENERATION_DIST_GRAPH, "Max_Generational_Distance"
-        Case 15
-          Form1.NewGraph GENETIC_SIMPLE_GRAPH, "Simple_Genetic_Distance_x1000-"
-        Case 16
-            Form1.NewGraph CUSTOM_1_GRAPH, "Customizable_Graph_1-"
-        Case 17
-            Form1.NewGraph CUSTOM_2_GRAPH, "Customizable_Graph_2-"
-        Case 18
-            Form1.NewGraph CUSTOM_3_GRAPH, "Customizable_Graph_3-"
-      End Select
-     End If
-    Next k
-    
-    SimOpts.NoWShotDecay = False 'Load information about not decaying waste shots
-    If Not EOF(1) Then Get #1, , SimOpts.NoWShotDecay 'EricL 6/8/2006 Added this
-    
-       'evo stuff
-   If Not EOF(1) Then Get #1, , energydif
-   If Not EOF(1) Then Get #1, , energydifX
-   If Not EOF(1) Then Get #1, , energydifXP
-   If Not EOF(1) Then Get #1, , ModeChangeCycles
-   If Not EOF(1) Then Get #1, , hidePredOffset
-   If Not EOF(1) Then Get #1, , hidepred
-   If Not EOF(1) Then Get #1, , energydif2
-   If Not EOF(1) Then Get #1, , energydifX2
-   If Not EOF(1) Then Get #1, , energydifXP2
+    For j = 0 To 20
+      Get #1, , SimOpts.Specie(k).Mutables.Mean(j)
+      Get #1, , SimOpts.Specie(k).Mutables.StdDev(j)
+    Next j
+  Next k
+  
+  For k = 0 To 70
+    Get #1, , SimOpts.Costs(k)
+  Next k
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).Poslf
+    Get #1, , SimOpts.Specie(k).Posrg
+    Get #1, , SimOpts.Specie(k).Postp
+    Get #1, , SimOpts.Specie(k).Posdn
+  Next k
+  
+  Get #1, , SimOpts.BadWastelevel
+  Get #1, , SimOpts.chartingInterval 'EricL 4/1/2006 Added this
+  Get #1, , SimOpts.CoefficientElasticity 'EricL 4/29/2006 Added this
+  Get #1, , SimOpts.FluidSolidCustom 'EricL 5/7/2006 Added this for UI initialization
+  Get #1, , SimOpts.CostRadioSetting 'EricL 5/7/2006 Added this for UI initialization
+  Get #1, , SimOpts.MaxVelocity 'EricL 5/16/2006 Added this - was not saved before
+  Get #1, , SimOpts.NoShotDecay 'EricL 6/8/2006 Added this
+  Get #1, , SimOpts.SunUpThreshold 'EricL 6/8/2006 Added this
+  Get #1, , SimOpts.SunUp 'EricL 6/8/2006 Added this
+  Get #1, , SimOpts.SunDownThreshold 'EricL 6/8/2006 Added this
+  Get #1, , SimOpts.SunDown 'EricL 6/8/2006 Added this
+  Get #1, , SimOpts.FixedBotRadii
+  Get #1, , SimOpts.DayNightCycleCounter
+  Get #1, , SimOpts.Daytime
+  Get #1, , SimOpts.SunThresholdMode
+  Get #1, , numObstacles
+         
+  For x = 1 To numObstacles
+    LoadObstacle 1, x
+  Next x
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).CantSee
+    Get #1, , SimOpts.Specie(k).DisableDNA
+    Get #1, , SimOpts.Specie(k).DisableMovementSysvars
+  Next k
+  
+  Get #1, , SimOpts.shapesAreVisable
+  Get #1, , SimOpts.allowVerticalShapeDrift
+  Get #1, , SimOpts.allowHorizontalShapeDrift
+  Get #1, , SimOpts.shapesAreSeeThrough
+  Get #1, , SimOpts.shapesAbsorbShots
+  Get #1, , SimOpts.shapeDriftRate
+  Get #1, , SimOpts.makeAllShapesTransparent
+  Get #1, , SimOpts.makeAllShapesBlack
    
-   SimOpts.DisableFixing = False
-   If Not EOF(1) Then Get #1, , SimOpts.DisableFixing
-    
-   If Not EOF(1) Then Get #1, , SunPosition
-   If Not EOF(1) Then Get #1, , SunRange
-   If Not EOF(1) Then Get #1, , SunChange
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).CantReproduce
+  Next k
+  
+  Get #1, , maxshotarray
+      
+  ReDim Shots(maxshotarray)
+             
+  For j = 1 To maxshotarray
+    LoadShot 1, j
+  Next j
+  RemapAllShots maxshotarray
+  
+  SimOpts.MaxAbsNum = MaxRobs
+  Get #1, , SimOpts.MaxAbsNum
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).VirusImmune
+  Next k
+  
+  For k = 0 To SimOpts.SpeciesNum - 1
+    Get #1, , SimOpts.Specie(k).population
+    Get #1, , SimOpts.Specie(k).SubSpeciesCounter
+  Next k
+      
+  Get #1, , SimOpts.oldCostX
+  Get #1, , SimOpts.DisableMutations
+  Get #1, , SimOpts.SimGUID
+  Get #1, , SimOpts.SpeciationGenerationalDistance
+  Get #1, , SimOpts.SpeciationGeneticDistance
+  Get #1, , SimOpts.EnableAutoSpeciation
+  Get #1, , SimOpts.SpeciationMinimumPopulation
+  Get #1, , SimOpts.SpeciationForkInterval
+  Get #1, , SimOpts.DisableTypArepro
+  Get #1, , j: strGraphQuery1 = Space(j)
+  Get #1, , strGraphQuery1
+  Get #1, , j: strGraphQuery2 = Space(j)
+  Get #1, , strGraphQuery2
+  Get #1, , j: strGraphQuery3 = Space(j)
+  Get #1, , strGraphQuery3
+  Get #1, , j: strSimStart = Space(j)
+  Get #1, , strSimStart
+  'the graphs themselfs
+  For k = 1 To NUMGRAPHS
+   Get #1, , graphfilecounter(k)
+   Get #1, , graphvisible(k)
+   Get #1, , graphleft(k)
+   Get #1, , graphtop(k)
+   Get #1, , graphsave(k)
    
-   'Botsareus 10/13/2014
-   If Not EOF(1) Then Get #1, , SimOpts.Tides
-   If Not EOF(1) Then Get #1, , SimOpts.TidesOf
+   If graphvisible(k) Then
+     Select Case k
+      Case 1
+        Form1.NewGraph POPULATION_GRAPH, "Populations"
+      Case 2
+        Form1.NewGraph MUTATIONS_GRAPH, "Average_Mutations"
+      Case 3
+        Form1.NewGraph AVGAGE_GRAPH, "Average_Age"
+      Case 4
+        Form1.NewGraph OFFSPRING_GRAPH, "Average_Offspring"
+      Case 5
+        Form1.NewGraph ENERGY_GRAPH, "Average_Energy"
+      Case 6
+        Form1.NewGraph DNALENGTH_GRAPH, "Average_DNA_length"
+      Case 7
+        Form1.NewGraph DNACOND_GRAPH, "Average_DNA_Cond_statements"
+      Case 8
+        Form1.NewGraph MUT_DNALENGTH_GRAPH, "Average_Mutations_per_DNA_length_x1000-"
+      Case 9
+        Form1.NewGraph ENERGY_SPECIES_GRAPH, "Total_Energy_per_Species_x1000-"
+      Case 10
+        Form1.NewGraph DYNAMICCOSTS_GRAPH, "Dynamic_Costs"
+      Case 11
+        Form1.NewGraph SPECIESDIVERSITY_GRAPH, "Species_Diversity"
+      Case 12
+        Form1.NewGraph AVGCHLR_GRAPH, "Average_Chloroplasts"
+      Case 13
+        Form1.NewGraph GENETIC_DIST_GRAPH, "Genetic_Distance_x1000-"
+      Case 14
+        Form1.NewGraph GENERATION_DIST_GRAPH, "Max_Generational_Distance"
+      Case 15
+        Form1.NewGraph GENETIC_SIMPLE_GRAPH, "Simple_Genetic_Distance_x1000-"
+      Case 16
+          Form1.NewGraph CUSTOM_1_GRAPH, "Customizable_Graph_1-"
+      Case 17
+          Form1.NewGraph CUSTOM_2_GRAPH, "Customizable_Graph_2-"
+      Case 18
+          Form1.NewGraph CUSTOM_3_GRAPH, "Customizable_Graph_3-"
+    End Select
+   End If
+  Next k
+  
+  Get #1, , SimOpts.NoWShotDecay 'EricL 6/8/2006 Added this
+
+  Get #1, , SimOpts.DisableFixing
    
-   'Botsareus 10/8/2015
-   If Not EOF(1) Then Get #1, , SimOpts.MutOscillSine
+  Get #1, , SunPosition
+  Get #1, , SunRange
+  Get #1, , SunChange
+  
+  'Botsareus 10/13/2014
+  Get #1, , SimOpts.Tides
+  Get #1, , SimOpts.TidesOf
+  
+  'Botsareus 10/8/2015
+  Get #1, , SimOpts.MutOscillSine
+  
+  'Botsareus 10/20/2015
+  Get #1, , stagnent
    
-   'Botsareus 10/20/2015
-   If Not EOF(1) Then Get #1, , stagnent
-    
-   Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
+  Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
     
   Close 1
   
@@ -1216,19 +924,11 @@ Public Sub LoadRobot(fnum As Integer, ByVal n As Integer)
     rob(n).genenum = CountGenes(rob(n).dna())
     rob(n).mem(DnaLenSys) = rob(n).DnaLen
     rob(n).mem(GenesSys) = rob(n).genenum
-   ' UpdateBotBucket n
   End If
 End Sub
 
 ' assignes a robot his unique code
 Public Sub GiveAbsNum(k As Integer)
- ' Dim n As Integer, Max As Long
-  'For n = 1 To MaxRobs
-  '  If Max < rob(n).AbsNum Then
-  '    Max = rob(n).AbsNum
-  '  End If
-  'Next n
-  'rob(k).AbsNum = Max + 1
   If rob(k).AbsNum = 0 Then
     SimOpts.MaxAbsNum = SimOpts.MaxAbsNum + 1
     rob(k).AbsNum = SimOpts.MaxAbsNum
@@ -1237,11 +937,9 @@ End Sub
 
 ' loads the body of the robot
 Private Sub LoadRobotBody(n As Integer, r As Integer)
-'robot r
-'file #n,
-  Dim t As Integer, k As Integer, ind As Integer, Fe As Byte, L1 As Long, inttmp As Integer
+  Dim t As Integer, k As Integer, Fe As Byte, L1 As Long, inttmp As Integer
   Dim MessedUpMutations As Boolean
-  Dim longtmp As Long 'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
+  Dim longtmp As Long
   
   MessedUpMutations = False
   With rob(r)
@@ -1326,23 +1024,20 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     Get #n, , .Skin()
     Get #n, , .color
     
-    'new stuff using FileContinue conditions for backward and forward compatability
-    If FileContinue(n) Then Get #n, , .body: .radius = FindRadius(r)
-    If FileContinue(n) Then Get #n, , .Bouyancy
-    If FileContinue(n) Then Get #n, , .Corpse
-    If FileContinue(n) Then Get #n, , .Pwaste
-    If FileContinue(n) Then Get #n, , .Waste
-    If FileContinue(n) Then Get #n, , .poison
-    If FileContinue(n) Then Get #n, , .venom
-    If FileContinue(n) Then Get #n, , inttmp
-    If FileContinue(n) Then Get #n, , .exist
-    If FileContinue(n) Then Get #n, , .Dead
-    
-    If FileContinue(n) Then Get #n, , k: .FName = Space(k)
-    If FileContinue(n) Then Get #n, , .FName
+    Get #n, , .body: .radius = FindRadius(r)
+    Get #n, , .Bouyancy
+    Get #n, , .Corpse
+    Get #n, , .Pwaste
+    Get #n, , .Waste
+    Get #n, , .poison
+    Get #n, , .venom
+    Get #n, , .exist
+    Get #n, , .Dead
+    Get #n, , k: .FName = Space(k)
+    Get #n, , .FName
             
-    If FileContinue(n) Then Get #n, , k: .LastOwner = Space(k)
-    If FileContinue(n) Then Get #n, , .LastOwner
+    Get #n, , k: .LastOwner = Space(k)
+    Get #n, , .LastOwner
     If .LastOwner = "" Then .LastOwner = "Local"
     
     If FileContinue(n) Then Get #n, , k
@@ -1469,15 +1164,7 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     
     .fertilized = -1
     If FileContinue(n) Then Get #n, , .fertilized
-    
-    'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
-    If FileContinue(n) Then Get #n, , inttmp
-    For t = 0 To 500
-      If FileContinue(n) Then Get #n, , longtmp
-      If FileContinue(n) Then Get #n, , longtmp
-      If FileContinue(n) Then Get #n, , longtmp
-    Next t
-    
+        
     .sim = 0
     If FileContinue(n) Then Get #n, , .sim
     If FileContinue(n) Then Get #n, , .AbsNum
@@ -1695,7 +1382,6 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .Waste
     Put #n, , .poison
     Put #n, , .venom
-    Put #n, , k
     Put #n, , .exist
     Put #n, , .Dead
     
@@ -1759,15 +1445,7 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
       Put #n, , .spermDNA(t).value
     Next t
     Put #n, , .fertilized
-    
-    'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
-    Put #n, , t
-    For t = 0 To 500
-      Put #n, , longtmp
-      Put #n, , longtmp
-      Put #n, , longtmp
-    Next t
-    
+        
     Put #n, , .sim
     Put #n, , .AbsNum
     
@@ -1818,22 +1496,6 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .actvel.x
     Put #n, , .actvel.y
     
-    
-    'Botsareus 10/5/2015 Replaced with something better
-'    'Botsareus 9/16/2014 Write gene kill resrictions
-'
-'    Dim x As Integer
-'    Dim y As Integer
-'    x = UBound(.delgenes): Put #n, , x
-'    For y = 0 To x
-'        Put #n, , .delgenes(y).position
-'        k = UBound(.delgenes(y).dna): Put #n, , k
-'        For t = 0 To k
-'          Put #n, , .delgenes(y).dna(t).tipo
-'          Put #n, , .delgenes(y).dna(t).value
-'        Next t
-'    Next
-    
     'write any future data here
     
     Put #n, , Fe
@@ -1845,13 +1507,7 @@ End Sub
 ' saves a robot dna     !!!New routine from Carlo!!!
 'Botsareus 10/8/2015 Code simplification
 Sub salvarob(n As Integer, path As String)
-
-  Dim hold As String
-  Dim hashed As String
-  
-  Dim a As Integer
-  Dim epigene As String
-  
+  Dim hold As String, hashed As String, a As Integer, epigene As String
   
   Close #1
   Open path For Output As #1
@@ -1860,19 +1516,14 @@ Sub salvarob(n As Integer, path As String)
   'Botsareus 10/8/2015 New code to save epigenetic memory as gene
   
   If UseEpiGene Then
-  
-      For a = 971 To 990
-          If rob(n).mem(a) <> 0 Then epigene = epigene & rob(n).mem(a) & " " & a & " store" & vbCrLf
-      Next
+    For a = 971 To 990
+      If rob(n).mem(a) <> 0 Then epigene = epigene & rob(n).mem(a) & " " & a & " store" & vbCrLf
+    Next
     
-      If epigene <> "" Then
-      
-          epigene = "start" & vbCrLf & epigene & "*.thisgene .delgene store" & vbCrLf & "stop"
-          
-          hold = hold + epigene
-      
-      End If
-
+    If epigene <> "" Then
+      epigene = "start" & vbCrLf & epigene & "*.thisgene .delgene store" & vbCrLf & "stop"
+      hold = hold + epigene
+    End If
   End If
     
   savingtofile = True 'Botsareus 2/28/2014 when saving to file the def sysvars should not save
@@ -1890,7 +1541,7 @@ Sub salvarob(n As Integer, path As String)
   Save_mrates rob(n).Mutables, extractpath(path) & "\" & extractexactname(extractname(path)) & ".mrate"
   
   If MsgBox("Do you want to change robot's name to " + extractname(path) + " ?", vbYesNo, "Robot DNA saved") = vbYes Then
-   rob(n).FName = extractname(path)
+    rob(n).FName = extractname(path)
   End If
 End Sub
 
@@ -1985,14 +1636,12 @@ Private Sub SaveShot(n As Integer, t As Long)
     Put #n, , .genenum     ' which gene to copy in host bot
     Put #n, , .stored      ' for virus shots (and maybe future types) this shot is stored inside the bot until it's ready to be launched
   
-    
     'write any future data here
     
     Put #n, , Fe
     Put #n, , Fe
     Put #n, , Fe
     'don't you dare put anything after this!
-    
   End With
 End Sub
 
@@ -2053,42 +1702,38 @@ Private Sub LoadShot(n As Integer, t As Long)
   End With
 End Sub
 
-'M U T A T I O N  F I L E Botsareus 12/11/2013
-
 'generate mrates file
 Sub Save_mrates(mut As mutationprobs, FName As String)
-Dim m As Byte
-    Open FName For Output As #1
-        With mut
-            Write #1, .PointWhatToChange
-            Write #1, .CopyErrorWhatToChange
-            For m = 0 To 10 'Need to change this if adding more mutation types (Trying to keep some backword compatability here)
-                Write #1, .mutarray(m)
-                Write #1, .Mean(m)
-                Write #1, .StdDev(m)
-            Next
-        End With
-    Close #1
+  Dim m As Byte
+  Open FName For Output As #1
+  With mut
+    Write #1, .PointWhatToChange
+    Write #1, .CopyErrorWhatToChange
+    For m = 0 To 10
+      Write #1, .mutarray(m)
+      Write #1, .Mean(m)
+      Write #1, .StdDev(m)
+    Next
+  End With
+  Close #1
 End Sub
+
 'load mrates file
 Public Function Load_mrates(FName As String) As mutationprobs
-Dim m As Byte
-    Open FName For Input As #1
-        With Load_mrates
-            Input #1, .PointWhatToChange
-            Input #1, .CopyErrorWhatToChange
-            For m = 0 To 10 'Need to change this if adding more mutation types (needs to have eofs if more then 10 for backword compatability)
-                Input #1, .mutarray(m)
-                Input #1, .Mean(m)
-                Input #1, .StdDev(m)
-            Next
-        End With
-    Close #1
+  Dim m As Byte
+  Open FName For Input As #1
+  With Load_mrates
+    Input #1, .PointWhatToChange
+    Input #1, .CopyErrorWhatToChange
+    For m = 0 To 10
+      Input #1, .mutarray(m)
+      Input #1, .Mean(m)
+      Input #1, .StdDev(m)
+    Next
+  End With
+  Close #1
 End Function
 
-'D A T A C O N V E R S I O N S Botsareus 12/18/2013
-
 Private Function sint(ByVal lval As Long) As Integer
-lval = lval Mod 32000
-sint = lval
+  sint = lval Mod 32000
 End Function

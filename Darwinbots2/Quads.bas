@@ -257,11 +257,9 @@ Private Sub CheckBotBucketForCollision(n As Integer, pos As vector)
     While Buckets(pos.x, pos.y).arr(a) <> -1
       robnumber = Buckets(pos.x, pos.y).arr(a)
       If robnumber > n Then ' only have to check bots higher than n otherwise we do it twice for each bot pair
-        If Not (rob(robnumber).FName = "Base.txt" And hidepred) Then
-            distvector = VectorSub(rob(n).pos, rob(robnumber).pos)
-            dist = rob(n).radius + rob(robnumber).radius
-            If VectorMagnitudeSquare(distvector) < (dist * dist) Then Repel3 n, robnumber
-        End If
+        distvector = VectorSub(rob(n).pos, rob(robnumber).pos)
+        dist = rob(n).radius + rob(robnumber).radius
+        If VectorMagnitudeSquare(distvector) < (dist * dist) Then Repel3 n, robnumber
       End If
       If a = Buckets(pos.x, pos.y).size Then GoTo getout
       a = a + 1
@@ -399,7 +397,6 @@ End Function
 'New compare routine from EricL
 'Takes into consideration movable eyes and eyes of variable width
 Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
-If (rob(n2).FName = "Base.txt" And hidepred) Then Exit Sub
       Dim ab As vector, ac As vector, ad As vector 'vector from n1 to n2
       Dim invdist As Single, sightdist As Single, eyedist As Single, distsquared As Single
       Dim edgetoedgedist As Single, percentdist As Single

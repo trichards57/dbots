@@ -15,16 +15,16 @@ Public savingtofile As Boolean 'make sure that when we are saving to file do not
 Public Sub calc_dnamatrix()
 'calculate dna matrix
 Dim result As String
-Dim Y As block
+Dim y As block
 Dim y_tipo As Byte
 Dim y_value As Byte
 Dim count As Byte
 
 For y_tipo = 0 To 8
  For y_value = 0 To 13
-  Y.tipo = y_tipo + 2
-  Y.value = y_value + 1
-  Parse result, Y
+  y.tipo = y_tipo + 2
+  y.value = y_value + 1
+  Parse result, y
   If result <> "" Then
    dnamatrix(y_tipo, y_value) = count
    count = count + 1
@@ -443,10 +443,6 @@ Private Function AdvancedCommandDetok(n As Integer) As String
       AdvancedCommandDetok = "sin"
     Case 12
       AdvancedCommandDetok = "cos"
-    Case 13
-      If Not ismutating Then AdvancedCommandDetok = "debugint" 'Botsareus 1/31/2013 the new debugint command
-    Case 14
-      If Not ismutating Then AdvancedCommandDetok = "debugbool" 'Botsareus 1/31/2013 the new debugbool command
   End Select
 End Function
 
@@ -478,10 +474,6 @@ Private Function AdvancedCommandTok(s As String) As block
       AdvancedCommandTok.value = 11
     Case "cos"
       AdvancedCommandTok.value = 12
-    Case "debugint" 'Botsareus 1/31/2013 the new debugint command
-      If Not ismutating Then AdvancedCommandTok.value = 13
-    Case "debugbool" 'Botsareus 1/31/2013 the new debugbool command
-      If Not ismutating Then AdvancedCommandTok.value = 14
   End Select
 End Function
 
@@ -3176,7 +3168,7 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
   Dim GeneEnd As Boolean
   Dim coding As Boolean
   
-  Dim X As Integer
+  Dim x As Integer
   Dim dna() As block
   Dim vlen As Integer
   Dim Insert As Integer

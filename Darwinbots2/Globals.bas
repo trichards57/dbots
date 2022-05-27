@@ -56,23 +56,9 @@ Public tmpseed As Long 'used only by "load simulation"
 Public simalreadyrunning As Boolean
 Public autosaved As Boolean
 
-
 'Botsareus 1/5/2014 Copy of Obstacle array
 Public xObstacle() As Obstacle
 Public StartChlr As Integer 'Botsareus 2/12/2014 Start repopulating robots with chloroplasts
-Public ModeChangeCycles As Long 'Botsareus 2/14/2014 Used to calculate time difference and mode change for survival
-
-'actual evolution globals
-
-Public curr_dna_size As Integer
-Public hidePredCycl As Integer
-Public Init_hidePredCycl As Integer
-Public hidePredOffset As Integer
-Public LFOR As Single
-Public LFORdir As Boolean 'direction
-Public LFORcorr As Single 'correction
-Public hidepred As Boolean
-Public target_dna_size As Integer
 
 ' var structure, to store the correspondance name<->value
 Public Type var
@@ -112,157 +98,11 @@ Public graphtop(NUMGRAPHS) As Long
 Public graphvisible(NUMGRAPHS) As Boolean
 Public graphsave(NUMGRAPHS) As Boolean
 
-Public TotalEnergy As Long     ' total energy in the sim
 Public totnvegs As Integer          ' total non vegs in sim
 Public totnvegsDisplayed As Integer   ' Toggle for display purposes, so the display doesn't catch half calculated value
-Public totwalls As Integer          ' total walls count
-Public totcorpse As Integer         ' Total corpses
 
 Public TotalChlr As Long 'Panda 8/24/2013 total number of chlroroplasts
-
-Public NoDeaths As Boolean     'Attempt to stop robots dying during the first cycle of a loaded sim
-                                'later used in conjunction with a routine to give robs a bit of energy back after loading up.
 Public maxfieldsize As Long
-
-Public ismutating As Boolean 'Botsareus 2/2/2013 Tells the parseor to ignore debugint and debugbool while the robot is mutating
-
-'Botsareus 6/11/2013 For music
-Declare Function mciSendString Lib "winmm" Alias "mciSendStringA" (ByVal _
-    lpstrCommand As String, ByVal lpstrReturnString As String, _
-    ByVal uReturnLength As Long, ByVal hwndCallback As Long) As Long
-
-
-Declare Function CallWindowProc Lib "user32" Alias "CallWindowProcA" _
-           (ByVal lpPrevWndFunc As Long, _
-            ByVal hwnd As Long, _
-            ByVal MSG As Long, _
-            ByVal wParam As Long, _
-            ByVal lParam As Long) As Long
-
-Declare Function SetWindowLong Lib "user32" Alias "SetWindowLongA" _
-           (ByVal hwnd As Long, _
-            ByVal nIndex As Long, _
-            ByVal dwNewLong As Long) As Long
-            
-Private Declare Function RegisterWindowMessage Lib "user32" _
-   Alias "RegisterWindowMessageA" (ByVal lpString As String) As Long
-   
-'Windows API calls for GetWinHandle
-'Stolen from MSDN somewhere
-Private Const GW_HWNDNEXT = 2
-Private Declare Function GetParent Lib "user32" (ByVal hwnd As Long) As Long
-Private Declare Function GetWindow Lib "user32" (ByVal hwnd As Long, _
-  ByVal wCmd As Long) As Long
-Private Declare Function FindWindow Lib "user32" Alias "FindWindowA" _
-  (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
-Public Const GWL_WNDPROC = -4
-Public Declare Function GetWindowThreadProcessId Lib "user32" _
-  (ByVal hwnd As Long, lpdwprocessid As Long) As Long
-'Stuff for close window
-Private Declare Function WaitForSingleObject Lib "kernel32" _
-   (ByVal hHandle As Long, _
-   ByVal dwMilliseconds As Long) As Long
-Private Declare Function PostMessage Lib "user32" _
-   Alias "PostMessageA" _
-   (ByVal hwnd As Long, _
-   ByVal wMsg As Long, _
-   ByVal wParam As Long, _
-   ByVal lParam As Long) As Long
-Private Declare Function IsWindow Lib "user32" _
-   (ByVal hwnd As Long) As Long
-Private Declare Function OpenProcess Lib "kernel32" _
-   (ByVal dwDesiredAccess As Long, _
-   ByVal bInheritHandle As Long, _
-   ByVal dwProcessId As Long) As Long
-'For args to the IM client
-'Botsareus 10/21/2015 No longer a required feature
-'Public Declare Function GetCurrentProcessId Lib "kernel32" () As Long
-   
-Const WM_CLOSE = &H10
-Const INFINITE = &HFFFFFFFF
-Const SYNCHRONIZE = &H100000
-   
-Global lpPrevWndProc As Long
-Global gHW As Long
-
-Private MSWHEEL_ROLLMSG     As Long
-
-
-Public Sub Hook()
-  MSWHEEL_ROLLMSG = RegisterWindowMessage("MSWHEEL_ROLLMSG")
-  lpPrevWndProc = SetWindowLong(gHW, GWL_WNDPROC, _
-                                     AddressOf WindowProc)
-End Sub
-
-Public Sub UnHook()
-  Dim lngReturnValue As Long
-  
-  lngReturnValue = SetWindowLong(gHW, GWL_WNDPROC, lpPrevWndProc)
-End Sub
-
-Function WindowProc(ByVal hw As Long, _
-                        ByVal uMsg As Long, _
-                        ByVal wParam As Long, _
-                        ByVal lParam As Long) As Long
-
-  Select Case uMsg
-    Case MSWHEEL_ROLLMSG
-        'Form1.MouseWheelZoom 'Botsareus 4/1/2014 Never worked
-    Case Else
-       WindowProc = CallWindowProc(lpPrevWndProc, hw, _
-                                           uMsg, wParam, lParam)
-  End Select
-End Function
-
-Private Function ProcIDFromWnd(ByVal hwnd As Long) As Long
-   Dim idProc As Long
-   
-   ' Get PID for this HWnd
-   GetWindowThreadProcessId hwnd, idProc
-   
-   ' Return PID
-   ProcIDFromWnd = idProc
-End Function
-
-Public Function GetWinHandle(pid As Long) As Long
-   Dim tempHwnd As Long
-   
-   ' Grab the first window handle that Windows finds:
-   tempHwnd = FindWindow(vbNullString, vbNullString)
-   
-   ' Loop until you find a match or there are no more window handles:
-   Do Until tempHwnd = 0
-      ' Check if no parent for this window
-      If GetParent(tempHwnd) = 0 Then
-         ' Check for PID match
-         If pid = ProcIDFromWnd(tempHwnd) Then
-            ' Return found handle
-            GetWinHandle = tempHwnd
-            ' Exit search loop
-            Exit Do
-         End If
-      End If
-   
-      ' Get the next window handle
-      tempHwnd = GetWindow(tempHwnd, GW_HWNDNEXT)
-   Loop
-End Function
-      
-Public Function CloseWindow(pid As Long)
-Dim lngReturnValue As Long
-Dim lngResult As Long
-Dim hThread As Long
-Dim hProcess As Long
-Dim hWindow As Long
-
-    hWindow = GetWinHandle(pid)
-    hThread = GetWindowThreadProcessId(hWindow, pid)
-    hProcess = OpenProcess(SYNCHRONIZE, 0&, pid)
-    lngReturnValue = PostMessage(hWindow, WM_CLOSE, 0&, 0&)
-    lngResult = WaitForSingleObject(hProcess, INFINITE)
-        
-End Function
-
 
 ' Not sure where to put this function, so it's going here
 ' makes poff. that is, creates that explosion effect with

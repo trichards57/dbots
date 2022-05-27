@@ -176,10 +176,6 @@ Public Type SimOptions
   shapeDriftRate As Integer
   makeAllShapesTransparent As Boolean
   makeAllShapesBlack As Boolean
-  
-  'Egrid Stuff
-  EGridEnabled As Boolean
-  EGridWidth As Integer
     
   oldCostX As Single
   

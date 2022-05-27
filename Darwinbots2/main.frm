@@ -346,7 +346,7 @@ Dim t As Integer
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
 'It is a hacky way of doing it, but should be a bit faster since the computation is only preformed twice, other than preforming it in each subsection.
 For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
         rob(t).pos.x = rob(t).pos.x - (rob(t).vel.x - rob(t).actvel.x)
         rob(t).pos.y = rob(t).pos.y - (rob(t).vel.y - rob(t).actvel.y)
     End If
@@ -374,7 +374,7 @@ Next
   
 'Plase robots back
 For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
         rob(t).pos.x = rob(t).pos.x + (rob(t).vel.x - rob(t).actvel.x)
         rob(t).pos.y = rob(t).pos.y + (rob(t).vel.y - rob(t).actvel.y)
     End If
@@ -947,7 +947,7 @@ Public Sub DrawAllRobs()
   
   If noeyeskin Then
     For a = 1 To MaxRobs
-      If rob(a).exist And Not (rob(a).FName = "Base.txt" And hidepred) Then
+      If rob(a).exist Then
         r = rob(a).radius
         If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
            rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
@@ -958,7 +958,7 @@ Public Sub DrawAllRobs()
   Else
     FillColor = BackColor
     For a = 1 To MaxRobs
-      If rob(a).exist And Not (rob(a).FName = "Base.txt" And hidepred) Then
+      If rob(a).exist Then
          r = rob(a).radius
          If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
             rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
@@ -971,7 +971,7 @@ Public Sub DrawAllRobs()
   DrawStyle = 0
   If dispskin And Not noeyeskin Then
     For a = 1 To MaxRobs
-      If rob(a).exist And Not (rob(a).FName = "Base.txt" And hidepred) Then
+      If rob(a).exist Then
         If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
            rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
            DrawRobSkin a
@@ -984,7 +984,7 @@ Public Sub DrawAllRobs()
   
   If Not noeyeskin Then
     For a = 1 To MaxRobs
-     If rob(a).exist And Not (rob(a).FName = "Base.txt" And hidepred) Then
+     If rob(a).exist Then
        If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
           rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
           DrawRobAim a
@@ -999,7 +999,7 @@ Public Sub DrawAllRobs()
   'draw memory monitor
   If MDIForm1.MonitorOn.Checked Then
     For a = 1 To MaxRobs
-      If rob(a).exist And Not (rob(a).FName = "Base.txt" And hidepred) Then
+      If rob(a).exist Then
          r = rob(a).radius
          If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
             rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
@@ -1030,7 +1030,7 @@ Public Sub DrawAllTies()
   PixRobSize = PixelsPerTwip * RobSize
   
   For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
       If rob(t).pos.x > visibleLeft And rob(t).pos.x < visibleRight And _
          rob(t).pos.y > visibleTop And rob(t).pos.y < visibleBottom Then
          DrawRobTiesCol t, PixelsPerTwip * rob(t).radius * 2, rob(t).radius
@@ -1316,9 +1316,7 @@ Sub startloaded()
   If MDIForm1.visualize Then DrawAllRobs
   MDIForm1.enablesim
   Me.Visible = True
-  
-  NoDeaths = True
-  
+    
   Vegs.cooldown = -SimOpts.RepopCooldown
   totnvegsDisplayed = -1 ' Just set this to -1 for the first cycle so the cost low water mark doesn't trigger.
   totvegs = -1 ' Set to -1 to avoid veggy reproduction on first cycle
@@ -1400,7 +1398,7 @@ Private Function whichrob(x As Single, y As Single) As Integer
   
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
 For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
         rob(t).pos.x = rob(t).pos.x - (rob(t).vel.x - rob(t).actvel.x)
         rob(t).pos.y = rob(t).pos.y - (rob(t).vel.y - rob(t).actvel.y)
     End If
@@ -1409,7 +1407,7 @@ Next
   whichrob = 0
   dist = 10000
   For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
       pist = Abs(rob(t).pos.x - x) ^ 2 + Abs(rob(t).pos.y - y) ^ 2
       If Abs(rob(t).pos.x - x) < rob(t).radius And Abs(rob(t).pos.y - y) < rob(t).radius And pist < dist And rob(t).exist Then
         whichrob = t
@@ -1419,7 +1417,7 @@ Next
   Next t
 
 For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
         rob(t).pos.x = rob(t).pos.x + (rob(t).vel.x - rob(t).actvel.x)
         rob(t).pos.y = rob(t).pos.y + (rob(t).vel.y - rob(t).actvel.y)
     End If
@@ -1573,7 +1571,7 @@ Dim rst As Boolean
 rst = True
 tmprob_c = 0
     For a = 1 To MaxRobs
-      If rob(a).exist And rob(a).highlight And Not (rob(a).FName = "Base.txt" And hidepred) Then
+      If rob(a).exist And rob(a).highlight Then
         If a = robfocus Then rst = False
         tmprob_c = tmprob_c + 1
         If tmprob_c < 51 Then
@@ -2684,51 +2682,6 @@ Public Function discendenti(t As Integer, disce As Integer) As Integer
   End If
 End Function
 
-' sets the energy token for vegs feeding
-'Private Sub setfeed()
-  'Dim t As Integer
-  'For t = 1 To MaxRobs
-  '  If rob(t).Veg = True Then rob(t).Feed = 8
-  'Next t
-'End Sub
-
-' selects a robot to kill for population control
-'Public Sub popcontrol()
-'  Dim a As Integer
-'  Dim totrob As Integer
-'  totrob = TotalRobots
-'  While totrob > SimOpts.MaxPopulation
-'    If SimOpts.PopLimMethod = 1 Then a = randrob
-'    If SimOpts.PopLimMethod = 2 Then a = eldest
-'    KillRobot a
-'    totrob = totrob - 1
-'  Wend
-'End Sub
-
-' returns a random robot (for population control)
-'Private Function randrob() As Integer
-'  Dim a As Integer
-'  a = Random(1, MaxRobs)
-'  While rob(a).exist = False
-'    a = Random(1, MaxRobs)
-'  Wend
-'End Function
-
-' returns the eldest robot (for pop control)
-'Private Function eldest() As Integer
-'  Dim t As Integer
-'  Dim mxa As Integer
-'  Dim mxr As Integer
-'  mxa = 0
-'  For t = 1 To MaxRobs
-'    If rob(t).exist And rob(t).age > mxa And Not (rob(t).FName = "Base.txt" And hidepred) Then
-'      mxa = rob(t).age
-'      mxr = t
-'    End If
-'  Next t
-'  eldest = mxr
-'End Function
-
 ' returns the fittest robot (selected through the score function)
 ' altered from the bot with the most generations
 ' to the bot with the most invested energy in itself and children
@@ -2744,17 +2697,12 @@ sPopulation = (IIf(intFindBestV2 < 100, 100, 200 - intFindBestV2)) / 100
   Dim Mx As Double
   Mx = 0
   For t = 1 To MaxRobs
-    If rob(t).exist And Not rob(t).Veg And Not rob(t).FName = "Corpse" And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist And Not rob(t).Veg And Not rob(t).FName = "Corpse" Then
       TotalOffspring = 1
       s = score(t, 1, 10, 0) + rob(t).nrg + rob(t).body * 10 'Botsareus 5/22/2013 Advanced fit test
       If s < 0 Then s = 0 'Botsareus 9/23/2016 Bug fix
       s = (TotalOffspring ^ sPopulation) * (s ^ sEnergy)
-      
-      '
 
-      '
-      
-      
       If s >= Mx Then
         Mx = s
         fittest = t

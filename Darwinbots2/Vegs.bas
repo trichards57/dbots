@@ -133,7 +133,7 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
   
   'Botsareus 8/16/2014 All robots are set to think there is no sun, sun is calculated later
   For t = 1 To MaxRobs
-    If rob(t).nrg > 0 And rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).nrg > 0 And rob(t).exist Then
         rob(t).mem(218) = 0
    End If
   Next
@@ -150,7 +150,7 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
   Next
   
   For t = 1 To MaxRobs 'Panda 8/14/2013 Figure out total robot area
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then   'Botsareus 8/14/2013 We have to make sure the robot is alive first
+    If rob(t).exist Then    'Botsareus 8/14/2013 We have to make sure the robot is alive first
         TotalRobotArea = TotalRobotArea + rob(t).radius ^ 2 * PI
     End If
   Next t
@@ -187,7 +187,7 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
  
   For t = 1 To MaxRobs
   With rob(t)
-    If .nrg > 0 And .exist And Not (.FName = "Base.txt" And hidepred) Then
+    If .nrg > 0 And .exist Then
     
     'Botsareus 8/16/2014 Allow robots to share chloroplasts again
     If .chloroplasts > 0 Then
