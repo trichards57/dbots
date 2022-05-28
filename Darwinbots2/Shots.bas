@@ -91,13 +91,7 @@ Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Si
   Dim angle As vector
   Dim ShAngle As Single
   Dim x As Integer
-  
-  
-  'If IsArrayBounded(Shots) = False Then
-  '  ReDim Shots(300)
-  '  maxshotarray = 300
-  'End If
-  
+
   a = FirstSlot
   If a > maxshotarray Then
     shotpointer = maxshotarray  ' we know the array is full.  Set the pointer to the end so it will point to the free space
@@ -869,46 +863,6 @@ If rob(n).fertilized < -10 Then Exit Sub 'block sex repro when necessary
   rob(n).spermDNAlen = Shots(t).DnaLen
 getout:
 End Sub
-
-'' checks the collisions between robots and shots
-'Private Function ShotColl(n As Integer) As Integer
-' ' Dim nd As node
-''  Dim vel As vector
-'
-' ' Dim dist As Single
-'
-'  With Shots(n)
-'
-'  If SimOpts.Updnconnected = True Then
-'    If .pos.y > SimOpts.FieldHeight Then
-'      .pos.y = .pos.y - SimOpts.FieldHeight
-'    ElseIf .pos.y < 0 Then
-'      .pos.y = .pos.y + SimOpts.FieldHeight
-'    End If
-'  Else
-'    If .pos.y > SimOpts.FieldHeight Or .pos.y < 0 Then
-'      .velocity.y = -.velocity.y
-'    End If
-'  End If
-'
-'  If SimOpts.Dxsxconnected = True Then
-'    If .pos.x > SimOpts.FieldWidth Then
-'      .pos.x = .pos.x - SimOpts.FieldWidth
-'    ElseIf .pos.x < 0 Then
-'      .pos.x = .pos.x + SimOpts.FieldWidth
-'    End If
-'  Else
-'    If .pos.x > SimOpts.FieldWidth Or .pos.x < 0 Then
-'      .velocity.x = -.velocity.x
-'    End If
-'  End If
-'
-'
-'  'ShotColl = OldShotColl(n)
-'  ShotColl = NewShotCollision(n)
-'
-'  End With
-'End Function
 
 'EricL 5/16/2006 Checks for collisions between shots and bots.  Takes into consideration
 'motion of target bot as well as shots which potentially pass through the target bot during the cycle

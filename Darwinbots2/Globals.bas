@@ -1,19 +1,6 @@
 Attribute VB_Name = "Globals"
 'A temporary module for everything without a home.
-
 Option Explicit
-
-'Botsareus 7/2/2014 PlayerBot settings
-Type keydata
- key As Byte
- memloc As Integer
- value As Integer
- Active As Boolean
- Invert As Boolean
-End Type
-
-Public Mouse_loc As vector
-Public PB_keys() As keydata
 
 'G L O B A L  S E T T I N G S Botsareus 3/15/2013
 Public screenratiofix As Boolean

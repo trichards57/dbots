@@ -175,6 +175,17 @@ Public Const sharechlr As Integer = 924 'Panda 08/26/2013 Share Chloroplasts bet
 'dna() As block
 'End Type
 
+Private Type PhysicBot
+  pos As vector
+  vel As vector
+  impulseInd As vector
+  Fixed As Boolean
+  mass As Single
+  AddedMass As Single
+End Type
+
+Private Declare Function UpdateBotPosition Lib "PhysicEngine" Alias "_UpdateBotPosition@8" (ByRef bot As PhysicBot, ByVal maxSpeed As Single, ByVal zeroMomentum As Boolean) As Long
+
 ' robot structure
 Private Type robot
 
@@ -199,7 +210,7 @@ Private Type robot
   actvel As vector 'Botsareus 6/22/2016 Robots actual velocity if it hits something
   opos As vector 'Used to calculate actvel
    
-  ImpulseInd As vector      ' independant forces vector
+  impulseInd As vector      ' independant forces vector
   ImpulseRes As vector      ' Resistive forces vector
   ImpulseStatic As Single   ' static force scalar (always opposes current forces)
     
@@ -616,8 +627,6 @@ ElseIf res2 - n2 > 0 Then 'run other side
     End If
 End If
 
-
-'same search
 Dim whatside As Boolean
 
 If i = 0 Then Exit Sub
@@ -628,58 +637,10 @@ ReDim Preserve Outdna(upperbound + resn - nn)
 
 whatside = Int(rndy * 2) = 0
 
-''''debug
-'Dim debugme As Boolean
-'debugme = False
-'Dim k As String
-'Dim temp As String
-'Dim bp As block
-'Dim converttosysvar As Boolean
-''''debug
-
 For a = nn To resn - 1
     Outdna(upperbound + 1 + a - nn).tipo = IIf(whatside, rob1(a).tipo, rob2(a - nn + res2).tipo) 'left hand side or right hand?
     Outdna(upperbound + 1 + a - nn).value = IIf(IIf(rob1(a).tipo = rob2(a - nn + res2).tipo And Abs(rob1(a).value) > 999 And Abs(rob2(a - nn + res2).value) > 999, Int(rndy * 2) = 0, whatside), rob1(a).value, rob2(a - nn + res2).value)  'if typo is different or in var range then all left/right hand, else choose a random side
-    'If rob1(a).tipo = rob2(a - nn + res2).tipo And Abs(rob1(a).value) > 999 And Abs(rob2(a - nn + res2).value) > 999 And rob1(a).value <> rob2(a - nn + res2).value Then debugme = True 'debug
 Next
-
-'If debugme Then
-'Dim a2 As Integer
-'Dim a3 As Integer
-'k = ""
-'      For a = nn To resn - 1
-'
-'        If a = UBound(rob1) Then converttosysvar = False Else converttosysvar = IIf(rob1(a + 1).tipo = 7, True, False)
-'        bp.tipo = rob1(a).tipo
-'        bp.value = rob1(a).value
-'        temp = ""
-'        Parse temp, bp, 1, converttosysvar
-'
-'      k = k & temp & vbTab
-'
-'        a2 = a - nn + res2
-'        If a2 = UBound(rob2) Then converttosysvar = False Else converttosysvar = IIf(rob2(a2 + 1).tipo = 7, True, False)
-'        bp.tipo = rob2(a2).tipo
-'        bp.value = rob2(a2).value
-'        temp = ""
-'        Parse temp, bp, 1, converttosysvar
-'
-'      k = k & temp & vbTab
-'
-'        a3 = upperbound + 1 + a - nn
-'        If a3 = UBound(Outdna) Then converttosysvar = False Else converttosysvar = IIf(Outdna(a3 + 1).tipo = 7, True, False)
-'        bp.tipo = Outdna(a3).tipo
-'        bp.value = Outdna(a3).value
-'        temp = ""
-'        Parse temp, bp, 1, converttosysvar
-'
-'      k = k & temp & vbCrLf
-'
-'      Next
-'
-'      MsgBox k
-'End If
-
 Loop
 
 End Sub
@@ -817,37 +778,26 @@ End Function
 Public Sub UpdatePosition(ByVal n As Integer)
   Dim t As Integer
   Dim vt As Single
-  
+ 
   With rob(n)
   
-  'Following line commented out since mass is set earlier in CalcMass
-  '.mass = (.body / 1000) + (.shell / 200) 'set value for mass
-  If .mass + .AddedMass < 0.25 Then .mass = 0.25 - .AddedMass ' a fudge since Euler approximation can't handle it when mass -> 0
+  Dim bot As PhysicBot
+  bot.AddedMass = .AddedMass
+  bot.Fixed = .Fixed
+  bot.impulseInd = .impulseInd
+  bot.mass = .mass
+  bot.pos = .pos
+  bot.vel = .vel
   
-  If Not .Fixed Then
-    ' speed normalization
-    
-    .vel = VectorAdd(.vel, VectorScalar(.ImpulseInd, 1 / (.mass + .AddedMass)))
-        
-    vt = VectorMagnitudeSquare(.vel)
-    If vt > SimOpts.MaxVelocity * SimOpts.MaxVelocity Then
-      .vel = VectorScalar(VectorUnit(.vel), SimOpts.MaxVelocity)
-      vt = SimOpts.MaxVelocity * SimOpts.MaxVelocity
-    End If
-    
-    .pos = VectorAdd(.pos, .vel)
-    UpdateBotBucket n
-   ' If .pos.x > 10000000 Then t = 1 / 0 ' Crash inducing line for debugging
-  Else
-    .vel = VectorSet(0, 0)
-  End If
-    
+  UpdateBotPosition bot, SimOpts.MaxVelocity, SimOpts.zeroMomentum
+  .pos = bot.pos
+  .vel = bot.vel
+  UpdateBotBucket n
+  
   'Have to do these here for both fixed and unfixed bots to avoid build up of forces in case fixed bots become unfixed.
-  .ImpulseInd = VectorSet(0, 0)
-  .ImpulseRes = .ImpulseInd
+  .impulseInd = VectorSet(0, 0)
+  .ImpulseRes = .impulseInd
   .ImpulseStatic = 0
-  
-  If SimOpts.ZeroMomentum = True Then .vel = VectorSet(0, 0)
   
   .lastup = .mem(dirup)
   .lastdown = .mem(dirdn)
@@ -858,7 +808,7 @@ Public Sub UpdatePosition(ByVal n As Integer)
   .mem(dirdx) = 0
   .mem(dirsx) = 0
   
-  .mem(velscalar) = iceil(Sqr(vt))
+  .mem(velscalar) = iceil(VectorMagnitude(.vel))
   .mem(vel) = iceil(Cos(.aim) * .vel.x + Sin(.aim) * .vel.y * -1)
   .mem(veldn) = .mem(vel) * -1
   .mem(veldx) = iceil(Sin(.aim) * .vel.x + Cos(.aim) * .vel.y)
@@ -1133,7 +1083,7 @@ Dim i As Integer
     'If no species structure for the bot, then create one
     If Not rob(n).Corpse Then
       If i = SimOpts.SpeciesNum And SimOpts.SpeciesNum < MAXNATIVESPECIES Then
-        AddSpecie n, False
+        AddSpecie n
       ElseIf SimOpts.SpeciesNum < MAXNATIVESPECIES Then
         SimOpts.Specie(i).population = SimOpts.Specie(i).population + 1
       End If
@@ -1144,7 +1094,6 @@ Dim i As Integer
     If rob(n).Veg Then
       totvegs = totvegs + 1
     ElseIf rob(n).Corpse Then
-      totcorpse = totcorpse + 1
       If rob(n).body > 0 Then
         Decay n
       Else
@@ -1452,9 +1401,6 @@ Public Sub UpdateBots()
   kl = 1
   kil(1) = 0
   rep(1) = 0
-  TotalEnergy = 0
-  totwalls = 0
-  totcorpse = 0
   'PopulationLastCycle = totnvegsDisplayed Botsareus 8/4/2014 Trying to save on memory by removing pointless defenitions
   TotalRobotsDisplayed = TotalRobots
   TotalRobots = 0
@@ -1466,7 +1412,7 @@ Public Sub UpdateBots()
   'Only calculate mass due to fuild displacement if the sim medium has density.
   If SimOpts.Density <> 0 Then
     For t = 1 To MaxRobs
-      If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then AddedMass t
+      If rob(t).exist Then AddedMass t
     Next t
   End If
   
@@ -1483,7 +1429,7 @@ Public Sub UpdateBots()
   'this loops is for pre update
   For t = 1 To MaxRobs
     If t Mod 250 = 0 Then DoEvents
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
       If (rob(t).Corpse = False) Then Upkeep t ' No upkeep costs if you are dead!
       If ((rob(t).Corpse = False) And (rob(t).DisableDNA = False)) Then Poisons t
       If Not SimOpts.DisableFixing Then ManageFixed t 'Botsareus 8/5/2014 Call function only if allowed
@@ -1495,18 +1441,18 @@ Public Sub UpdateBots()
       If Not rob(t).Fixed Then NetForces t 'calculate forces on all robots
       BucketsCollision t
       'Botsareus 6/17/2016 Static friction fix
-      If rob(t).ImpulseStatic > 0 And (rob(t).ImpulseInd.x <> 0 Or rob(t).ImpulseInd.y <> 0) Then
+      If rob(t).ImpulseStatic > 0 And (rob(t).impulseInd.x <> 0 Or rob(t).impulseInd.y <> 0) Then
         If rob(t).vel.x = 0 And rob(t).vel.y = 0 Then
             staticV = rob(t).ImpulseStatic
         Else
             'Takes into account the fact that the robot may be moving along the same vector
-            staticV = rob(t).ImpulseStatic * Abs(Cross(VectorUnit(rob(t).vel), VectorUnit(rob(t).ImpulseInd)))
+            staticV = rob(t).ImpulseStatic * Abs(Cross(VectorUnit(rob(t).vel), VectorUnit(rob(t).impulseInd)))
         End If
-        If staticV > VectorMagnitude(rob(t).ImpulseInd) Then
-          rob(t).ImpulseInd = VectorSet(0, 0) 'If static vector is greater then impulse vector, reset impulse vector
+        If staticV > VectorMagnitude(rob(t).impulseInd) Then
+          rob(t).impulseInd = VectorSet(0, 0) 'If static vector is greater then impulse vector, reset impulse vector
         End If
       End If
-      rob(t).ImpulseInd = VectorSub(rob(t).ImpulseInd, rob(t).ImpulseRes)
+      rob(t).impulseInd = VectorSub(rob(t).impulseInd, rob(t).ImpulseRes)
       
       If Not rob(t).Corpse And Not rob(t).DisableDNA Then tieportcom t 'transfer data through ties
       If Not rob(t).Corpse And Not rob(t).DisableDNA Then readtie t 'reads all of the tref variables from a given tie number
@@ -1522,7 +1468,7 @@ Public Sub UpdateBots()
     i = i + 1
   Wend
   For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then UpdateCounters t ' Counts the number of bots and decays body...
+    If rob(t).exist Then UpdateCounters t  ' Counts the number of bots and decays body...
   Next t
   
   DoEvents
@@ -1530,7 +1476,7 @@ Public Sub UpdateBots()
   For t = 1 To MaxRobs
     If t Mod 250 = 0 Then DoEvents
      
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
         Update_Ties t                    ' Carries out all tie routines
              
         'EricL Transfer genetic meomory locations for newborns through the birth tie during their first 15 cycles
@@ -1571,7 +1517,7 @@ Public Sub UpdateBots()
     If t Mod 250 = 0 Then DoEvents
     UpdateTieAngles t                ' Updates .tielen and .tieang.  Have to do this here after all bot movement happens above.
   
-    If Not rob(t).Corpse And Not rob(t).DisableDNA And rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If Not rob(t).Corpse And Not rob(t).DisableDNA And rob(t).exist Then
       mutate t
       MakeStuff t
       HandleWaste t
@@ -1584,7 +1530,7 @@ Public Sub UpdateBots()
       WriteSenses t
       FireTies t
     End If
-    If Not rob(t).Corpse And rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If Not rob(t).Corpse And rob(t).exist Then
       Ageing t      ' Even bots with disabled DNA age...
       ManageDeath t ' Even bots with disabled DNA can die...
     End If
@@ -2206,7 +2152,7 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
             MratesMax = IIf(NormMut, CLng(.DnaLen) * CLng(valMaxNormMut), 2000000000)
             'dynamic mutation overload correction
             Dim dmoc As Double
-            dmoc = 1 + (rob(nuovo).DnaLen - curr_dna_size) / 500
+            dmoc = 1 + rob(nuovo).DnaLen / 500
             If dmoc < 0.01 Then dmoc = 0.01 'Botsareus 1/16/2016 Bug fix
              dmoc = 1
             'zerobot stabilization
@@ -2631,7 +2577,7 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
             MratesMax = IIf(NormMut, CLng(.DnaLen) * CLng(valMaxNormMut), 2000000000)
             'dynamic mutation overload correction
             Dim dmoc As Double
-            dmoc = 1 + (rob(nuovo).DnaLen - curr_dna_size) / 500
+            dmoc = 1 + rob(nuovo).DnaLen / 500
             If dmoc < 0.01 Then dmoc = 0.01 'Botsareus 1/16/2016 Bug fix
              dmoc = 1
 
@@ -2737,7 +2683,7 @@ Public Function simplecoll(x As Long, y As Long, k As Integer) As Boolean
   simplecoll = False
   
   For t = 1 To MaxRobs
-    If rob(t).exist And Not (rob(t).FName = "Base.txt" And hidepred) Then
+    If rob(t).exist Then
       If Abs(rob(t).pos.x - x) < rob(t).radius + rob(k).radius And _
         Abs(rob(t).pos.y - y) < rob(t).radius + rob(k).radius Then
         If k <> t Then

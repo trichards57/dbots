@@ -1,5 +1,5 @@
 Attribute VB_Name = "Flex"
-Public Function Exists(ByRef key As String, ByRef Keys) As Boolean
+Private Function Exists(ByRef key As String, ByRef Keys) As Boolean
   Dim k As Integer
   Dim u As Integer
   u = UBound(Keys)
@@ -11,7 +11,7 @@ Public Function Exists(ByRef key As String, ByRef Keys) As Boolean
   If Keys(k) = key Then Exists = True
 End Function
 
-Public Function ConsPos(ByRef key As String, ByRef Keys) As Integer
+Private Function ConsPos(ByRef key As String, ByRef Keys) As Integer
   Dim k As Integer
   Dim u As Integer
   u = UBound(Keys)
@@ -40,20 +40,20 @@ Public Function Position(ByRef key As String, ByRef Keys) As Integer
   End If
 End Function
 
-Public Sub Delete(ByRef key As String, ByRef Keys, ByRef data)
-  Dim k As Integer, P As Integer
+Private Sub Delete(ByRef key As String, ByRef Keys, ByRef data)
+  Dim k As Integer, p As Integer
   Dim uk As Integer, ud1 As Integer, ud2 As Integer
-  P = ConsPos(key, Keys)
+  p = ConsPos(key, Keys)
   uk = UBound(Keys)
   ud1 = UBound(data, 1)
   ud2 = UBound(data, 2)
-  If P > 0 Then
-    For k = P To ud1 - 1
+  If p > 0 Then
+    For k = p To ud1 - 1
       For j = 0 To ud2
         data(k, j) = data(k + 1, j)
       Next j
     Next k
-    For k = P To uk - 1
+    For k = p To uk - 1
       Keys(k) = Keys(k + 1)
     Next k
     Keys(uk) = ""
