@@ -6,3 +6,6 @@ intsett.ini
 lastexit.sim
 lastexit.set
 lastran.set
+/PhysicsEngine/Debug
+/PhysicsEngine/x64
+/PhysicsEngine/.vs

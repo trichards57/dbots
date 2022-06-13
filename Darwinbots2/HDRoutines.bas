@@ -234,7 +234,7 @@ Public Function RemapAllShots(numOfShots As Long)
   Dim i As Long, j As Integer
   
   For i = 1 To numOfShots
-    If Shots(i).exist Then
+    If Shots(i).Exists Then
       For j = 1 To MaxRobs
         If rob(j).exist And Shots(i).parent = rob(j).oldBotNum Then
           Shots(i).parent = j
@@ -1605,25 +1605,25 @@ Private Sub SaveShot(n As Integer, t As Long)
   Const Fe As Byte = 254
 
   With Shots(t)
-    Put #n, , .exist       ' exists?
-    Put #n, , .pos         ' position vector
-    Put #n, , .opos        ' old position vector
+    Put #n, , .Exists       ' exists?
+    Put #n, , .Position         ' position vector
+    Put #n, , .OldPosition        ' old position vector
     Put #n, , .velocity    ' velocity vector
     Put #n, , .parent      ' who shot it?
     Put #n, , .age         ' shot age
-    Put #n, , .nrg         ' energy carrier
+    Put #n, , .Energy         ' energy carrier
     Put #n, , .Range       ' shot range (the maximum .nrg ever was)
     Put #n, , .value       ' power of shot for negative shots (or amt of shot, etc.), value to write for > 0
     Put #n, , .color       ' colour
     Put #n, , .shottype    ' carried location/value couple
     Put #n, , .fromveg     ' does shot come from veg?
-    Put #n, , CInt(Len(.FromSpecie))
-    Put #n, , .FromSpecie  ' Which species fired the shot
-    Put #n, , .memloc      ' Memory location for custom poison and venom
-    Put #n, , .Memval      ' Value to insert into custom venom location
+    Put #n, , CInt(Len(.fromSpecies))
+    Put #n, , .fromSpecies  ' Which species fired the shot
+    Put #n, , .memoryLocation      ' Memory location for custom poison and venom
+    Put #n, , .memoryValue      ' Value to insert into custom venom location
     
     ' Somewhere to store genetic code for a virus or sperm
-    If (.shottype = -7 Or .shottype = -8) And .exist And .DnaLen > 0 Then
+    If (.shottype = -7 Or .shottype = -8) And .Exists And .DnaLen > 0 Then
       Put #n, , .DnaLen
       For x = 1 To .DnaLen
         Put #n, , .dna(x).tipo

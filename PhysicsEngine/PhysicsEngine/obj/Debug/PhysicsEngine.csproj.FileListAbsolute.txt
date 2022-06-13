@@ -1,0 +1,7 @@
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\bin\Debug\PhysicsEngine.dll
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\bin\Debug\PhysicsEngine.pdb
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\bin\Debug\PhysicsEngine.tlb
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\obj\Debug\PhysicsEngine.csproj.AssemblyReference.cache
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\obj\Debug\PhysicsEngine.csproj.CoreCompileInputs.cache
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\obj\Debug\PhysicsEngine.dll
+C:\Users\trich\source\repos\PhysicsEngine\PhysicsEngine\obj\Debug\PhysicsEngine.pdb

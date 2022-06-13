@@ -23,11 +23,11 @@ Option Explicit
 
 Public Type Obstacle
   exist As Boolean
-  pos As vector
+  pos As Vector
   Width As Single
   Height As Single
   color As Long
-  vel As vector
+  vel As Vector
 End Type
 
 Public Const MAXOBSTACLES = 1000
@@ -36,7 +36,7 @@ Public Obstacles(MAXOBSTACLES) As Obstacle
 Public defaultWidth As Single
 Public defaultHeight As Single
 Public obstaclefocus As Integer
-Public mousepos As vector
+Public mousepos As Vector
 Public mazeCorridorWidth As Integer
 Public mazeWallThickness As Integer
 Public leftCompactor As Integer
@@ -355,10 +355,10 @@ Dim i As Integer
   For i = 1 To numObstacles
     If Obstacles(i).exist And (i <> leftCompactor And i <> rightCompactor) Then
       If SimOpts.allowHorizontalShapeDrift Then
-        Obstacles(i).vel.x = Obstacles(i).vel.x + Random(-SimOpts.shapeDriftRate, SimOpts.shapeDriftRate) * Rndy * 0.01
+        Obstacles(i).vel.x = Obstacles(i).vel.x + Random(-SimOpts.shapeDriftRate, SimOpts.shapeDriftRate) * rndy * 0.01
       End If
       If SimOpts.allowVerticalShapeDrift Then
-        Obstacles(i).vel.y = Obstacles(i).vel.y + Random(-SimOpts.shapeDriftRate, SimOpts.shapeDriftRate) * Rndy * 0.01
+        Obstacles(i).vel.y = Obstacles(i).vel.y + Random(-SimOpts.shapeDriftRate, SimOpts.shapeDriftRate) * rndy * 0.01
       End If
       If VectorMagnitude(Obstacles(i).vel) > SimOpts.MaxVelocity Then
         Obstacles(i).vel = VectorScalar(Obstacles(i).vel, VectorMagnitude(Obstacles(i).vel) / SimOpts.MaxVelocity)
@@ -414,15 +414,15 @@ Dim i As Integer
   With Shots(n)
   For i = 1 To numObstacles
     If Obstacles(i).exist Then
-      If .pos.x >= Obstacles(i).pos.x And _
-         .pos.x <= Obstacles(i).pos.x + Obstacles(i).Width And _
-         .pos.y >= Obstacles(i).pos.y And _
-         .pos.y <= Obstacles(i).pos.y + Obstacles(i).Height Then
-           If SimOpts.shapesAbsorbShots Then .exist = False
-           If .opos.x < Obstacles(i).pos.x Or .opos.x > (Obstacles(i).pos.x + Obstacles(i).Width) Then
+      If .Position.x >= Obstacles(i).pos.x And _
+         .Position.x <= Obstacles(i).pos.x + Obstacles(i).Width And _
+         .Position.y >= Obstacles(i).pos.y And _
+         .Position.y <= Obstacles(i).pos.y + Obstacles(i).Height Then
+           If SimOpts.shapesAbsorbShots Then .Exists = False
+           If .OldPosition.x < Obstacles(i).pos.x Or .OldPosition.x > (Obstacles(i).pos.x + Obstacles(i).Width) Then
              .velocity.x = -.velocity.x
            End If
-           If .opos.y < Obstacles(i).pos.y Or .opos.y > (Obstacles(i).pos.y + Obstacles(i).Height) Then
+           If .OldPosition.y < Obstacles(i).pos.y Or .OldPosition.y > (Obstacles(i).pos.y + Obstacles(i).Height) Then
              .velocity.y = -.velocity.y
            End If
       End If

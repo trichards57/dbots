@@ -176,15 +176,15 @@ Public Const sharechlr As Integer = 924 'Panda 08/26/2013 Share Chloroplasts bet
 'End Type
 
 Private Type PhysicBot
-  pos As vector
-  vel As vector
-  impulseInd As vector
+  pos As Vector
+  vel As Vector
+  impulseInd As Vector
   Fixed As Boolean
   mass As Single
   AddedMass As Single
 End Type
 
-Private Declare Function UpdateBotPosition Lib "PhysicEngine" Alias "_UpdateBotPosition@8" (ByRef bot As PhysicBot, ByVal maxSpeed As Single, ByVal zeroMomentum As Boolean) As Long
+Private Declare Function UpdateBotPosition Lib "PhysicEngine" Alias "_UpdateBotPosition@8" (ByRef bot As PhysicBot, ByVal maxSpeed As Single, ByVal ZeroMomentum As Boolean) As Long
 
 ' robot structure
 Private Type robot
@@ -203,21 +203,21 @@ Private Type robot
   NewMove As Boolean      ' is the bot using the new physics paradigms?
   
   ' physics
-  pos As vector
-  BucketPos As vector
+  pos As Vector
+  BucketPos As Vector
   
-  vel As vector
-  actvel As vector 'Botsareus 6/22/2016 Robots actual velocity if it hits something
-  opos As vector 'Used to calculate actvel
+  vel As Vector
+  actvel As Vector 'Botsareus 6/22/2016 Robots actual velocity if it hits something
+  opos As Vector 'Used to calculate actvel
    
-  impulseInd As vector      ' independant forces vector
-  ImpulseRes As vector      ' Resistive forces vector
+  impulseInd As Vector      ' independant forces vector
+  ImpulseRes As Vector      ' Resistive forces vector
   ImpulseStatic As Single   ' static force scalar (always opposes current forces)
     
   AddedMass As Single     'From fluid displacement
   
   aim As Single           ' aim angle
-  aimvector As vector     ' the unit vector for aim
+  aimvector As Vector     ' the unit vector for aim
   
   oaim As Single          ' old aim angle
   ma As Single              ' angular momentum
@@ -281,7 +281,7 @@ Private Type robot
                             ' 0 - bot
                             ' 1 - shape
                             ' 2 - edge of the playing field
-  lastopppos As vector      ' the position of the closest portion of the viewed object
+  lastopppos As Vector      ' the position of the closest portion of the viewed object
   
   lasttch As Long           ' Botsareus 11/26/2013 The robot who is touching our robot.
   
@@ -789,7 +789,7 @@ Public Sub UpdatePosition(ByVal n As Integer)
   bot.pos = .pos
   bot.vel = .vel
   
-  UpdateBotPosition bot, SimOpts.MaxVelocity, SimOpts.zeroMomentum
+  UpdateBotPosition bot, SimOpts.MaxVelocity, SimOpts.ZeroMomentum
   .pos = bot.pos
   .vel = bot.vel
   UpdateBotBucket n
@@ -2812,7 +2812,7 @@ Public Sub KillRobot(n As Integer)
   End If
   
   If rob(n).virusshot > 0 And rob(n).virusshot <= maxshotarray Then
-    Shots(rob(n).virusshot).exist = False ' We have to kill any stored shots for this bot
+    Shots(rob(n).virusshot).Exists = False ' We have to kill any stored shots for this bot
     rob(n).virusshot = 0
   End If
   

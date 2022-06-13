@@ -2,12 +2,12 @@ Attribute VB_Name = "Shots_Module"
 Option Explicit
 
 ' shot structure definition
-Public Type shot
+Public Type Old_Shot
  exist As Boolean       ' exists?
  
- pos As vector          ' position vector
- opos As vector         ' old position vector
- velocity As vector     ' velocity vector
+ pos As Vector          ' position vector
+ opos As Vector         ' old position vector
+ velocity As Vector     ' velocity vector
  
  parent As Integer      ' who shot it?
  
@@ -27,7 +27,7 @@ Public Type shot
  memloc As Integer      ' Memory location for custom poison and venom
  Memval As Integer      ' Value to insert into custom venom location
  
- dna() As block         ' Somewhere to store genetic code for a virus or sperm
+ dna() As Block         ' Somewhere to store genetic code for a virus or sperm
  DnaLen As Integer      ' length of DNA  stored on this shot
  genenum As Integer     ' which gene to copy in host bot
  stored As Boolean      ' for virus shots (and maybe future types) this shot is stored
@@ -35,7 +35,7 @@ Public Type shot
  flash As Boolean       ' For showing shot impacts
 End Type
 
-Public Shots() As shot  ' array of shots
+Public Shots() As Shot  ' array of shots
 Public shotpointer As Long     ' index into the Shots array used to find new slots for new shots
 'Public maxshots As Integer
 Public numshots As Long       'Counter for tracking number of shots in the sim
@@ -51,6 +51,8 @@ Const MinBotRadius = 0.2 'A total hack.  Used to bypass checking the rest of the
                            'in the cycle, but the perf benefit of skipping the rest of the bots is significant.
 Public MaxBotShotSeperation As Single
 Public FlashColor(10) As Long      ' array of colors to use for flashing bots when they get shot
+
+Private manager As New ShotManager
 
 '
 '   S H O T S   M A N A G E M E N T
@@ -88,39 +90,35 @@ End Function
 Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Single, rngmultiplier As Single, Optional offset As Boolean = False) As Long
   Dim a As Long
   Dim ran As Single
-  Dim angle As vector
+  Dim angle As Vector
   Dim ShAngle As Single
   Dim x As Integer
 
-  a = FirstSlot
-  If a > maxshotarray Then
-    shotpointer = maxshotarray  ' we know the array is full.  Set the pointer to the end so it will point to the free space
-    maxshotarray = CLng(maxshotarray * 1.1) ' Increase the array by 10%
-    ReDim Preserve Shots(maxshotarray)
-  End If
+  a = manager.createshot()
   
   If val > 32000 Then val = 32000 ' EricL March 16, 2006 This line moved here from below to catch val before assignment
-  Shots(a).exist = True
-  Shots(a).age = 0
-  Shots(a).parent = n
-  Shots(a).FromSpecie = rob(n).FName    'Which species fired the shot
-  Shots(a).fromveg = rob(n).Veg 'does shot come from a veg or not?
-  Shots(a).color = rob(n).color
-  Shots(a).value = Int(val)
   
+  Dim s As Shot
+  s = manager.GetShot(a)
+  s.Exists = True
+  s.age = 0
+  s.parent = n
+  s.FromSpecie = rob(n).FName
+  s.fromveg = rob(n).Veg
+  s.color = rob(n).color
+  s.value = Int(val)
+
+ 
   If (shottype > 0) Or (shottype = -100) Then
-    Shots(a).shottype = shottype
+    s.shottype = shottype
   Else
-    Shots(a).shottype = -(Abs(shottype) Mod 8)  ' EricL 6/2006 essentially Mod 8 so as to increse probabiltiy that mutations do something interesting
-    If Shots(a).shottype = 0 Then Shots(a).shottype = -8 ' want multiples of -8 to be -8
+    s.shottype = -(Abs(shottype) Mod 8)  ' EricL 6/2006 essentially Mod 8 so as to increse probabiltiy that mutations do something interesting
+    If s.shottype = 0 Then s.shottype = -8 ' want multiples of -8 to be -8
   End If
-  If shottype = -2 Then Shots(a).color = vbWhite
-  Shots(a).memloc = rob(n).mem(835)     'location for venom to target
-  'If Shots(a).memloc < 1 Then Shots(a).memloc = ((Shots(a).memloc - 1) Mod 1000) + 1 'Botsareus 10/6/2015 Normalized on reseaving side
-  'If Shots(a).memloc > 1000 Then Shots(a).memloc = ((Shots(a).memloc - 1) Mod 1000) + 1
-  Shots(a).Memval = rob(n).mem(836)     'value to insert into venom target location
+  If shottype = -2 Then s.color = vbWhite
+  s.memloc = rob(n).mem(835)     'location for venom to target
+  s.Memval = rob(n).mem(836)     'value to insert into venom target location
   
-  'If val > 32000 Then val = 32000 'EricL March 16, 2006 This line commented out since moved to above
   ran = Random(-2, 2) / 20
   
   If rob(n).mem(backshot) = 0 Then
@@ -140,54 +138,52 @@ Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Si
   ShAngle = ShAngle + Random(-20, 20) / 200
   
   angle = VectorSet(Cos(ShAngle), -Sin(ShAngle))
-  Shots(a).pos = VectorAdd(rob(n).pos, VectorScalar(angle, rob(n).radius))
+  s.pos = VectorAdd(rob(n).pos, VectorScalar(angle, rob(n).radius))
   
   'Botsareus 6/23/2016 Takes care of shot position bug - so it matches the painted robot position
   If offset Then
-  Shots(a).pos = VectorSub(Shots(a).pos, rob(n).vel)
-  Shots(a).pos = VectorAdd(Shots(a).pos, rob(n).actvel)
+    s.pos = VectorSub(s.pos, rob(n).vel)
+    s.pos = VectorAdd(s.pos, rob(n).actvel)
   End If
-  '
   
-  Shots(a).velocity = VectorAdd(rob(n).actvel, VectorScalar(angle, 40))
   
-  Shots(a).opos = VectorSub(Shots(a).pos, Shots(a).velocity)
+  s.velocity = VectorAdd(rob(n).actvel, VectorScalar(angle, 40))
+  
+  s.opos = VectorSub(s.pos, s.velocity)
   
   If rob(n).vbody > 10 Then
-    Shots(a).nrg = Log(Abs(rob(n).vbody)) * 60 * rngmultiplier
+    s.nrg = Log(Abs(rob(n).vbody)) * 60 * rngmultiplier
     Dim temp As Long
-    temp = (Shots(a).nrg + 40 + 1) \ 40 'divides and rounds up
-    Shots(a).Range = temp
-    Shots(a).nrg = temp * 40
+    temp = (s.nrg + 40 + 1) \ 40 'divides and rounds up
+    s.Range = temp
+    s.nrg = temp * 40
   Else
-    Shots(a).Range = rngmultiplier
-    Shots(a).nrg = 40 * rngmultiplier
+    s.Range = rngmultiplier
+    s.nrg = 40 * rngmultiplier
   End If
   
   'return the new shot
   newshot = a
   
   If shottype = -7 Then
-    Shots(a).color = vbCyan
-    Shots(a).genenum = val
-    Shots(a).stored = True
-    If Not copygene(a, Shots(a).genenum) Then
-      Shots(a).exist = False
-      Shots(a).stored = False
-      'Shots(a).flash = True
+    s.color = vbCyan
+    s.genenum = val
+    s.stored = True
+    If Not copygene(a, s.genenum) Then
+      s.exist = False
+      s.stored = False
       newshot = -1
     End If
   Else
-    Shots(a).stored = False
+    s.stored = False
   End If
   
-  If shottype = -2 Then Shots(a).nrg = val
+  If shottype = -2 Then s.nrg = val
   
   ' sperm shot
   If shottype = -8 Then
-    'ReDim Shots(a).DNA(rob(n).dnalen)
-    Shots(a).dna = rob(n).dna
-    Shots(a).DnaLen = rob(n).DnaLen
+    s.dna = rob(n).dna
+    s.DnaLen = rob(n).DnaLen
   End If
       
 End Function
@@ -496,7 +492,7 @@ End Sub
 Public Sub releasenrg(ByVal n As Integer, ByVal t As Long)
   'n=robot number
   't=shot number
-  Dim vel As vector
+  Dim vel As Vector
   
   Dim vs As Integer
   Dim vr As Single
@@ -504,14 +500,14 @@ Public Sub releasenrg(ByVal n As Integer, ByVal t As Long)
   Dim Range As Single
   Dim scalingfactor As Single
   Dim Newangle As Single
-  Dim startingPos As vector
-  Dim incoming As vector
+  Dim startingPos As Vector
+  Dim incoming As Vector
   Dim offcenter As Single
-  Dim shotNow As vector
+  Dim shotNow As Vector
   Dim x As Single
   Dim y As Single
   Dim angle As Single
-  Dim relVel As vector
+  Dim relVel As Vector
   Dim EnergyLost As Single
   Dim a As Long
   
@@ -589,7 +585,7 @@ getout:
 End Sub
 Private Sub releasebod(ByVal n As Integer, ByVal t As Long) 'a robot is shot by a -6 shot and releases energy directly from body points
   'much more effective against a corpse
-  Dim vel As vector
+  Dim vel As Vector
   Dim Range As Single
   Dim power As Single
   Dim shell As Single
@@ -871,14 +867,14 @@ End Sub
 'Side Effect: On a hit, changes the shot position to be the point of impact with the bot
 Private Function NewShotCollision(shotnum As Long) As Integer
   Dim robnum As Integer
-  Dim B0 As vector 'Position of bot at time 0
-  Dim b As vector 'Position of bot at time 0 < t < 1
-  Dim S0 As vector 'Position of shot at time 0
-  Dim S1 As vector 'Position of shot at time 1
-  Dim s As vector 'Position of shot at time 0 < t < 1
-  Dim vs As vector 'Velocity of the shot
-  Dim vb As vector 'Velocity of the bot
-  Dim d As vector 'Vector from bot center to shot at time 0
+  Dim B0 As Vector 'Position of bot at time 0
+  Dim b As Vector 'Position of bot at time 0 < t < 1
+  Dim S0 As Vector 'Position of shot at time 0
+  Dim S1 As Vector 'Position of shot at time 1
+  Dim s As Vector 'Position of shot at time 0 < t < 1
+  Dim vs As Vector 'Velocity of the shot
+  Dim vb As Vector 'Velocity of the bot
+  Dim d As Vector 'Vector from bot center to shot at time 0
   Dim D2 As Single
   Dim r As Single 'Bot radius
   Dim t As Single 'Loop counter
@@ -887,7 +883,7 @@ Private Function NewShotCollision(shotnum As Long) As Integer
                                   'The time in the cycle at which the earliest collision with the shot occurred.
   Dim time0 As Single
   Dim time1 As Single
-  Dim p As vector 'Position Vector - Realtive positions of bot and shot over time
+  Dim p As Vector 'Position Vector - Realtive positions of bot and shot over time
   Dim L1 As Single
   Dim P2 As Single
   Dim x As Single
@@ -1174,7 +1170,7 @@ Public Function addgene(ByVal n As Integer, ByVal p As Long) As Integer
 getout:
 End Function
 
-Private Function IsArrayBounded(ByRef ArrayIn() As shot) As Boolean
+Private Function IsArrayBounded(ByRef ArrayIn() As Shot) As Boolean
 On Error GoTo getout
  
   IsArrayBounded = (UBound(ArrayIn) >= LBound(ArrayIn))

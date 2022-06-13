@@ -632,13 +632,13 @@ End Sub
 ' draws rob aim
 Private Sub DrawRobAim(n As Integer)
   Dim x As Long, y As Long
-  Dim pos As vector
-  Dim pos2 As vector
-  Dim vol As vector
-  Dim arrow1 As vector
-  Dim arrow2 As vector
-  Dim arrow3 As vector
-  Dim temp As vector
+  Dim pos As Vector
+  Dim pos2 As Vector
+  Dim vol As Vector
+  Dim arrow1 As Vector
+  Dim arrow2 As Vector
+  Dim arrow3 As Vector
+  Dim temp As Vector
   
   If Not rob(n).Corpse Then
     With rob(n)
@@ -852,13 +852,13 @@ Public Sub DrawShots()
     If Shots(t).flash And MDIForm1.displayShotImpactsToggle Then
        If Shots(t).shottype < 0 And Shots(t).shottype >= -7 Then
         FillColor = FlashColor(Shots(t).shottype + 10)
-        Form1.Circle (Shots(t).opos.x, Shots(t).opos.y), 20, FlashColor(Shots(t).shottype + 10)
+        Form1.Circle (Shots(t).OldPosition.x, Shots(t).OldPosition.y), 20, FlashColor(Shots(t).shottype + 10)
       Else
         FillColor = vbBlack
-        Form1.Circle (Shots(t).opos.x, Shots(t).opos.y), 20, vbBlack
+        Form1.Circle (Shots(t).OldPosition.x, Shots(t).OldPosition.y), 20, vbBlack
       End If
-    ElseIf Shots(t).exist And Shots(t).stored = False Then
-      PSet (Shots(t).pos.x, Shots(t).pos.y), Shots(t).color
+    ElseIf Shots(t).Exists And Shots(t).stored = False Then
+      PSet (Shots(t).Position.x, Shots(t).Position.y), Shots(t).color
     End If
   Next t
   FillColor = BackColor
@@ -1165,7 +1165,7 @@ MDIForm1.menuupdate
   shotpointer = 1
   
   For t = 1 To maxshotarray
-    Shots(t).exist = False
+    Shots(t).Exists = False
     Shots(t).flash = False
     Shots(t).stored = False
   Next t
@@ -1433,7 +1433,7 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
   Dim vsv As Long
   Dim hsv As Long
   Dim t As Byte
-  Dim vel As vector
+  Dim vel As Vector
   
   visibleh = Int(Form1.ScaleHeight)
   If button = 0 Then
