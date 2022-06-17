@@ -10,10 +10,10 @@ Dim NumYBuckets As Integer ' Field height divided by bucket size
 'This is the buckets Array
 Dim Buckets() As BucketType
 
-Public Type BucketType
+Private Type BucketType
   arr() As Integer
   size As Integer 'number of bots in the bucket i.e. highest array element with a bot
-  adjBucket(8) As vector ' List of buckets adjoining this one.  Interior buckets will have 8.  Edge buckets 5.  Corners 3.
+  adjBucket(8) As Vector ' List of buckets adjoining this one.  Interior buckets will have 8.  Edge buckets 5.  Corners 3.
 End Type
 
 Public eyeDistance(10) As Single  ' used for exact distances to viewed objects for displaying the eye viewer for the focus bot
@@ -67,7 +67,7 @@ Public Sub UpdateBotBucket(n As Integer)
   'if we move out of our bucket
   'call this from outside the function
     
-  Dim currbucket As Single, newbucket As vector, changed As Boolean
+  Dim currbucket As Single, newbucket As Vector, changed As Boolean
   
   If Not rob(n).exist Then
     Delete_Bot n, rob(n).BucketPos
@@ -104,7 +104,7 @@ Public Sub UpdateBotBucket(n As Integer)
 getout:
 End Sub
 
-Public Sub Add_Bot(n As Integer, pos As vector)
+Public Sub Add_Bot(n As Integer, pos As Vector)
   Dim a As Integer
 
 'Will grow the bucket's array if necessary
@@ -133,7 +133,7 @@ getout:
   End With
 End Sub
 
-Public Sub Delete_Bot(n As Integer, pos As vector)
+Public Sub Delete_Bot(n As Integer, pos As Vector)
   Dim a As Integer, b As Integer, c As Integer
 
 'Removes a bot fro a bucket
@@ -174,8 +174,8 @@ End Sub
 Public Function BucketsProximity(n As Integer) As Integer
   'mirror of proximity function.  Checks all the bots in the same bucket and surrounding buckets
   Dim x As Long, y As Long
-  Dim BucketPos As vector
-  Dim adjBucket As vector
+  Dim BucketPos As Vector
+  Dim adjBucket As Vector
 
   BucketPos = rob(n).BucketPos
   rob(n).lastopp = 0
@@ -204,7 +204,7 @@ done:
   BucketsProximity = rob(n).lastopp ' return the index of the last viewed object
 End Function
 
-Private Sub CheckBotBucketForVision(n As Integer, pos As vector)
+Private Sub CheckBotBucketForVision(n As Integer, pos As Vector)
   Dim a As Integer, robnumber As Integer
   
   With Buckets(pos.x, pos.y)
@@ -223,8 +223,8 @@ End Sub
 Public Sub BucketsCollision(n As Integer)
   'mirror of proximity function.  Checks all the bots in the same bucket and surrounding buckets
   Dim x As Long, y As Long
-  Dim BucketPos As vector
-  Dim adjBucket As vector
+  Dim BucketPos As Vector
+  Dim adjBucket As Vector
 
   BucketPos = rob(n).BucketPos
 
@@ -245,10 +245,10 @@ done:
 End Sub
 
 
-Private Sub CheckBotBucketForCollision(n As Integer, pos As vector)
+Private Sub CheckBotBucketForCollision(n As Integer, pos As Vector)
   Dim a As Integer, robnumber As Integer
   Dim k As Integer
-  Dim distvector As vector
+  Dim distvector As Vector
   Dim dist As Single
   'If pos.x = -2 Or pos.Y = -2 Then goto getout
 
@@ -286,11 +286,11 @@ getout:
 End Function
 
 Public Function ShapeBlocksBot(n1 As Integer, n2 As Integer, o As Integer) As Boolean
-Dim D1(4) As vector
-Dim p(4) As vector
-Dim P0 As vector
-Dim D0 As vector
-Dim Delta As vector
+Dim D1(4) As Vector
+Dim p(4) As Vector
+Dim P0 As Vector
+Dim D0 As Vector
+Dim Delta As Vector
 Dim i As Integer
 Dim s As Single
 Dim t As Single
@@ -397,7 +397,7 @@ End Function
 'New compare routine from EricL
 'Takes into consideration movable eyes and eyes of variable width
 Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
-      Dim ab As vector, ac As vector, ad As vector 'vector from n1 to n2
+      Dim ab As Vector, ac As Vector, ad As Vector 'vector from n1 to n2
       Dim invdist As Single, sightdist As Single, eyedist As Single, distsquared As Single
       Dim edgetoedgedist As Single, percentdist As Single
       Dim a As Integer
@@ -592,12 +592,12 @@ getout:
 'Checks to see if any shapes are visable to bot n
 'Only gets called if shapes are visable
 Public Sub CompareShapes(n As Integer, field As Integer)
-Dim D1(4) As vector
-Dim p(4) As vector
-Dim P0 As vector
-Dim closestPoint As vector
-Dim D0 As vector
-Dim ab As vector
+Dim D1(4) As Vector
+Dim p(4) As Vector
+Dim P0 As Vector
+Dim closestPoint As Vector
+Dim D0 As Vector
+Dim ab As Vector
 Dim i As Integer
 Dim a As Integer
 Dim o As Integer
@@ -607,22 +607,22 @@ Dim eyevalue As Single
 Dim eyeaim As Single
 Dim eyeaimleft As Single
 Dim eyeaimright As Single
-Dim eyeaimleftvector As vector
-Dim eyeaimrightvector As vector
+Dim eyeaimleftvector As Vector
+Dim eyeaimrightvector As Vector
 Dim beta As Single
 Dim theta As Single
 Dim halfeyewidth As Single
 Dim botspanszero As Boolean
 Dim eyespanszero As Boolean
 Dim botLocation As Integer
-Dim nearestCorner As vector
+Dim nearestCorner As Vector
 Dim sightdist As Single
 Dim eyedist As Single
 Dim distleft As Single
 Dim distright As Single
 Dim dist As Single
 Dim lowestDist As Single
-Dim lastopppos As vector
+Dim lastopppos As Vector
 Dim percentdist As Single
 
 
@@ -941,9 +941,9 @@ End Sub
 
 'Returns the percent along vector P0 + sDO where it interects vector P1 + tD1.
 'Returns 0 if there is no interestion
-Public Function SegmentSegmentIntersect(P0 As vector, D0 As vector, P1 As vector, D1 As vector) As Single
+Public Function SegmentSegmentIntersect(P0 As Vector, D0 As Vector, P1 As Vector, D1 As Vector) As Single
 Dim dotPerp As Single
-Dim Delta As vector
+Dim Delta As Vector
 Dim s As Single
 Dim t As Single
 
