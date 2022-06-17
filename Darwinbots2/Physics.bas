@@ -79,13 +79,13 @@ Public Sub BrownianForces(n As Integer)
   Impulse = SimOpts.PhysBrown * 0.5 * rndy
   
   RandomAngle = rndy * 2 * PI
-  rob(n).ImpulseInd = VectorAdd(rob(n).ImpulseInd, VectorSet(Cos(RandomAngle) * Impulse, Sin(RandomAngle) * Impulse))
+  rob(n).impulseInd = VectorAdd(rob(n).impulseInd, VectorSet(Cos(RandomAngle) * Impulse, Sin(RandomAngle) * Impulse))
   rob(n).ma = rob(n).ma + (Impulse / 100) * (rndy - 0.5) ' turning motion due to brownian motion
 End Sub
 
 Public Sub SphereDragForces(n As Integer)  'for bots
   Dim Impulse As Single
-  Dim ImpulseVector As vector
+  Dim ImpulseVector As Vector
   Dim mag As Single
   
   'No Drag if no velocity or no density
@@ -188,7 +188,7 @@ Public Sub GravityForces(n As Integer)  'Botsareus 2/2/2013 added bouy as part o
         If Not boylabldisp Then Form1.BoyLabl.Visible = True
         boylabldisp = True
       End If
-      .ImpulseInd = VectorAdd(.ImpulseInd, VectorSet(0, SimOpts.Ygravity * .mass))
+      .impulseInd = VectorAdd(.impulseInd, VectorSet(0, SimOpts.Ygravity * .mass))
     Else
       If Form1.BoyLabl.Visible Then Form1.BoyLabl.Visible = False
       'bouy costs energy (calculated from voluntery movment)
@@ -196,10 +196,10 @@ Public Sub GravityForces(n As Integer)  'Botsareus 2/2/2013 added bouy as part o
       If .Bouyancy > 0 Then
         .nrg = .nrg - (SimOpts.Ygravity / (SimOpts.PhysMoving) * IIf(.mass > 192, 192, .mass) * SimOpts.Costs(MOVECOST) * SimOpts.Costs(COSTMULTIPLIER)) * .Bouyancy
       End If
-      If (1 / BouyancyScaling - .pos.y / SimOpts.FieldHeight) > .Bouyancy Then
-        .ImpulseInd = VectorAdd(.ImpulseInd, VectorSet(0, SimOpts.Ygravity * .mass))
+      If (1 / BouyancyScaling - robManager.GetRobotPosition(n).y / SimOpts.FieldHeight) > .Bouyancy Then
+        .impulseInd = VectorAdd(.impulseInd, VectorSet(0, SimOpts.Ygravity * .mass))
       Else
-        .ImpulseInd = VectorAdd(.ImpulseInd, VectorSet(0, -SimOpts.Ygravity * .mass))
+        .impulseInd = VectorAdd(.impulseInd, VectorSet(0, -SimOpts.Ygravity * .mass))
       End If
     End If
   End With
@@ -209,8 +209,8 @@ Public Sub VoluntaryForces(n As Integer)
   'calculates new acceleration and energy values from robot's
   '.up/.dn/.sx/.dx vars
   Dim EnergyCost As Single
-  Dim NewAccel As vector
-  Dim dir As vector
+  Dim NewAccel As Vector
+  Dim dir As Vector
   Dim mult As Single
   
   With rob(n)
@@ -240,7 +240,7 @@ Public Sub VoluntaryForces(n As Integer)
     'NewAccel is the impulse vector formed by the robot's internal "engine".
     'Impulse is the integral of Force over time.
     
-    .ImpulseInd = VectorAdd(.ImpulseInd, VectorScalar(NewAccel, SimOpts.PhysMoving))
+    .impulseInd = VectorAdd(.impulseInd, VectorScalar(NewAccel, SimOpts.PhysMoving))
     
     EnergyCost = VectorMagnitude(NewAccel) * SimOpts.Costs(MOVECOST) * SimOpts.Costs(COSTMULTIPLIER)
     
@@ -274,8 +274,8 @@ Public Sub TieHooke(n As Integer)
   Dim Impulse As Single
   Dim k As Integer
   Dim t As Integer
-  Dim uv As vector
-  Dim vy As vector
+  Dim uv As Vector
+  Dim vy As Vector
   Dim deformation As Single
      
   'EricL 5/26/2006 Perf Test
@@ -305,7 +305,7 @@ Public Sub TieHooke(n As Integer)
         Loop Until Not CheckRobot(.Ties(k).pnt)
       End If
      
-      uv = VectorSub(.pos, rob(.Ties(k).pnt).pos)
+      uv = VectorSub(robManager.GetRobotPosition(n), robManager.GetRobotPosition(.Ties(k).pnt))
       length = VectorMagnitude(uv)
            
       'delete tie if length > 1000
@@ -331,12 +331,12 @@ Public Sub TieHooke(n As Integer)
             If Abs(displacement) > deformation Then
               displacement = Sgn(displacement) * (Abs(displacement) - deformation)
               Impulse = .Ties(k).k * displacement
-              .ImpulseInd = VectorAdd(.ImpulseInd, VectorScalar(uv, Impulse))
+              .impulseInd = VectorAdd(.impulseInd, VectorScalar(uv, Impulse))
               
               'next -bv
               vy = VectorSub(.vel, rob(.Ties(k).pnt).vel)
               Impulse = Dot(vy, uv) * -.Ties(k).b
-              .ImpulseInd = VectorAdd(.ImpulseInd, VectorScalar(uv, Impulse))
+              .impulseInd = VectorAdd(.impulseInd, VectorScalar(uv, Impulse))
             End If
           End If
         End If
@@ -368,14 +368,14 @@ Public Sub PlanetEaters(n As Integer)
   'Botsareus 8/22/2014 Cap on mass to gravity
   Dim t As Integer
   Dim force As Single
-  Dim PosDiff As vector
+  Dim PosDiff As Vector
   Dim mag As Single
   
   If Not SimOpts.PlanetEaters Or rob(n).mass = 0 Then Exit Sub
     
   For t = n + 1 To MaxRobs
     If rob(t).exist And Not rob(t).mass = 0 Then
-      PosDiff = VectorSub(rob(t).pos, rob(n).pos)
+      PosDiff = VectorSub(robManager.GetRobotPosition(t), robManager.GetRobotPosition(n))
       mag = VectorMagnitude(PosDiff)
       If Not mag = 0 Then
       
@@ -385,8 +385,8 @@ Public Sub PlanetEaters(n As Integer)
             
         PosDiff = VectorScalar(PosDiff, force)
         
-        rob(n).ImpulseInd = VectorAdd(rob(n).ImpulseInd, PosDiff)
-        rob(t).ImpulseInd = VectorSub(rob(t).ImpulseInd, PosDiff)
+        rob(n).impulseInd = VectorAdd(rob(n).impulseInd, PosDiff)
+        rob(t).impulseInd = VectorSub(rob(t).impulseInd, PosDiff)
       End If
     End If
   Next
@@ -449,7 +449,7 @@ Public Sub TieTorque(t As Integer)
   Dim j As Integer
   Dim mt As Single, mm As Single, m As Single
   Dim nax As Single, nay As Single
-  Dim TorqueVector As vector
+  Dim TorqueVector As Vector
   Dim angleslack As Single ' amount angle can vary without torque forces being applied
   Dim numOfTorqueTies As Integer
     
@@ -463,7 +463,7 @@ Public Sub TieTorque(t As Integer)
       While .Ties(j).pnt > 0
         If .Ties(j).angreg Then 'if angle is fixed.
           n = .Ties(j).pnt
-          anl = angle(.pos.x, .pos.y, rob(n).pos.x, rob(n).pos.y) 'angle of tie in euclidian space
+          anl = angle(robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y, robManager.GetRobotPosition(n).x, robManager.GetRobotPosition(n).y) 'angle of tie in euclidian space
           dlo = AngDiff(anl, .aim) 'difference of angle of tie and direction of robot
           mm = AngDiff(dlo, .Ties(j).ang + .Ties(j).bend) 'difference of actual angle and requested angle
          
@@ -472,8 +472,8 @@ Public Sub TieTorque(t As Integer)
             numOfTorqueTies = numOfTorqueTies + 1
             mm = (Abs(mm) - angleslack) * Sgn(mm)
             m = mm * 0.1
-            dx = rob(n).pos.x - .pos.x
-            dy = .pos.y - rob(n).pos.y
+            dx = robManager.GetRobotPosition(n).x - robManager.GetRobotPosition(t).x
+            dy = robManager.GetRobotPosition(t).y - robManager.GetRobotPosition(n).y
             dist = Sqr(dx ^ 2 + dy ^ 2)
             nax = -Sin(anl) * m * dist / 10
             nay = -Cos(anl) * m * dist / 10
@@ -484,8 +484,8 @@ Public Sub TieTorque(t As Integer)
             'EricL 4/24/2006 This is the torque vector on robot t from it's movement of the tie
             TorqueVector = VectorSet(nax, nay)
           
-            rob(n).ImpulseInd = VectorSub(rob(n).ImpulseInd, TorqueVector) 'EricL Subtact the torque for bot n.
-            .ImpulseInd = VectorAdd(.ImpulseInd, TorqueVector) 'EricL Add the acceleration for bot t
+            rob(n).impulseInd = VectorSub(rob(n).impulseInd, TorqueVector) 'EricL Subtact the torque for bot n.
+            .impulseInd = VectorAdd(.impulseInd, TorqueVector) 'EricL Add the acceleration for bot t
             mt = mt + mm    'in other words mt = mm for 1 tie
           End If
         End If
@@ -517,46 +517,51 @@ Public Sub bordercolls(t As Integer)
   Const k As Single = 0.4
   Const b As Single = 0.05
   
-  Dim dif As vector
-  Dim dist As vector
+  Dim dif As Vector
+  Dim dist As Vector
   Dim smudge As Single
   
   With rob(t)
-    If (.pos.x > .radius) And (.pos.x < SimOpts.FieldWidth - .radius) And (.pos.y > .radius) And (.pos.y < SimOpts.FieldHeight - .radius) Then Exit Sub
+    If (robManager.GetRobotPosition(t).x > .radius) And (robManager.GetRobotPosition(t).x < SimOpts.FieldWidth - .radius) And (robManager.GetRobotPosition(t).y > .radius) And (robManager.GetRobotPosition(t).y < SimOpts.FieldHeight - .radius) Then Exit Sub
   
     .mem(214) = 0
     
     smudge = .radius + smudgefactor
   
-    dif = VectorMin(VectorMax(.pos, VectorSet(smudge, smudge)), VectorSet(SimOpts.FieldWidth - smudge, SimOpts.FieldHeight - smudge))
-    dist = VectorSub(dif, .pos)
+    dif = VectorMin(VectorMax(robManager.GetRobotPosition(t), VectorSet(smudge, smudge)), VectorSet(SimOpts.FieldWidth - smudge, SimOpts.FieldHeight - smudge))
+    dist = VectorSub(dif, robManager.GetRobotPosition(t))
   
     If dist.x <> 0 Then
       If SimOpts.Dxsxconnected = True Then
         If dist.x < 0 Then
-          ReSpawn t, smudge, .pos.y
+          ReSpawn t, smudge, robManager.GetRobotPosition(t).y
         Else
-          ReSpawn t, SimOpts.FieldWidth - smudge, .pos.y
+          ReSpawn t, SimOpts.FieldWidth - smudge, robManager.GetRobotPosition(t).y
         End If
       Else
         .mem(214) = 1
-        If .pos.x - .radius < 0 Then .pos.x = .radius
-        If .pos.x + .radius > SimOpts.FieldWidth Then .pos.x = CSng(SimOpts.FieldWidth) - .radius
+        Dim pos As Vector
+        pos = robManager.GetRobotPosition(t)
+        If pos.x - .radius < 0 Then pos.x = .radius
+        If pos.x + .radius > SimOpts.FieldWidth Then pos.x = CSng(SimOpts.FieldWidth) - .radius
         .ImpulseRes.x = .ImpulseRes.x + .vel.x * b
+        robManager.SetRobotPosition t, pos
       End If
     End If
   
     If dist.y <> 0 Then
       If SimOpts.Updnconnected Then
         If dist.y < 0 Then
-          ReSpawn t, .pos.x, smudge
+          ReSpawn t, robManager.GetRobotPosition(t).x, smudge
         Else
-          ReSpawn t, .pos.x, SimOpts.FieldHeight - smudge
+          ReSpawn t, robManager.GetRobotPosition(t).x, SimOpts.FieldHeight - smudge
         End If
       Else
         rob(t).mem(214) = 1
-        If .pos.y - .radius < 0 Then .pos.y = .radius
-        If .pos.y + .radius > SimOpts.FieldHeight Then .pos.y = CSng(SimOpts.FieldHeight) - .radius
+        pos = robManager.GetRobotPosition(t)
+        If pos.y - .radius < 0 Then pos.y = .radius
+        If pos.y + .radius > SimOpts.FieldHeight Then pos.y = CSng(SimOpts.FieldHeight) - .radius
+        robManager.SetRobotPosition t, pos
         .ImpulseRes.y = .ImpulseRes.y + .vel.y * b
       End If
     End If
@@ -564,33 +569,33 @@ Public Sub bordercolls(t As Integer)
 End Sub
 
 Public Sub Repel3(rob1 As Integer, rob2 As Integer)
-  Dim normal As vector
-  Dim vy As vector
+  Dim normal As Vector
+  Dim vy As Vector
   Dim length As Single
   Dim force As Single
-  Dim V1 As vector
-  Dim V1f As vector
-  Dim V1d As vector
-  Dim V2 As vector
-  Dim V2f As vector
-  Dim V2d As vector
+  Dim V1 As Vector
+  Dim V1f As Vector
+  Dim V1d As Vector
+  Dim V2 As Vector
+  Dim V2f As Vector
+  Dim V2d As Vector
   Dim M1 As Single
   Dim M2 As Single
   Dim currdist As Single
-  Dim unit As vector
-  Dim vel1 As vector
-  Dim vel2 As vector
+  Dim unit As Vector
+  Dim vel1 As Vector
+  Dim vel2 As Vector
   Dim projection As Single
   Dim e As Single
   Dim fixedSep As Single ' the distance each fixed bots need to be separated
-  Dim fixedSepVector As vector
+  Dim fixedSepVector As Vector
   Dim i As Single ' moment of interia
   Dim relVel As Single
   Dim TotalMass As Single
   
   e = SimOpts.CoefficientElasticity ' Set in the UI or loaded/defaulted in the sim load routines
   
-  normal = VectorSub(rob(rob2).pos, rob(rob1).pos) ' Vector pointing from bot 1 to bot 2
+  normal = VectorSub(robManager.GetRobotPosition(rob2), robManager.GetRobotPosition(rob1)) ' Vector pointing from bot 1 to bot 2
   currdist = VectorMagnitude(normal) ' The current distance between the bots
   
   'If both bots are fixed or not moving and they overlap, move their positions directly.  Fixed bots can overlap when shapes sweep them together
@@ -600,15 +605,15 @@ Public Sub Repel3(rob1 As Integer, rob2 As Integer)
   If rob(rob1).Fixed And rob(rob2).Fixed Or (VectorMagnitude(rob(rob1).vel) < 0.0001 And VectorMagnitude(rob(rob2).vel) < 0.0001) Then
     fixedSep = ((rob(rob1).radius + rob(rob2).radius) - currdist) / 2
     fixedSepVector = VectorScalar(VectorUnit(normal), fixedSep)
-    rob(rob1).pos = VectorSub(rob(rob1).pos, fixedSepVector)
-    rob(rob2).pos = VectorAdd(rob(rob2).pos, fixedSepVector)
+    robManager.SetRobotPosition rob1, VectorSub(robManager.GetRobotPosition(rob1), fixedSepVector)
+    robManager.SetRobotPosition rob2, VectorAdd(robManager.GetRobotPosition(rob2), fixedSepVector)
   Else
     'Botsareus 6/18/2016 Still slowly move robots appart to cancel out compressive events
     TotalMass = rob(rob1).mass + rob(rob2).mass
     fixedSep = ((rob(rob1).radius + rob(rob2).radius) - currdist)
     fixedSepVector = VectorScalar(VectorUnit(normal), fixedSep / (1 + 55 ^ (0.3 - e)))
-    rob(rob1).pos = VectorSub(rob(rob1).pos, VectorScalar(fixedSepVector, rob(rob2).mass / TotalMass))  'Botsareus 7/4/2016 Factor in mass of robots (apply inverted)
-    rob(rob2).pos = VectorAdd(rob(rob2).pos, VectorScalar(fixedSepVector, rob(rob1).mass / TotalMass))
+    robManager.SetRobotPosition rob1, VectorSub(robManager.GetRobotPosition(rob1), VectorScalar(fixedSepVector, rob(rob2).mass / TotalMass))  'Botsareus 7/4/2016 Factor in mass of robots (apply inverted)
+    robManager.SetRobotPosition rob2, VectorAdd(robManager.GetRobotPosition(rob2), VectorScalar(fixedSepVector, rob(rob1).mass / TotalMass))
   End If
   
                   
@@ -663,8 +668,8 @@ Public Sub Repel3(rob1 As Integer, rob2 As Integer)
     End If
       
     'Update the touch senses
-    touch rob1, rob(rob2).pos.x, rob(rob2).pos.y
-    touch rob2, rob(rob1).pos.x, rob(rob1).pos.y
+    touch rob1, robManager.GetRobotPosition(rob2).x, robManager.GetRobotPosition(rob2).y
+    touch rob2, robManager.GetRobotPosition(rob1).x, robManager.GetRobotPosition(rob1).y
     
     'Update last touch variables
     rob(rob1).lasttch = rob2

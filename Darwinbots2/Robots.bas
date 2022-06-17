@@ -162,28 +162,6 @@ Public Const rmchlr As Integer = 922 'Panda 8/15/2013 The remove chloroplast var
 Public Const light As Integer = 923 'Botsareus 8/14/2013 A variable to let robots know how much light is available
 Public Const sharechlr As Integer = 924 'Panda 08/26/2013 Share Chloroplasts between ties variable
 
-'Botsareus 10/5/2015 freeing up memory from Eric's obsolete ancestors code
-'Private Type ancestorType
-'  num As Long ' unique ID of ancestor
-'  mut As Long ' mutations this ancestor had at time next descendent was born
-'  sim As Long ' the sim this ancestor was born in
-'End Type
-
-'Botsareus 10/5/2015 Replaced with something better
-'Private Type delgenerestore 'Botsareus 9/16/2014 A new bug fix from Billy
-'position As Integer
-'dna() As block
-'End Type
-
-Private Type PhysicBot
-  pos As Vector
-  vel As Vector
-  impulseInd As Vector
-  Fixed As Boolean
-  mass As Single
-  AddedMass As Single
-End Type
-
 ' robot structure
 Private Type robot
 
@@ -201,7 +179,6 @@ Private Type robot
   NewMove As Boolean      ' is the bot using the new physics paradigms?
   
   ' physics
-  pos As Vector
   BucketPos As Vector
   
   vel As Vector
@@ -374,6 +351,8 @@ Public TotalRobots As Integer               ' total robots in the sim
 Public TotalRobotsDisplayed As Integer      ' Display value to avoid displaying half updated numbers
 'Public MaxAbsNum As Long                   ' robots born (used to assign unique code)
 Public MaxMem As Integer
+
+Public robManager As New RobotManager
 
 'Botsareus 4/3/2013 crossover section
 ''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -780,7 +759,6 @@ Public Sub UpdatePosition(ByVal n As Integer)
   With rob(n)
   
   'Following line commented out since mass is set earlier in CalcMass
-  '.mass = (.body / 1000) + (.shell / 200) 'set value for mass
   If .mass + .AddedMass < 0.25 Then .mass = 0.25 - .AddedMass ' a fudge since Euler approximation can't handle it when mass -> 0
   
   If Not .Fixed Then
@@ -794,9 +772,12 @@ Public Sub UpdatePosition(ByVal n As Integer)
       vt = SimOpts.MaxVelocity * SimOpts.MaxVelocity
     End If
     
-    .pos = VectorAdd(.pos, .vel)
+    Dim pos As Vector
+    pos = robManager.GetRobotPosition(n)
+    
+    pos = VectorAdd(pos, .vel)
+    robManager.SetRobotPosition n, pos
     UpdateBotBucket n
-   ' If .pos.x > 10000000 Then t = 1 / 0 ' Crash inducing line for debugging
   Else
     .vel = VectorSet(0, 0)
   End If
@@ -1373,7 +1354,7 @@ Private Sub FireTies(ByVal n As Integer)
     If .lastopp > 0 And Not SimOpts.DisableTies And (.lastopptype = 0) Then
       
       '2 robot lengths
-      length = VectorMagnitude(VectorSub(rob(.lastopp).pos, .pos))
+      length = VectorMagnitude(VectorSub(robManager.GetRobotPosition(.lastopp), robManager.GetRobotPosition(n)))
       maxLength = RobSize * 4# + rob(n).radius + rob(rob(n).lastopp).radius
       
       If length <= maxLength Then
@@ -1448,7 +1429,6 @@ Public Sub UpdateBots()
       If ((rob(t).Corpse = False) And (rob(t).DisableDNA = False)) Then Poisons t
       If Not SimOpts.DisableFixing Then ManageFixed t 'Botsareus 8/5/2014 Call function only if allowed
       CalcMass t
-      If numObstacles > 0 Then DoObstacleCollisions t
       bordercolls t
       TieHooke t ' Handles tie lengths, tie hardening and compressive, elastic tie forces
       If Not rob(t).Corpse And Not rob(t).DisableDNA Then TieTorque t 'EricL 4/21/2006 Handles tie angles
@@ -2032,8 +2012,8 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
   
   tempnrg = rob(n).nrg
   If tempnrg > 0 Then
-    nx = rob(n).pos.x + absx(rob(n).aim, sondist, 0, 0, 0)
-    ny = rob(n).pos.y + absy(rob(n).aim, sondist, 0, 0, 0)
+    nx = robManager.GetRobotPosition(n).x + absx(rob(n).aim, sondist, 0, 0, 0)
+    ny = robManager.GetRobotPosition(n).y + absy(rob(n).aim, sondist, 0, 0, 0)
     tests = tests Or simplecoll(nx, ny, n)
     tests = tests Or Not rob(n).exist 'Botsareus 6/4/2014 Can not reproduce from a dead robot
     'tests = tests Or (rob(n).Fixed And IsInSpawnArea(nx, ny))
@@ -2070,8 +2050,13 @@ If SimOpts.DisableTypArepro And rob(n).Veg = False Then Exit Sub
       Erase rob(nuovo).mem
       Erase rob(nuovo).Ties
       
-      rob(nuovo).pos.x = rob(n).pos.x + absx(rob(n).aim, sondist, 0, 0, 0)
-      rob(nuovo).pos.y = rob(n).pos.y + absy(rob(n).aim, sondist, 0, 0, 0)
+      Dim pos As Vector
+      
+      pos.x = robManager.GetRobotPosition(n).x + absx(rob(n).aim, sondist, 0, 0, 0)
+      pos.y = robManager.GetRobotPosition(n).y + absy(rob(n).aim, sondist, 0, 0, 0)
+      
+      robManager.SetRobotPosition nuovo, pos
+      
       rob(nuovo).exist = True
       rob(nuovo).BucketPos.x = -2
       rob(nuovo).BucketPos.y = -2
@@ -2327,8 +2312,8 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
   
   tempnrg = rob(female).nrg
   If tempnrg > 0 Then
-    nx = rob(female).pos.x + absx(rob(female).aim, sondist, 0, 0, 0)
-    ny = rob(female).pos.y + absy(rob(female).aim, sondist, 0, 0, 0)
+    nx = robManager.GetRobotPosition(female).x + absx(rob(female).aim, sondist, 0, 0, 0)
+    ny = robManager.GetRobotPosition(female).y + absy(rob(female).aim, sondist, 0, 0, 0)
     tests = tests Or simplecoll(nx, ny, female)
     tests = tests Or Not rob(female).exist 'Botsareus 6/4/2014 Can not reproduce from a dead robot
     'tests = tests Or (rob(n).Fixed And IsInSpawnArea(nx, ny))
@@ -2482,8 +2467,12 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
       Erase rob(nuovo).mem
       Erase rob(nuovo).Ties
       
-      rob(nuovo).pos.x = rob(female).pos.x + absx(rob(female).aim, sondist, 0, 0, 0)
-      rob(nuovo).pos.y = rob(female).pos.y + absy(rob(female).aim, sondist, 0, 0, 0)
+      Dim pos As Vector
+      
+      pos.x = robManager.GetRobotPosition(female).x + absx(rob(female).aim, sondist, 0, 0, 0)
+      pos.y = robManager.GetRobotPosition(female).y + absy(rob(female).aim, sondist, 0, 0, 0)
+      robManager.SetRobotPosition nuovo, pos
+      
       rob(nuovo).exist = True
       rob(nuovo).BucketPos.x = -2
       rob(nuovo).BucketPos.y = -2
@@ -2698,8 +2687,8 @@ Public Function simplecoll(x As Long, y As Long, k As Integer) As Boolean
   
   For t = 1 To MaxRobs
     If rob(t).exist Then
-      If Abs(rob(t).pos.x - x) < rob(t).radius + rob(k).radius And _
-        Abs(rob(t).pos.y - y) < rob(t).radius + rob(k).radius Then
+      If Abs(robManager.GetRobotPosition(t).x - x) < rob(t).radius + rob(k).radius And _
+        Abs(robManager.GetRobotPosition(t).y - y) < rob(t).radius + rob(k).radius Then
         If k <> t Then
           simplecoll = True
           GoTo getout
@@ -2707,18 +2696,7 @@ Public Function simplecoll(x As Long, y As Long, k As Integer) As Boolean
       End If
     End If
   Next t
-  
-  'EricL Can't reproduce into or across a shape
-  For t = 1 To numObstacles
-    If Not ((Obstacles.Obstacles(t).pos.x > Max(rob(k).pos.x, x)) Or _
-           (Obstacles.Obstacles(t).pos.x + Obstacles.Obstacles(t).Width < Min(rob(k).pos.x, x)) Or _
-           (Obstacles.Obstacles(t).pos.y > Max(rob(k).pos.y, y)) Or _
-           (Obstacles.Obstacles(t).pos.y + Obstacles.Obstacles(t).Height < Min(rob(k).pos.y, y))) Then
-       simplecoll = True
-       GoTo getout
-    End If
-  Next t
-  
+    
   If SimOpts.Dxsxconnected = False Then
     If x < rob(k).radius + smudgefactor Or x + rob(k).radius + smudgefactor > SimOpts.FieldWidth Then simplecoll = True
   End If

@@ -330,7 +330,6 @@ Private Sub Form_Load()
   FlashColor(-5 + 10) = vbYellow  ' Hit with poison Shot
   FlashColor(-6 + 10) = vbMagenta ' Hit with body feeding shot
   FlashColor(-7 + 10) = vbCyan    ' Hit with virus shot
-  InitObstacles
 End Sub
 
 '
@@ -340,12 +339,14 @@ End Sub
 ' redraws screen
 Public Sub Redraw()
 Dim t As Integer
+        Dim pos As Vector
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
 'It is a hacky way of doing it, but should be a bit faster since the computation is only preformed twice, other than preforming it in each subsection.
 For t = 1 To MaxRobs
     If rob(t).exist Then
-        rob(t).pos.x = rob(t).pos.x - (rob(t).vel.x - rob(t).actvel.x)
-        rob(t).pos.y = rob(t).pos.y - (rob(t).vel.y - rob(t).actvel.y)
+        pos.x = robManager.GetRobotPosition(t).x - (rob(t).vel.x - rob(t).actvel.x)
+        pos.y = robManager.GetRobotPosition(t).y - (rob(t).vel.y - rob(t).actvel.y)
+        robManager.SetRobotPosition t, pos
     End If
 Next
 
@@ -361,8 +362,6 @@ Next
   End If
   Cls
     
-  If numObstacles > 0 Then Obstacles.DrawObstacles
-  
   DrawArena
   DrawAllTies
   DrawAllRobs
@@ -372,8 +371,11 @@ Next
 'Plase robots back
 For t = 1 To MaxRobs
     If rob(t).exist Then
-        rob(t).pos.x = rob(t).pos.x + (rob(t).vel.x - rob(t).actvel.x)
-        rob(t).pos.y = rob(t).pos.y + (rob(t).vel.y - rob(t).actvel.y)
+        
+        pos.x = robManager.GetRobotPosition(t).x + (rob(t).vel.x - rob(t).actvel.x)
+        pos.y = robManager.GetRobotPosition(t).y + (rob(t).vel.y - rob(t).actvel.y)
+        
+        robManager.SetRobotPosition t, pos
     End If
 Next
 End Sub
@@ -485,7 +487,7 @@ With frmMonitorSet
     '
     Dim aspectmod As Double
     aspectmod = TwipHeight / twipWidth
-    Line (rob(n).pos.x - rob(n).radius * 1.1, rob(n).pos.y - rob(n).radius * 1.1 / aspectmod)-(rob(n).pos.x + rob(n).radius * 1.1, rob(n).pos.y + rob(n).radius * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
+    Line (robManager.GetRobotPosition(n).x - rob(n).radius * 1.1, robManager.GetRobotPosition(n).y - rob(n).radius * 1.1 / aspectmod)-(robManager.GetRobotPosition(n).x + rob(n).radius * 1.1, robManager.GetRobotPosition(n).y + rob(n).radius * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
 End With
 End Sub
 
@@ -507,8 +509,8 @@ Private Sub DrawRobPer(n As Integer)
   Dim topX As Single
   Dim topY As Single
   
-  CentreX = rob(n).pos.x
-  CentreY = rob(n).pos.y
+  CentreX = robManager.GetRobotPosition(n).x
+  CentreY = robManager.GetRobotPosition(n).y
   radius = rob(n).radius
    
   If rob(n).highlight Then Circle (CentreX, CentreY), radius * 1.2, vbYellow
@@ -614,8 +616,8 @@ Private Sub DrawRobDistPer(n As Integer)
   Dim nrgPercent As Single
   Dim bodyPercent As Single
   
-  CentreX = rob(n).pos.x
-  CentreY = rob(n).pos.y
+  CentreX = robManager.GetRobotPosition(n).x
+  CentreY = robManager.GetRobotPosition(n).y
    
   If rob(n).highlight Then Circle (CentreX, CentreY), RobSize * 2, vbYellow 'new line
   If n = robfocus Then Circle (CentreX, CentreY), RobSize * 2, vbWhite
@@ -644,7 +646,7 @@ Private Sub DrawRobAim(n As Integer)
     pos.x = .aimvector.x
     pos.y = -.aimvector.y
        
-    pos2 = VectorAdd(.pos, VectorScalar(VectorUnit(pos), .radius))
+    pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(VectorUnit(pos), .radius))
     PSet (pos2.x, pos2.y), vbWhite
     
     If MDIForm1.displayMovementVectorsToggle Then
@@ -668,7 +670,7 @@ Private Sub DrawRobAim(n As Integer)
       If .lastdown <> 0 Then
         If .lastdown < -1000 Then .lastdown = -1000
         If .lastdown > 1000 Then .lastdown = 1000
-        pos2 = VectorSub(.pos, VectorScalar(pos, .radius))
+        pos2 = VectorSub(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
         vol = VectorSub(pos2, VectorScalar(pos, CSng(.lastdown)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -687,7 +689,7 @@ Private Sub DrawRobAim(n As Integer)
         If .lastleft > 1000 Then .lastleft = 1000
         pos = VectorSet(Cos(.aim - PI / 2), Sin(.aim - PI / 2))
         pos.y = -pos.y
-        pos2 = VectorAdd(.pos, VectorScalar(pos, .radius))
+        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
         vol = VectorAdd(pos2, VectorScalar(pos, CSng(.lastleft)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -706,7 +708,7 @@ Private Sub DrawRobAim(n As Integer)
         If .lastright > 1000 Then .lastright = 1000
         pos = VectorSet(Cos(.aim + PI / 2), Sin(.aim + PI / 2))
         pos.y = -pos.y
-        pos2 = VectorAdd(.pos, VectorScalar(pos, .radius))
+        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
         vol = VectorAdd(pos2, VectorScalar(pos, CSng(.lastright)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -738,19 +740,19 @@ Private Sub DrawRobSkin(n As Integer)
       With rob(n)
         .OSkin(0) = (Cos(.Skin(1) / 100 - .aim) * .Skin(0)) * .radius / 60
         .OSkin(1) = (Sin(.Skin(1) / 100 - .aim) * .Skin(0)) * .radius / 60
-        PSet (.OSkin(0) + .pos.x, .OSkin(1) + .pos.y)
+        PSet (.OSkin(0) + robManager.GetRobotPosition(n).x, .OSkin(1) + robManager.GetRobotPosition(n).y)
         For t = 2 To 6 Step 2
           .OSkin(t) = (Cos(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * .radius / 60
           .OSkin(t + 1) = (Sin(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * .radius / 60
-          Line -(.OSkin(t) + .pos.x, .OSkin(t + 1) + .pos.y), .color
+          Line -(.OSkin(t) + robManager.GetRobotPosition(n).x, .OSkin(t + 1) + robManager.GetRobotPosition(n).y), .color
         Next t
         .oaim = .aim
       End With
     Else
       With rob(n)
-        PSet (.OSkin(0) + .pos.x, .OSkin(1) + .pos.y)
+        PSet (.OSkin(0) + robManager.GetRobotPosition(n).x, .OSkin(1) + robManager.GetRobotPosition(n).y)
         For t = 2 To 6 Step 2
-          Line -(.OSkin(t) + .pos.x, .OSkin(t + 1) + .pos.y), .color
+          Line -(.OSkin(t) + robManager.GetRobotPosition(n).x, .OSkin(t + 1) + robManager.GetRobotPosition(n).y), .color
         Next t
       End With
     End If
@@ -771,13 +773,13 @@ Private Sub DrawRobTies(t As Integer, w As Integer, ByVal s As Integer)
   
   k = 1
   With rob(t)
-  CentreX = .pos.x
-  CentreY = .pos.y
+  CentreX = robManager.GetRobotPosition(t).x
+  CentreY = robManager.GetRobotPosition(t).y
   While .Ties(k).pnt > 0
     If Not .Ties(k).back Then
       rp = .Ties(k).pnt
-      CentreX1 = rob(rp).pos.x
-      CentreY1 = rob(rp).pos.y
+      CentreX1 = robManager.GetRobotPosition(rp).x
+      CentreY1 = robManager.GetRobotPosition(rp).y
       DrawWidth = drawsmall
       If .Ties(k).last > 0 Then
         If w > 2 Then
@@ -808,13 +810,13 @@ Private Sub DrawRobTiesCol(t As Integer, w As Integer, ByVal s As Integer)
   If drawsmall = 0 Then drawsmall = 1
   k = 1
   With rob(t)
-  CentreX = .pos.x
-  CentreY = .pos.y
+  CentreX = robManager.GetRobotPosition(t).x
+  CentreY = robManager.GetRobotPosition(t).y
   While .Ties(k).pnt > 0
     If Not .Ties(k).back Then
       rp = .Ties(k).pnt
-      CentreX1 = rob(rp).pos.x
-      CentreY1 = rob(rp).pos.y
+      CentreX1 = robManager.GetRobotPosition(rp).x
+      CentreY1 = robManager.GetRobotPosition(rp).y
       DrawWidth = drawsmall
       col = .color
       If w < 2 Then w = 2
@@ -930,10 +932,10 @@ Public Sub DrawAllRobs()
         length = EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + rob(robfocus).radius + rob(robfocus).radius
       End If
             
-      Circle (rob(robfocus).pos.x, rob(robfocus).pos.y), length, vbCyan, -low, -hi
+      Circle (robManager.GetRobotPosition(robfocus).x, robManager.GetRobotPosition(robfocus).y), length, vbCyan, -low, -hi
       
       If (a = Abs(rob(robfocus).mem(FOCUSEYE) + 4) Mod 9) Then
-        Circle (rob(robfocus).pos.x, rob(robfocus).pos.y), length, vbRed, low, hi
+        Circle (robManager.GetRobotPosition(robfocus).x, robManager.GetRobotPosition(robfocus).y), length, vbRed, low, hi
       End If
        
     Next
@@ -948,8 +950,7 @@ Public Sub DrawAllRobs()
     For a = 1 To MaxRobs
       If rob(a).exist Then
         r = rob(a).radius
-        If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
-           rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
+        If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
            DrawRobDistPer a
         End If
       End If
@@ -959,8 +960,8 @@ Public Sub DrawAllRobs()
     For a = 1 To MaxRobs
       If rob(a).exist Then
          r = rob(a).radius
-         If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
-            rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
+         If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
+            robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
             DrawRobPer a
          End If
       End If
@@ -971,8 +972,8 @@ Public Sub DrawAllRobs()
   If dispskin And Not noeyeskin Then
     For a = 1 To MaxRobs
       If rob(a).exist Then
-        If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
-           rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
+        If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
+           robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
            DrawRobSkin a
         End If
       End If
@@ -984,8 +985,8 @@ Public Sub DrawAllRobs()
   If Not noeyeskin Then
     For a = 1 To MaxRobs
      If rob(a).exist Then
-       If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
-          rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
+       If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
+          robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
           DrawRobAim a
        End If
      End If
@@ -1000,8 +1001,8 @@ Public Sub DrawAllRobs()
     For a = 1 To MaxRobs
       If rob(a).exist Then
          r = rob(a).radius
-         If rob(a).pos.x + r > visibleLeft And rob(a).pos.x - r < visibleRight And _
-            rob(a).pos.y + r > visibleTop And rob(a).pos.y - r < visibleBottom Then
+         If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
+            robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
             DrawMonitor a
          End If
       End If
@@ -1030,8 +1031,8 @@ Public Sub DrawAllTies()
   
   For t = 1 To MaxRobs
     If rob(t).exist Then
-      If rob(t).pos.x > visibleLeft And rob(t).pos.x < visibleRight And _
-         rob(t).pos.y > visibleTop And rob(t).pos.y < visibleBottom Then
+      If robManager.GetRobotPosition(t).x > visibleLeft And robManager.GetRobotPosition(t).x < visibleRight And _
+         robManager.GetRobotPosition(t).y > visibleTop And robManager.GetRobotPosition(t).y < visibleBottom Then
          DrawRobTiesCol t, PixelsPerTwip * rob(t).radius * 2, rob(t).radius
       End If
     End If
@@ -1161,15 +1162,7 @@ MDIForm1.menuupdate
   Init_Buckets
   
   ShotManager.CLEAR
-  
-  For t = 1 To MAXOBSTACLES
-    Obstacles.Obstacles(t).exist = False
-  Next t
-  numObstacles = 0
-  
-  defaultWidth = 0.2
-  defaultHeight = 0.2
-       
+         
   MaxRobs = 0
   loadrobs
   If Form1.Active Then SecTimer.Enabled = True
@@ -1188,20 +1181,6 @@ MDIForm1.menuupdate
   End If
  
   strSimStart = Replace(Replace(Now, ":", "-"), "/", "-")
-  
-  'Botsareus 1/5/2014 The Obstacle Regeneration code
-  
-  Dim o As Integer
-  Dim oo As Integer
-For o = 1 To UBound(xObstacle)
-If xObstacle(o).exist Then
-With xObstacle(o)
-    oo = NewObstacle(.pos.x * SimOpts.FieldWidth, .pos.y * SimOpts.FieldHeight, .Width * SimOpts.FieldWidth, .Height * SimOpts.FieldHeight)
-    Obstacles.Obstacles(oo).color = xObstacle(o).color
-    Obstacles.Obstacles(oo).vel = xObstacle(o).vel
-End With
-End If
-Next
   
   'sim running
 
@@ -1274,7 +1253,6 @@ Sub startloaded()
   maxfieldsize = SimOpts.FieldWidth * 2
   robfocus = 0
   MDIForm1.DisableRobotsMenu
-  'SimOpts.MutCurrMult = 1
   
   'EricL - This is used in Shot collision as a fast way to weed out bots that could not possibily have collided with a shot
   'this cycle.  It is the maximum possible distance a bot center can be from a shot and still have had the shot impact.
@@ -1284,9 +1262,6 @@ Sub startloaded()
   'side B is the sum of the maximum bot velocity and the maximum shot velocity, the latter of which can be robsize/3 + the bot
   'max velocity since bot velocity is added to shot velocity.
   MaxBotShotSeperation = Sqr((FindRadius(0, -1) ^ 2) + ((SimOpts.MaxVelocity * 2 + RobSize / 3) ^ 2))
-  
-  defaultWidth = 0.2
-  defaultHeight = 0.2
     
   MDIForm1.DontDecayNrgShots.Checked = SimOpts.NoShotDecay
   MDIForm1.DontDecayWstShots.Checked = SimOpts.NoWShotDecay
@@ -1333,8 +1308,10 @@ Private Sub loadrobs()
       rob(a).NoChlr = SimOpts.Specie(k).NoChlr
       rob(a).Fixed = SimOpts.Specie(k).Fixed
       If rob(a).Fixed Then rob(a).mem(216) = 1
-      rob(a).pos.x = Random(SimOpts.Specie(k).Poslf * CSng(SimOpts.FieldWidth - 60#), SimOpts.Specie(k).Posrg * CSng(SimOpts.FieldWidth - 60#))
-      rob(a).pos.y = Random(SimOpts.Specie(k).Postp * CSng(SimOpts.FieldHeight - 60#), SimOpts.Specie(k).Posdn * CSng(SimOpts.FieldHeight - 60#))
+      Dim pos As Vector
+      pos.x = Random(SimOpts.Specie(k).Poslf * CSng(SimOpts.FieldWidth - 60#), SimOpts.Specie(k).Posrg * CSng(SimOpts.FieldWidth - 60#))
+      pos.y = Random(SimOpts.Specie(k).Postp * CSng(SimOpts.FieldHeight - 60#), SimOpts.Specie(k).Posdn * CSng(SimOpts.FieldHeight - 60#))
+      robManager.SetRobotPosition a, pos
       
       rob(a).nrg = SimOpts.Specie(k).Stnrg
       rob(a).body = 1000
@@ -1387,10 +1364,12 @@ Private Function whichrob(x As Single, y As Single) As Integer
   Dim t As Integer
   
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
+Dim pos As Vector
 For t = 1 To MaxRobs
     If rob(t).exist Then
-        rob(t).pos.x = rob(t).pos.x - (rob(t).vel.x - rob(t).actvel.x)
-        rob(t).pos.y = rob(t).pos.y - (rob(t).vel.y - rob(t).actvel.y)
+        pos = robManager.GetRobotPosition(t)
+        pos = VectorAdd(VectorSub(pos, rob(t).vel), rob(t).actvel)
+        robManager.SetRobotPosition t, pos
     End If
 Next
   
@@ -1398,8 +1377,8 @@ Next
   dist = 10000
   For t = 1 To MaxRobs
     If rob(t).exist Then
-      pist = Abs(rob(t).pos.x - x) ^ 2 + Abs(rob(t).pos.y - y) ^ 2
-      If Abs(rob(t).pos.x - x) < rob(t).radius And Abs(rob(t).pos.y - y) < rob(t).radius And pist < dist And rob(t).exist Then
+      pist = Abs(robManager.GetRobotPosition(t).x - x) ^ 2 + Abs(robManager.GetRobotPosition(t).y - y) ^ 2
+      If Abs(robManager.GetRobotPosition(t).x - x) < rob(t).radius And Abs(robManager.GetRobotPosition(t).y - y) < rob(t).radius And pist < dist And rob(t).exist Then
         whichrob = t
         dist = pist
       End If
@@ -1408,8 +1387,9 @@ Next
 
 For t = 1 To MaxRobs
     If rob(t).exist Then
-        rob(t).pos.x = rob(t).pos.x + (rob(t).vel.x - rob(t).actvel.x)
-        rob(t).pos.y = rob(t).pos.y + (rob(t).vel.y - rob(t).actvel.y)
+        pos = robManager.GetRobotPosition(t)
+        pos = VectorSub(VectorAdd(pos, rob(t).vel), rob(t).actvel)
+        robManager.SetRobotPosition t, pos
     End If
 Next
 End Function
@@ -1431,7 +1411,7 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
     MouseClickY = y
   End If
   
-  If button = 1 And Not MDIForm1.insrob And obstaclefocus = 0 Then
+  If button = 1 And Not MDIForm1.insrob Then
     If MouseClicked Then
       st = ScaleTop + MouseClickY - y
       sl = ScaleLeft + MouseClickX - x
@@ -1459,27 +1439,19 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
   End If
   
   If button = 1 And robfocus > 0 And DraggingBot Then
-    vel = VectorSub(rob(robfocus).pos, VectorSet(x, y))
-    rob(robfocus).pos = VectorSet(x, y)
+    vel = VectorSub(robManager.GetRobotPosition(robfocus), VectorSet(x, y))
+    robManager.SetRobotPosition robfocus, VectorSet(x, y)
     rob(robfocus).vel = VectorSet(0, 0)
     rob(robfocus).actvel = VectorSet(0, 0) 'Botsareus 6/24/2016 Bug fix
     Dim a As Byte
     For a = 1 To tmprob_c
-        rob(tmppos(a).n).pos = VectorSet(x - tmppos(a).x, y - tmppos(a).y)
+        robManager.SetRobotPosition tmppos(a).n, VectorSet(x - tmppos(a).x, y - tmppos(a).y)
         rob(tmppos(a).n).vel = VectorSet(0, 0)
         rob(tmppos(a).n).actvel = VectorSet(0, 0) 'Botsareus 6/24/2016 Bug fix
     Next
     If Not Active Then Redraw
     Exit Sub
   End If
-  
-  If button = 1 And obstaclefocus > 0 Then
-   Obstacles.Obstacles(obstaclefocus).pos = VectorSet(x - (Obstacles.Obstacles(obstaclefocus).Width / 2), y - (Obstacles.Obstacles(obstaclefocus).Height / 2))
-    If Not Active Then Redraw
-    Exit Sub
-  End If
-  
-
 End Sub
 
 ' it seems that there's no simple way to know the mouse status
@@ -1532,21 +1504,11 @@ Private Sub Form_Click()
 If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
 
   Dim n As Integer
-  Dim m As Integer
    
   'LogForm.Visible = False
   n = whichrob(CSng(MouseClickX), CSng(MouseClickY))
   
-  If n = 0 And m = 0 Then
-    m = whichobstacle(CSng(MouseClickX), CSng(MouseClickY))
-    If m <> 0 Then
-      obstaclefocus = m
-      MDIForm1.DeleteShape.Enabled = True
-    End If
-  End If
-  
-  If n = 0 And m = 0 Then
-    'datirob.Form_Unload 0 Botsareus 12/12/2012 Info form does not auto hide
+  If n = 0 Then
     robfocus = 0
     MDIForm1.DisableRobotsMenu
     If ActivForm.Visible Then ActivForm.NoFocus
@@ -1566,8 +1528,8 @@ tmprob_c = 0
         tmprob_c = tmprob_c + 1
         If tmprob_c < 51 Then
             tmppos(tmprob_c).n = a
-            tmppos(tmprob_c).x = rob(robfocus).pos.x - rob(a).pos.x
-            tmppos(tmprob_c).y = rob(robfocus).pos.y - rob(a).pos.y
+            tmppos(tmprob_c).x = robManager.GetRobotPosition(robfocus).x - robManager.GetRobotPosition(a).x
+            tmppos(tmprob_c).y = robManager.GetRobotPosition(robfocus).y - robManager.GetRobotPosition(a).y
         Else
             tmprob_c = 50
         End If
@@ -1611,16 +1573,6 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   Else
     DraggingBot = True
     gen_tmp_pos_lst
-  End If
-  
-  If n = 0 Then
-    obstaclefocus = whichobstacle(x, y)
-    If obstaclefocus <> 0 Then
-      MDIForm1.DeleteShape.Enabled = True
-      mousepos = VectorSet(x, y)
-    Else
-      MDIForm1.DeleteShape.Enabled = False
-    End If
   End If
   
   If button = 2 Then
@@ -2726,16 +2678,16 @@ Function score(ByVal r As Integer, ByVal reclev As Integer, maxrec As Integer, t
         If tipo = 4 And reclev > p_reclev Then p_reclev = reclev
         If tipo = 1 Then rob(t).highlight = True
         If tipo = 3 Then
-          dx = (rob(r).pos.x - rob(t).pos.x) / 2
-          dy = (rob(r).pos.y - rob(t).pos.y) / 2
+          dx = (robManager.GetRobotPosition(r).x - robManager.GetRobotPosition(t).x) / 2
+          dy = (robManager.GetRobotPosition(r).y - robManager.GetRobotPosition(t).y) / 2
           cr = RGB(128, 128, 128)
           ct = vbWhite
           If rob(r).AbsNum > rob(t).AbsNum Then
             cr = vbWhite
             ct = RGB(128, 128, 128)
           End If
-          Line (rob(t).pos.x, rob(t).pos.y)-Step(dx, dy), ct
-          Line -(rob(r).pos.x, rob(r).pos.y), cr
+          Line (robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y)-Step(dx, dy), ct
+          Line -(robManager.GetRobotPosition(r).x, robManager.GetRobotPosition(r).y), cr
         End If
       End If
     End If

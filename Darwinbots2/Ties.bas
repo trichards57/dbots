@@ -106,8 +106,8 @@ Public Sub UpdateTieAngles(t As Integer)
   While k > 0
     If rob(t).Ties(k).Port = whichTie Then
        n = rob(t).Ties(k).pnt  ' The bot number of the robot on the other end of the tie
-       tieAngle = angle(rob(t).pos.x, rob(t).pos.y, rob(n).pos.x, rob(n).pos.y)
-       dist = Sqr((rob(t).pos.x - rob(n).pos.x) ^ 2 + (rob(t).pos.y - rob(n).pos.y) ^ 2)
+       tieAngle = angle(robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y, robManager.GetRobotPosition(n).x, robManager.GetRobotPosition(n).y)
+       dist = Sqr((robManager.GetRobotPosition(t).x - robManager.GetRobotPosition(n).x) ^ 2 + (robManager.GetRobotPosition(t).y - robManager.GetRobotPosition(n).y) ^ 2)
        'Overflow prevention.  Very long ties can happen for one cycle when bots wrap in torridal fields
        If dist > 32000 Then dist = 32000
        rob(t).mem(TIEANG) = -CInt(AngDiff(angnorm(tieAngle), angnorm(rob(t).aim)) * 200)
@@ -192,36 +192,6 @@ Public Sub Update_Ties(t As Integer)
       .mem(DELTIE) = 0 'resets .deltie command
     End If
     
-'Botsareus 2/21/2013 Broken
-'    If .mem(480) <> 32000 Then
-'      .Ties(1).ang = .mem(480) / 200
-'    End If
-'    If .mem(481) <> 32000 Then
-'      .Ties(2).ang = .mem(481) / 200
-'    End If
-'    If .mem(482) <> 32000 Then
-'      .Ties(3).ang = .mem(482) / 200
-'    End If
-'    If .mem(483) <> 32000 Then
-'      .Ties(4).ang = .mem(483) / 200
-'    End If
-'    If .mem(484) > RobSize And .mem(484) > RobSize Then 'set tie 1 length
-'      .Ties(1).ln = .mem(484)
-'      rob(.Ties(1).pnt).Ties(srctie((.Ties(1).pnt), t)).ln = .mem(484)
-'    End If
-'    If .mem(485) > RobSize And .mem(485) > RobSize Then 'set tie 2 length
-'      .Ties(2).ln = .mem(485)
-'      rob(.Ties(2).pnt).Ties(srctie((.Ties(2).pnt), t)).ln = .mem(485)
-'    End If
-'    If .mem(486) > RobSize And .mem(486) > RobSize Then 'set tie 3 length
-'      .Ties(3).ln = .mem(485)
-'      rob(.Ties(3).pnt).Ties(srctie((.Ties(3).pnt), t)).ln = .mem(486)
-'    End If
-'    If .mem(487) > RobSize And .mem(487) > RobSize Then 'set tie 4 length
-'      .Ties(4).ln = .mem(487)
-'      rob(.Ties(4).pnt).Ties(srctie((.Ties(4).pnt), t)).ln = .mem(487)
-'    End If
-    
     If tn = 0 Then tn = .mem(TIEPRES)
     If tn = 0 Then GoTo getout
    ' If tn Then  'routines only carried out if .tienum has a value
@@ -298,8 +268,8 @@ Public Sub Update_Ties(t As Integer)
         Dim dist As Single
         Dim tieAngle As Single
         n = .Ties(k).pnt
-        tieAngle = angle(.pos.x, .pos.y, rob(n).pos.x, rob(n).pos.y)
-        dist = Sqr((.pos.x - rob(n).pos.x) ^ 2 + (.pos.y - rob(n).pos.y) ^ 2)
+        tieAngle = angle(robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y, robManager.GetRobotPosition(n).x, robManager.GetRobotPosition(n).y)
+        dist = Sqr((robManager.GetRobotPosition(t).x - robManager.GetRobotPosition(n).x) ^ 2 + (robManager.GetRobotPosition(t).y - robManager.GetRobotPosition(n).y) ^ 2)
         If dist > 32000 Then dist = 32000 'Botsareus 1/24/2014 Bug fix here
         .mem(483 + k) = CInt(dist - .radius - rob(n).radius)
         .mem(479 + k) = angnorm(angnorm(tieAngle) - angnorm(.aim)) * 200
@@ -855,7 +825,7 @@ Public Function maketie(ByVal a As Integer, ByVal b As Integer, c As Long, last 
   k = 1
   j = 1
   
-  length = VectorMagnitude(VectorSub(rob(a).pos, rob(b).pos))
+  length = VectorMagnitude(VectorSub(robManager.GetRobotPosition(a), robManager.GetRobotPosition(b)))
     
   If length <= c * 1.5 Then 'And deflect > rob(b).slime Then
     If deflect < rob(b).Slime Then OK = False  'should stop ties forming when slime is high
@@ -934,30 +904,17 @@ Public Sub regang(t As Integer, j As Integer)
   Dim dist As Single
   With rob(t)
       .Multibot = True: .mem(multi) = 1
-      .Ties(j).b = 0.1 ' was 0.1
-      .Ties(j).k = 0.05 ' was 0.05
+      .Ties(j).b = 0.1
+      .Ties(j).k = 0.05
       .Ties(j).type = 3
       n = .Ties(j).pnt
-      angl = angle(.pos.x, .pos.y, rob(n).pos.x, rob(n).pos.y)
-    '  angl = angnorm(angl)
-      dist = Sqr((.pos.x - rob(n).pos.x) ^ 2 + (.pos.y - rob(n).pos.y) ^ 2)
+      angl = angle(robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y, robManager.GetRobotPosition(n).x, robManager.GetRobotPosition(n).y)
+      dist = Sqr((robManager.GetRobotPosition(t).x - robManager.GetRobotPosition(n).x) ^ 2 + (robManager.GetRobotPosition(t).y - robManager.GetRobotPosition(n).y) ^ 2)
       If .Ties(j).back = False Then
         .Ties(j).ang = AngDiff(angnorm(angl), angnorm(rob(t).aim)) ' only fix the angle of the bot that created the tie
         .Ties(j).angreg = True
       End If
       .Ties(j).NaturalLength = dist
-      'If .Ties(j).NaturalLength < 200 Then .Ties(j).NaturalLength = 200
-   '   If .mem(468) <> 32000 Then 'And .mem(468) <> 0 Then          'replaces .ang calculated value with .fixang value
-   '     If .mem(468) > 628 Then .mem(468) = 628
-   '     If .mem(468) < -628 Then .mem(468) = -628
-   '     .Ties(j).ang = .mem(468) / 200 'should it be 100 or 200?
-   '   End If
-   '   If .mem(469) <> 0 Then            'replaces .ln with .fixlen value
-   '    .Ties(j).NaturalLength = .mem(469)
-   '   End If
-    '  .Ties(j).angreg = True
-      '.mem(10) = .Ties(j).ang       'temporary test locations
-      '.mem(11) = .Ties(j).ln
   End With
 End Sub
 

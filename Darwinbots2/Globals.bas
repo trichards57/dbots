@@ -43,8 +43,6 @@ Public tmpseed As Long 'used only by "load simulation"
 Public simalreadyrunning As Boolean
 Public autosaved As Boolean
 
-'Botsareus 1/5/2014 Copy of Obstacle array
-Public xObstacle() As Obstacle
 Public StartChlr As Integer 'Botsareus 2/12/2014 Start repopulating robots with chloroplasts
 
 ' var structure, to store the correspondance name<->value
@@ -108,8 +106,8 @@ Public Sub makepoff(n As Integer)
     vx = rob(n).vel.x + absx(an / 100, vs, 0, 0, 0)
     vy = rob(n).vel.y + absy(an / 100, vs, 0, 0, 0)
     With rob(n)
-    x = Random(.pos.x - .radius, .pos.x + .radius)
-    y = Random(.pos.y - .radius, .pos.y + .radius)
+    x = Random(robManager.GetRobotPosition(n).x - .radius, robManager.GetRobotPosition(n).x + .radius)
+    y = Random(robManager.GetRobotPosition(n).y - .radius, robManager.GetRobotPosition(n).y + .radius)
     End With
     If Random(1, 2) = 1 Then
       createshot x, y, vx, vy, -100, 0, 0, RobSize * 2, rob(n).color
@@ -231,18 +229,12 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
     rob(a).SonNumber = 0
     rob(a).parent = 0
     Erase rob(a).mem
-    'If rob(a).Veg Then rob(a).Feed = 8
     If rob(a).Fixed Then rob(a).mem(216) = 1
-    rob(a).pos.x = x
-    rob(a).pos.y = y
-    
+    robManager.SetRobotPosition a, VectorSet(x, y)
     
     rob(a).aim = rndy * PI * 2 'Botsareus 5/30/2012 Added code to rotate the robot on placment
     rob(a).mem(SetAim) = rob(a).aim * 200
     
-    'Bot is already in a bucket due to the prepare routine
-   ' rob(a).BucketPos.x = -2
-   ' rob(a).BucketPos.Y = -2
     UpdateBotBucket a
     rob(a).nrg = SimOpts.Specie(r).Stnrg
    ' EnergyAddedPerCycle = EnergyAddedPerCycle + rob(a).nrg

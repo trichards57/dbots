@@ -82,11 +82,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Manager\BucketManager.cs" />
+    <Compile Include="Manager\RobotManager.cs" />
     <Compile Include="Model\Block.cs" />
     <Compile Include="Model\Bucket.cs" />
     <Compile Include="Model\Point.cs" />
+    <Compile Include="Model\Robot.cs" />
     <Compile Include="Model\Shot.cs" />
     <Compile Include="Manager\ShotManager.cs" />
+    <Compile Include="Model\Tie.cs" />
     <Compile Include="Model\Vector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

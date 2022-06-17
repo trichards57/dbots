@@ -76,7 +76,7 @@ Public Sub UpdateBotBucket(n As Integer)
    
   
     newbucket = rob(n).BucketPos
-    currbucket = Int(rob(n).pos.x / BucketSize)
+    currbucket = Int(robManager.GetRobotPosition(n).x / BucketSize)
     If currbucket < 0 Then currbucket = 0 ' Possible bot is off the field
     If currbucket >= NumXBuckets Then currbucket = NumXBuckets - 1 ' Possible bot is off the field
   
@@ -86,7 +86,7 @@ Public Sub UpdateBotBucket(n As Integer)
       changed = True
     End If
   
-    currbucket = Int(rob(n).pos.y / BucketSize)
+    currbucket = Int(robManager.GetRobotPosition(n).y / BucketSize)
     If currbucket < 0 Then currbucket = 0 ' Possible bot is off the field
     If currbucket >= NumYBuckets Then currbucket = NumYBuckets - 1 ' Possible bot is off the field
   
@@ -198,9 +198,7 @@ Public Function BucketsProximity(n As Integer) As Integer
     End If
   Next x
 done:
-        
-  If SimOpts.shapesAreVisable And rob(n).exist Then CompareShapes n, 12
-      
+              
   BucketsProximity = rob(n).lastopp ' return the index of the last viewed object
 End Function
 
@@ -257,7 +255,7 @@ Private Sub CheckBotBucketForCollision(n As Integer, pos As Vector)
     While Buckets(pos.x, pos.y).arr(a) <> -1
       robnumber = Buckets(pos.x, pos.y).arr(a)
       If robnumber > n Then ' only have to check bots higher than n otherwise we do it twice for each bot pair
-        distvector = VectorSub(rob(n).pos, rob(robnumber).pos)
+        distvector = VectorSub(robManager.GetRobotPosition(n), robManager.GetRobotPosition(robnumber))
         dist = rob(n).radius + rob(robnumber).radius
         If VectorMagnitudeSquare(distvector) < (dist * dist) Then Repel3 n, robnumber
       End If
@@ -267,82 +265,6 @@ Private Sub CheckBotBucketForCollision(n As Integer, pos As Vector)
 getout:
 
 End Sub
-
-
-Public Function AnyShapeBlocksBot(n1 As Integer, n2 As Integer) As Boolean
-Dim i As Integer
-  
-  AnyShapeBlocksBot = False
-  
-  For i = 1 To numObstacles
-    If Obstacles.Obstacles(i).exist Then
-      If ShapeBlocksBot(n1, n2, i) Then
-        AnyShapeBlocksBot = True
-        GoTo getout
-      End If
-    End If
-  Next i
-getout:
-End Function
-
-Public Function ShapeBlocksBot(n1 As Integer, n2 As Integer, o As Integer) As Boolean
-Dim D1(4) As Vector
-Dim p(4) As Vector
-Dim P0 As Vector
-Dim D0 As Vector
-Dim Delta As Vector
-Dim i As Integer
-Dim s As Single
-Dim t As Single
-Dim useS As Boolean
-Dim useT As Boolean
-Dim numerator As Single
-
-  ShapeBlocksBot = False
-  
-  'Cheap weed out check
-  If (Obstacles.Obstacles(o).pos.x > Max(rob(n1).pos.x, rob(n2).pos.x)) Or _
-     (Obstacles.Obstacles(o).pos.x + Obstacles.Obstacles(o).Width < Min(rob(n1).pos.x, rob(n2).pos.x)) Or _
-     (Obstacles.Obstacles(o).pos.y > Max(rob(n1).pos.y, rob(n2).pos.y)) Or _
-     (Obstacles.Obstacles(o).pos.y + Obstacles.Obstacles(o).Height < Min(rob(n1).pos.y, rob(n2).pos.y)) Then GoTo getout
-  
-  D1(1) = VectorSet(0, Obstacles.Obstacles(o).Width) ' top
-  D1(2) = VectorSet(Obstacles.Obstacles(o).Height, 0) ' left side
-  D1(3) = D1(1) ' bottom
-  D1(4) = D1(2) ' right side
-  
-  p(1) = Obstacles.Obstacles(o).pos
-  p(2) = p(1)
-  p(3) = VectorAdd(p(1), D1(2))
-  p(4) = VectorAdd(p(1), D1(1))
-  
-  P0 = rob(n1).pos
-  D0 = VectorSub(rob(n2).pos, rob(n1).pos)
-  For i = 1 To 4
-    numerator = Cross(D0, D1(i))
-    If numerator <> 0 Then
-      Delta = VectorSub(p(i), P0)
-      s = Cross(Delta, D1(i)) / numerator
-      t = Cross(Delta, D0) / numerator
-    
-      useT = False
-      useS = False
-  
-      If t >= 0 And t <= 1 Then useT = True
-      If s >= 0 And s <= 1 Then useS = True
-      
-      If useT Or useS Then
-        ShapeBlocksBot = True
-        GoTo getout
-      End If
-   
-    End If
-  Next i
-getout:
-End Function
-
-
-
 
 'Returns the absolute width of an eye
 Public Function AbsoluteEyeWidth(Width As Integer) As Integer
@@ -381,8 +303,8 @@ End Function
 Private Function eyestrength(n1 As Integer) As Single 'Botsareus 2/3/2013 eye strength mod
 Const EyeEffectiveness As Byte = 3  'Botsareus 3/26/2013 For eye strength formula
 
-If SimOpts.Pondmode And rob(n1).pos.y > 1 Then 'Botsareus 3/26/2013 Bug fix if robot Y pos is almost zero
-  eyestrength = (EyeEffectiveness / (rob(n1).pos.y / 2000) ^ SimOpts.Gradient) ^ (6828 / SimOpts.FieldHeight)  'Botsareus 3/26/2013 Robots only effected by density, not light intensity
+If SimOpts.Pondmode And robManager.GetRobotPosition(n1).y > 1 Then 'Botsareus 3/26/2013 Bug fix if robot Y pos is almost zero
+  eyestrength = (EyeEffectiveness / (robManager.GetRobotPosition(n1).y / 2000) ^ SimOpts.Gradient) ^ (6828 / SimOpts.FieldHeight)  'Botsareus 3/26/2013 Robots only effected by density, not light intensity
 Else
   eyestrength = 1
 End If
@@ -412,7 +334,7 @@ Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
       Dim eyespanszero As Boolean
       Dim eyesum As Long
              
-      ab = VectorSub(rob(n2).pos, rob(n1).pos)
+      ab = VectorSub(robManager.GetRobotPosition(n2), robManager.GetRobotPosition(n1))
       edgetoedgedist = VectorMagnitude(ab) - rob(n1).radius - rob(n2).radius
       
       'Here we compute the maximum possible distance bot N1 can see.  Sight distance is a function of
@@ -437,11 +359,6 @@ Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
             
       'Now we check the maximum possible distance bot N1 can see against how far away bot N2 is.
       If edgetoedgedist > sightdist Then GoTo getout ' Bot too far away to see
-      
-      'If Shapes are see through, then there is no reason to check if a shape blocks a bot
-      If Not SimOpts.shapesAreSeeThrough Then
-        If AnyShapeBlocksBot(n1, n2) Then GoTo getout
-      End If
       
       invdist = VectorInvMagnitude(ab)
         
@@ -587,357 +504,6 @@ Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
       Next a
 getout:
     End Sub
-
-'Shape compare routine from EricL
-'Checks to see if any shapes are visable to bot n
-'Only gets called if shapes are visable
-Public Sub CompareShapes(n As Integer, field As Integer)
-Dim D1(4) As Vector
-Dim p(4) As Vector
-Dim P0 As Vector
-Dim closestPoint As Vector
-Dim D0 As Vector
-Dim ab As Vector
-Dim i As Integer
-Dim a As Integer
-Dim o As Integer
-Dim s As Single
-Dim t As Single
-Dim eyevalue As Single
-Dim eyeaim As Single
-Dim eyeaimleft As Single
-Dim eyeaimright As Single
-Dim eyeaimleftvector As Vector
-Dim eyeaimrightvector As Vector
-Dim beta As Single
-Dim theta As Single
-Dim halfeyewidth As Single
-Dim botspanszero As Boolean
-Dim eyespanszero As Boolean
-Dim botLocation As Integer
-Dim nearestCorner As Vector
-Dim sightdist As Single
-Dim eyedist As Single
-Dim distleft As Single
-Dim distright As Single
-Dim dist As Single
-Dim lowestDist As Single
-Dim lastopppos As Vector
-Dim percentdist As Single
-
-
-  sightdist = EyeSightDistance(NarrowestEye(n), n) + rob(n).radius
-
-  For o = 1 To numObstacles
-  If Obstacles.Obstacles(o).exist Then
-  
-    'Cheap weed out check - check to see if shape is too far away to be seen
-    If (Obstacles.Obstacles(o).pos.x > rob(n).pos.x + sightdist) Or _
-       (Obstacles.Obstacles(o).pos.x + Obstacles.Obstacles(o).Width < rob(n).pos.x - sightdist) Or _
-       (Obstacles.Obstacles(o).pos.y > rob(n).pos.y + sightdist) Or _
-       (Obstacles.Obstacles(o).pos.y + Obstacles.Obstacles(o).Height < rob(n).pos.y - sightdist) Then
-       'Do nothing.  Shape is too far away.  Move on to next shape.
-    ElseIf (Obstacles.Obstacles(o).pos.x < rob(n).pos.x) And _
-       (Obstacles.Obstacles(o).pos.x + Obstacles.Obstacles(o).Width > rob(n).pos.x) And _
-       (Obstacles.Obstacles(o).pos.y < rob(n).pos.y) And _
-       (Obstacles.Obstacles(o).pos.y + Obstacles.Obstacles(o).Height > rob(n).pos.y) Then
-       'Bot is inside shape!
-       For i = 0 To 8
-         rob(n).mem(EyeStart + 1 + i) = 32000
-       Next i
-       rob(n).lastopp = o
-       rob(n).lastopptype = 1
-       GoTo getout
-    Else
-      'Guess we have to actually do the hard work and check...
-      
-      'Here are the four sides of the shape
-      D1(1) = VectorSet(Obstacles.Obstacles(o).Width, 0) ' top
-      D1(2) = VectorSet(0, Obstacles.Obstacles(o).Height) ' left side
-      D1(3) = D1(1) ' bottom
-      D1(4) = D1(2) ' right side
-
-      'Here are the four corners
-      p(1) = Obstacles.Obstacles(o).pos ' NW corner
-      p(2) = p(1): p(2).y = p(1).y + Obstacles.Obstacles(o).Height ' SW Corner
-      p(3) = VectorAdd(p(1), D1(1)) ' NE Corner
-      p(4) = VectorAdd(p(2), D1(1)) ' SE Corner
-       
-      'Here is the bot.
-      P0 = rob(n).pos
-            
-      'Bots can be in one of eight possible locations relative to a shape.
-      ' 1 North - Center is above top edge
-      ' 2 East - Center is to right of right edge
-      ' 3 South - Center is below bottom edge
-      ' 4 West - Center is left of left edge
-      ' 5 NE - Center is North of top and East of right edge
-      ' 6 SE - Center is South of bottom and East of right edge
-      ' 7 SW - Center is South of bottom and West of left edge
-      ' 8 NW - Center is North or top and West of left edge
-      ' We first need to figure out which the bot is in.
-      
-      If P0.x < p(1).x Then 'Must be NW, W or SW
-        botLocation = 4 ' Set to West for default
-        If P0.y < p(1).y Then
-          botLocation = 8  ' Must be NW
-          nearestCorner = p(1)
-        ElseIf P0.y > p(2).y Then
-          botLocation = 7  ' Must be SW
-          nearestCorner = p(2)
-        End If
-      ElseIf P0.x > p(3).x Then ' Must be NE, E or SE
-        botLocation = 2 ' Set to East for default
-        If P0.y < p(1).y Then
-          botLocation = 5  ' Must be NE
-          nearestCorner = p(3)
-        ElseIf P0.y > p(2).y Then
-          botLocation = 6  ' Must be SE
-          nearestCorner = p(4)
-        End If
-      ElseIf P0.y < p(1).y Then
-        botLocation = 1 ' Must be North
-      Else
-        botLocation = 3 ' Must be South
-      End If
-      
-      'If the bot is off one of the corners, we have to check two shape edges.
-      'If it is off one of the sides, then we only have to check one.
-      
-      
-      'For each eye
-      For a = 0 To 8
-      
-        'Now we check to see if the sight distance for this specific eye is far enough to see this specific shape
-        eyedist = EyeSightDistance(AbsoluteEyeWidth(rob(n).mem(EYE1WIDTH + a)), n)
-        
-        If (Obstacles.Obstacles(o).pos.x > rob(n).pos.x + eyedist) Or _
-           (Obstacles.Obstacles(o).pos.x + Obstacles.Obstacles(o).Width < rob(n).pos.x - eyedist) Or _
-           (Obstacles.Obstacles(o).pos.y > rob(n).pos.y + eyedist) Or _
-           (Obstacles.Obstacles(o).pos.y + Obstacles.Obstacles(o).Height < rob(n).pos.y - eyedist) Then
-          '  Do nothing - shape is too far away
-        Else
-        
-        'Check to see if the side is viewable in this eye
-        'First, figure out the direction in radians in which the eye is pointed relative to .aim
-        'We have to mod the value and divide by 200 to get radians
-        'then since the eyedir values are offsets from their defaults, eye 1 is off from .aim by 4 eye field widths,
-        'three for eye2, and so on.
-        eyeaim = (rob(n).mem(EYE1DIR + a) Mod 1256) / 200 - ((PI / 18) * a) + (PI / 18) * 4 + rob(n).aim
-        
-        'It's possible we wrapped 0 so check
-        While eyeaim > 2 * PI: eyeaim = eyeaim - 2 * PI: Wend
-        While eyeaim < 0: eyeaim = eyeaim + 2 * PI: Wend
-        
-        'These are the left and right sides of the field of view for the eye
-        halfeyewidth = ((rob(n).mem(EYE1WIDTH + a)) + 35) / 400
-        While halfeyewidth > PI: halfeyewidth = halfeyewidth - PI: Wend
-        While halfeyewidth < 0: halfeyewidth = halfeyewidth + PI: Wend
-        eyeaimleft = eyeaim + halfeyewidth
-        eyeaimright = eyeaim - halfeyewidth
-        
-        'Check the case where the eye field of view spans 0
-        If eyeaimright < 0 Then eyeaimright = 2 * PI + eyeaimright
-        If eyeaimleft > 2 * PI Then eyeaimleft = eyeaimleft - 2 * PI
-        If eyeaimleft < eyeaimright Then
-          eyespanszero = True
-        Else
-          eyespanszero = False
-        End If
-        
-        'Now we have the two sides of the eye.  We need to figure out if and where they intersect the shape.
-        
-        'Change the angles to vectors and scale them by the sight distance
-        eyeaimleftvector = VectorSet(Cos(eyeaimleft), Sin(eyeaimleft))
-        eyeaimleftvector = VectorScalar(VectorUnit(eyeaimleftvector), eyedist)
-        eyeaimrightvector = VectorSet(Cos(eyeaimright), Sin(eyeaimright))
-        eyeaimrightvector = VectorScalar(VectorUnit(eyeaimrightvector), eyedist)
-        
-        eyeaimleftvector.y = -eyeaimleftvector.y
-        eyeaimrightvector.y = -eyeaimrightvector.y
-                
-        distleft = 0
-        distright = 0
-        dist = 32000       ' set to something impossibly big
-        lowestDist = 32000 ' set to something impossibly big
-        
-        'First, check here for parts of the shape that may be in the eye and closer than either side of the eye width.
-        'There are two major cases here:  either the bot is off a corner and the eye spanes the corner or the bot is off a side
-        'and the bot eye spans the point on the shape closest to the bot.  For both these cases, we find out what is the closest point
-        'be it a corner or the point on the edge perpendicular to the bot and see if that point is inside the span of the eye.  If
-        'it is, it is closer then either eye edge.
-        'Perhaps do this before edges and not do edges if found?
-        Select Case botLocation
-          Case 1: closestPoint = P0: closestPoint.y = p(1).y ' North side
-          Case 2: closestPoint = P0: closestPoint.x = p(4).x ' East side
-          Case 3: closestPoint = P0: closestPoint.y = p(4).y ' South side
-          Case 4: closestPoint = P0: closestPoint.x = p(1).x ' West side
-          Case 5: closestPoint = p(3) ' NE Corner
-          Case 6: closestPoint = p(4) ' SE corner
-          Case 7: closestPoint = p(2) ' SW corner
-          Case 8: closestPoint = p(1) ' NW corner
-        End Select
-        
-        ab = VectorSub(closestPoint, P0) ' Vector from bot to corner of shape
-          'Coordinates are in the 4th quadrant, so make the y values negative so the math works
-        ab.y = -ab.y
-   
-        ' theta is the angle to the closest point on the shape
-        If ab.x = 0 Then ' Divide by zero protection
-           If ab.y > 0 Then
-             theta = PI / 2 '
-           Else
-             theta = 3 * PI / 2 '
-           End If
-        Else
-          If ab.x > 0 Then
-            theta = Atn(ab.y / ab.x)
-          Else
-             theta = Atn(ab.y / ab.x) + PI
-          End If
-        End If
-        theta = angnorm(theta)
-        If ((eyeaimleft) >= (theta)) And ((theta) >= (eyeaimright)) And Not eyespanszero Or _
-           ((eyeaimleft) >= (theta)) And eyespanszero Or _
-           ((eyeaimright) <= (theta)) And eyespanszero Then
-           lowestDist = VectorMagnitude(ab)
-           If (a = 4) Then lastopppos = closestPoint
-        End If
-         
-        If lowestDist = 32000 Then ' eye doesn't span corner or spot perpendicular to line from bot to shape side
-            
-          If (botLocation = 1) Or (botLocation = 5) Or (botLocation = 8) Then
-          ' North - Bot is above shape, might be able to see top of shape
-            s = SegmentSegmentIntersect(P0, eyeaimleftvector, p(1), D1(1))   'Check intersection of left eye range and shape side
-            If s > 0 Then distleft = s * VectorMagnitude(eyeaimleftvector)   'If the left eye range intersects then store the distance of the interesction
-            t = SegmentSegmentIntersect(P0, eyeaimrightvector, p(1), D1(1))  'Check intersection of right eye range and shape side
-            If t > 0 Then distright = t * VectorMagnitude(eyeaimrightvector) 'If the right eye range intersects, then store the distance of the intersection
-            If distleft > 0 And distright > 0 Then                           'bot eye sides intersect.  Pick the closest one.
-              dist = Min(distleft, distright)
-            ElseIf distleft > 0 Then dist = distleft                         'Only left side intersects
-            ElseIf distright > 0 Then dist = distright                       'Only right side intersects
-            End If
-            If (dist > 0) And (dist < lowestDist) Then
-              lowestDist = dist
-              If a = 4 Then
-                If (distleft < distright) And (distleft > 0) Then
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimleftvector), dist))
-                Else
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimrightvector), dist))
-                End If
-              End If
-            End If
-          End If
-            
-          If (botLocation = 2) Or (botLocation = 5) Or (botLocation = 6) Then
-          ' East = Bot to right of shape, might be abel to see right side
-            s = SegmentSegmentIntersect(P0, eyeaimleftvector, p(3), D1(4))   'Check intersection of left eye range and shape side
-            If s > 0 Then distleft = s * VectorMagnitude(eyeaimleftvector)   'If the left eye range intersects then store the distance of the interesction
-            t = SegmentSegmentIntersect(P0, eyeaimrightvector, p(3), D1(4))  'Check intersection of right eye range and shape side
-            If t > 0 Then distright = t * VectorMagnitude(eyeaimrightvector) 'If the right eye range intersects, then store the distance of the intersection
-            If distleft > 0 And distright > 0 Then                           'bot eye sides intersect.  Pick the closest one.
-              dist = Min(distleft, distright)
-            ElseIf distleft > 0 Then dist = distleft                         'Only left side intersects
-            ElseIf distright > 0 Then dist = distright                       'Only right side intersects
-            End If
-            If (dist > 0) And (dist < lowestDist) Then
-              lowestDist = dist
-              If a = 4 Then
-                If (distleft < distright) And (distleft > 0) Then
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimleftvector), dist))
-                Else
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimrightvector), dist))
-                End If
-              End If
-            End If
-          End If
-          
-          If (botLocation = 3) Or (botLocation = 6) Or (botLocation = 7) Then
-          ' South - Bot is below shape
-            s = SegmentSegmentIntersect(P0, eyeaimleftvector, p(2), D1(3))   'Check intersection of left eye range and shape side
-            If s > 0 Then distleft = s * VectorMagnitude(eyeaimleftvector)   'If the left eye range intersects then store the distance of the interesction
-            t = SegmentSegmentIntersect(P0, eyeaimrightvector, p(2), D1(3))  'Check intersection of right eye range and shape side
-            If t > 0 Then distright = t * VectorMagnitude(eyeaimrightvector) 'If the right eye range intersects, then store the distance of the intersection
-            If distleft > 0 And distright > 0 Then                           'bot eye sides intersect.  Pick the closest one.
-              dist = Min(distleft, distright)
-            ElseIf distleft > 0 Then dist = distleft                         'Only left side intersects
-            ElseIf distright > 0 Then dist = distright                       'Only right side intersects
-            End If
-            If (dist > 0) And (dist < lowestDist) Then
-              lowestDist = dist
-              If a = 4 Then
-                If (distleft < distright) And (distleft > 0) Then
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimleftvector), dist))
-                Else
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimrightvector), dist))
-                End If
-              End If
-            End If
-          End If
-      
-          If (botLocation = 4) Or (botLocation = 7) Or (botLocation = 8) Then
-          ' West - Bot is to left of shape
-            s = SegmentSegmentIntersect(P0, eyeaimleftvector, p(1), D1(2))   'Check intersection of left eye range and shape side
-            If s > 0 Then distleft = s * VectorMagnitude(eyeaimleftvector)   'If the left eye range intersects then store the distance of the interesction
-            t = SegmentSegmentIntersect(P0, eyeaimrightvector, p(1), D1(2))  'Check intersection of right eye range and shape side
-            If t > 0 Then distright = t * VectorMagnitude(eyeaimrightvector) 'If the right eye range intersects, then store the distance of the intersection
-            If distleft > 0 And distright > 0 Then                           'bot eye sides intersect.  Pick the closest one.
-              dist = Min(distleft, distright)
-            ElseIf distleft > 0 Then dist = distleft                         'Only left side intersects
-            ElseIf distright > 0 Then dist = distright                       'Only right side intersects
-            End If
-            If (dist > 0) And (dist < lowestDist) Then
-              lowestDist = dist
-              If a = 4 Then
-                If (distleft < distright) And (distleft > 0) Then
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimleftvector), dist))
-                Else
-                  lastopppos = VectorAdd(rob(n).pos, VectorScalar(VectorUnit(eyeaimrightvector), dist))
-                End If
-              End If
-            End If
-          End If
-        End If
-             
-        If lowestDist < 32000 Then
-          percentdist = (lowestDist - rob(n).radius + 10) / eyedist
-          If percentdist <= 0 Then
-            eyevalue = 32000
-          Else
-            eyevalue = 1 / (percentdist * percentdist)
-          End If
-            
-         ' If (RobSize - rob(n).radius + lowestDist) <> 0 Then
-          '  eyevalue = RobSize * 100 / (RobSize - rob(n).radius + lowestDist)
-          'Else
-           ' eyevalue = 100
-          'End If
-          If eyevalue > 32000 Then eyevalue = 32000
-                     
-          If rob(n).mem(EyeStart + 1 + a) < eyevalue Then
-            'It is closer than other bots we may have seen.
-            'Check to see if this eye has the focus
-            If a = Abs(rob(n).mem(FOCUSEYE) + 4) Mod 9 Then
-              'This eye does have the focus
-              'Set the EYEF value and also lastopp so the lookoccur list will get populated later
-              rob(n).lastopp = o
-              rob(n).lastopptype = 1
-              rob(n).mem(EYEF) = eyevalue
-              rob(n).lastopppos = lastopppos
-            End If
-            'Set the distance for the eye
-            rob(n).mem(EyeStart + 1 + a) = eyevalue
-            If n = robfocus Then eyeDistance(a + 1) = lowestDist ' + rob(n).radius
-          End If
-        End If
-      End If
-      Next a
-     
-    End If
-  End If
-  Next o
-getout:
-End Sub
 
 'Returns the percent along vector P0 + sDO where it interects vector P1 + tD1.
 'Returns 0 if there is no interestion

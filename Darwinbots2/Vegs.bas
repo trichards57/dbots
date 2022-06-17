@@ -143,11 +143,6 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
   ScreenArea = CDbl(SimOptModule.SimOpts.FieldWidth) * CDbl(SimOptModule.SimOpts.FieldHeight) 'Botsareus 12/28/2013 Formula simplified, people are getting resonable frame rates with 3ghz cpus
   
   'Botsareus 12/28/2013 Subtract Obstacles
-  For t = 1 To numObstacles
-    If Obstacles.Obstacles(t).exist Then
-     ScreenArea = ScreenArea - Obstacles.Obstacles(t).Width * Obstacles.Obstacles(t).Height
-    End If
-  Next
   
   For t = 1 To MaxRobs 'Panda 8/14/2013 Figure out total robot area
     If rob(t).exist Then    'Botsareus 8/14/2013 We have to make sure the robot is alive first
@@ -197,10 +192,10 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
     
       acttok = 0
         
-      If (.pos.x < sunstart2 Or .pos.x > sunstop2) And (.pos.x < sunstart Or .pos.x > sunstop) Then GoTo nextrob
+      If (robManager.GetRobotPosition(t).x < sunstart2 Or robManager.GetRobotPosition(t).x > sunstop2) And (robManager.GetRobotPosition(t).x < sunstart Or robManager.GetRobotPosition(t).x > sunstop) Then GoTo nextrob
 
       If SimOpts.Pondmode Then
-        depth = (.pos.y / 2000) + 1
+        depth = (robManager.GetRobotPosition(t).y / 2000) + 1
         If depth < 1 Then depth = 1
         tok = (SimOpts.LightIntensity / depth ^ SimOpts.Gradient) 'Botsareus 3/26/2013 No longer add one, robots get fed more accuratly
       Else

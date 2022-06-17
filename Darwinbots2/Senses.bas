@@ -28,8 +28,8 @@ Public Sub touch(ByVal a As Long, ByVal x As Long, ByVal y As Long)
   Dim aim As Single
   Dim dang As Single
   aim = 6.28 - rob(a).aim
-  xc = rob(a).pos.x
-  yc = rob(a).pos.y
+  xc = robManager.GetRobotPosition(a).x
+  yc = robManager.GetRobotPosition(a).y
   dx = x - xc
   dy = y - yc
   
@@ -68,8 +68,8 @@ Public Sub taste(a As Integer, ByVal x As Single, ByVal y As Single, value As In
   Dim aim As Single
   Dim dang As Single
   aim = 6.28 - rob(a).aim
-  xc = rob(a).pos.x
-  yc = rob(a).pos.y
+  xc = robManager.GetRobotPosition(a).x
+  yc = robManager.GetRobotPosition(a).y
   dx = x - xc
   dy = y - yc
   If dx <> 0 Then
@@ -182,13 +182,8 @@ Public Sub WriteSenses(ByVal n As Integer)
       'If BasicProximity(n) > 0 Then
         'There is somethign visable in the focus eye
         If .lastopptype = 0 Then lookoccurr n, .lastopp ' It's a bot.  Populate the refvar sysvars
-        If .lastopptype = 1 Then lookoccurrShape n, .lastopp
       End If
     End If
-      
-
-    'If Abs(.vel.x) > 1000 Then .vel.x = 1000 * Sgn(.vel.x) '2 new lines added to stop weird crashes
-    'If Abs(.vel.y) > 1000 Then .vel.y = 1000 * Sgn(.vel.y)
 
     If .nrg > 32000 Then .nrg = 32000
     If .onrg < 0 Then .onrg = 0
@@ -205,14 +200,18 @@ Public Sub WriteSenses(ByVal n As Integer)
     .mem(Energy) = CInt(.nrg)
     If .age = 0 And .mem(body) = 0 Then .mem(body) = .body 'to stop an odd bug in birth.  Don't ask
     If .Fixed Then .mem(215) = 1 Else .mem(215) = 0
-    If .pos.y < 0 Then .pos.y = 0
-    temp = Int((.pos.y / Form1.yDivisor) / 32000#)
-    temp = (.pos.y / Form1.yDivisor) - (temp * 32000#)
+    Dim pos As Vector
+    pos = robManager.GetRobotPosition(n)
+    If pos.y < 0 Then pos.y = 0
+    temp = Int((pos.y / Form1.yDivisor) / 32000#)
+    temp = (pos.y / Form1.yDivisor) - (temp * 32000#)
     .mem(217) = CInt(temp Mod 32000)
-    If .pos.x < 0 Then .pos.x = 0
-    temp = Int((.pos.x / Form1.xDivisor) / 32000#)
-    temp = (.pos.x / Form1.xDivisor) - (temp * 32000#)
+    If pos.x < 0 Then pos.x = 0
+    temp = Int((pos.x / Form1.xDivisor) / 32000#)
+    temp = (pos.x / Form1.xDivisor) - (temp * 32000#)
     .mem(219) = CInt(temp Mod 32000)
+    
+    robManager.SetRobotPosition n, pos
   End With
 End Sub
 
@@ -342,73 +341,6 @@ Public Sub EraseLookOccurr(ByVal n As Integer)
   rob(n).mem(refmulti) = 0
   rob(n).mem(473) = 0
   rob(n).mem(477) = 0
-getout:
-End Sub
-
-' sets up the refvars for a viewed shape
-' in the ref* vars of the viewing one
-Public Sub lookoccurrShape(ByVal n As Integer, ByVal o As Integer)
-  ' bot n has shape o in it's focus eye
-  
-  If rob(n).Corpse Then GoTo getout
-  Dim t As Byte
-  
-  rob(n).mem(REFTYPE) = 1
-  
-  For t = 1 To 8
-    rob(n).mem(occurrstart + t) = 0
-  Next t
-  
-  rob(n).mem(occurrstart + 9) = 0 ' refnrg
-   
-  rob(n).mem(occurrstart + 10) = 0 'refage
-   
-  rob(n).mem(in1) = 0
-  rob(n).mem(in2) = 0
-  rob(n).mem(in3) = 0
-  rob(n).mem(in4) = 0
-  rob(n).mem(in5) = 0
-  rob(n).mem(in6) = 0
-  rob(n).mem(in7) = 0
-  rob(n).mem(in8) = 0
-  rob(n).mem(in9) = 0
-  rob(n).mem(in10) = 0
-  
-  rob(n).mem(711) = 0  'refaim
-  rob(n).mem(712) = 0  'reftie
-  rob(n).mem(refshell) = 0
-  rob(n).mem(refbody) = 0
-  
-  rob(n).mem(refxpos) = CInt((rob(n).lastopppos.x / Form1.xDivisor) Mod 32000)
-  rob(n).mem(refypos) = CInt((rob(n).lastopppos.y / Form1.yDivisor) Mod 32000)
-    
-  'give reference variables from the bots frame of reference
-  rob(n).mem(refvelup) = (Obstacles.Obstacles(o).vel.x * Cos(rob(n).aim) + Obstacles.Obstacles(o).vel.y * Sin(rob(n).aim) * -1) - rob(n).mem(velup)
-  rob(n).mem(refveldn) = rob(n).mem(refvelup) * -1
-  rob(n).mem(refveldx) = (Obstacles.Obstacles(o).vel.y * Cos(rob(n).aim) + Obstacles.Obstacles(o).vel.x * Sin(rob(n).aim)) - rob(n).mem(veldx)
-  rob(n).mem(refvelsx) = rob(n).mem(refvelsx) * -1
-  
-  Dim temp As Single
-  temp = Sqr(CLng(rob(n).mem(refvelup) ^ 2) + CLng(rob(n).mem(refveldx) ^ 2))  ' how fast is this shape moving compared to me?
-  If temp > 32000 Then temp = 32000
-  
-  rob(n).mem(refvelscalar) = temp
-  rob(n).mem(713) = 0     'refpoison. current value of poison. not poison commands
-  rob(n).mem(714) = 0     'refvenom (as with poison)
-  rob(n).mem(715) = 0       'refkills
-  rob(n).mem(refmulti) = 0
-  
- 'readmem and memloc couple used to read a specified memory location of the target robot
-  rob(n).mem(473) = 0
-  
-  If Obstacles.Obstacles(o).vel.x = 0 And Obstacles.Obstacles(o).vel.y = 0 Then                  'reffixed. Tells if a viewed robot is fixed by .fixpos.
-    rob(n).mem(477) = 1
-  Else
-    rob(n).mem(477) = 0
-  End If
-  
-'  rob(n).mem(825) = 0 ' venom
-'  rob(n).mem(827) = 0 ' poison
 getout:
 End Sub
 

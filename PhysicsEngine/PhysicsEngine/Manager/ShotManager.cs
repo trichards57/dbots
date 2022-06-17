@@ -40,7 +40,7 @@ namespace PhysicsEngine.Manager
     [Guid("E514AE43-3D40-48A3-9C62-D54058826EAA"), ClassInterface(ClassInterfaceType.None)]
     public class ShotManager : IShotManager
     {
-        private readonly Dictionary<int, Shot> _shots = new Dictionary<int, Shot>();
+        private static readonly Dictionary<int, Shot> _shots = new Dictionary<int, Shot>();
 
         public ShotManager()
         { }

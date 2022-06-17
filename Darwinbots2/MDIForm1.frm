@@ -6,10 +6,10 @@ Begin VB.MDIForm MDIForm1
    AutoShowChildren=   0   'False
    BackColor       =   &H00400000&
    Caption         =   "DarwinBots"
-   ClientHeight    =   6495
-   ClientLeft      =   3630
-   ClientTop       =   2655
-   ClientWidth     =   14295
+   ClientHeight    =   6504
+   ClientLeft      =   3636
+   ClientTop       =   2652
+   ClientWidth     =   14292
    Icon            =   "MDIForm1.frx":0000
    LinkTopic       =   "MDIForm1"
    Picture         =   "MDIForm1.frx":08CA
@@ -18,8 +18,8 @@ Begin VB.MDIForm MDIForm1
    Begin InetCtlsObjects.Inet Inet1 
       Left            =   2520
       Top             =   2160
-      _ExtentX        =   1005
-      _ExtentY        =   1005
+      _ExtentX        =   995
+      _ExtentY        =   995
       _Version        =   393216
    End
    Begin VB.Timer unpause 
@@ -30,8 +30,8 @@ Begin VB.MDIForm MDIForm1
    Begin MSComctlLib.ImageList ImageList1 
       Left            =   2520
       Top             =   1440
-      _ExtentX        =   1005
-      _ExtentY        =   1005
+      _ExtentX        =   995
+      _ExtentY        =   995
       BackColor       =   -2147483643
       ImageWidth      =   16
       ImageHeight     =   16
@@ -111,13 +111,13 @@ Begin VB.MDIForm MDIForm1
    End
    Begin MSComctlLib.Toolbar Toolbar1 
       Align           =   1  'Align Top
-      Height          =   420
+      Height          =   396
       Left            =   0
       TabIndex        =   1
       Top             =   0
-      Width           =   14295
-      _ExtentX        =   25215
-      _ExtentY        =   741
+      Width           =   14292
+      _ExtentX        =   25210
+      _ExtentY        =   699
       ButtonWidth     =   609
       ButtonHeight    =   582
       Appearance      =   1
@@ -374,8 +374,8 @@ Begin VB.MDIForm MDIForm1
          Height          =   375
          Left            =   11160
          Picture         =   "MDIForm1.frx":7E55
-         ScaleHeight     =   315
-         ScaleWidth      =   315
+         ScaleHeight     =   324
+         ScaleWidth      =   324
          TabIndex        =   5
          Top             =   0
          Width           =   375
@@ -422,81 +422,81 @@ Begin VB.MDIForm MDIForm1
       TabIndex        =   0
       Top             =   6225
       Width           =   14295
-      _ExtentX        =   25215
-      _ExtentY        =   476
+      _ExtentX        =   25210
+      _ExtentY        =   466
       _Version        =   393216
       BeginProperty Panels {8E3867A5-8586-11D1-B16A-00C0F0283628} 
          NumPanels       =   13
          BeginProperty Panel1 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel2 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel3 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel4 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel5 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel6 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel7 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel8 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel9 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel10 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel11 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
          EndProperty
          BeginProperty Panel12 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1402
+            Object.Width           =   1418
             MinWidth        =   1411
             Object.ToolTipText     =   "The ratio of the energy this cycle to the average"
          EndProperty
          BeginProperty Panel13 {8E3867AB-8586-11D1-B16A-00C0F0283628} 
             AutoSize        =   2
-            Object.Width           =   1773
+            Object.Width           =   1778
             MinWidth        =   1764
          EndProperty
       EndProperty
       BeginProperty Font {0BE35203-8F91-11CE-9DE3-00AA004BB851} 
          Name            =   "Arial"
-         Size            =   8.25
+         Size            =   8.4
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -971,10 +971,6 @@ Sub wait(n As Byte)
   Loop Until ((e + n) Mod 86400) < Timer And IIf((e + n) > 86400, Timer < 100, True)
 End Sub
 
-Private Sub AddTenObstacles_Click()
-  AddRandomObstacles (10)
-End Sub
-
 Private Sub AutoFork_Click() 'Botsareus 3/23/2014 auto forking
   On Error GoTo b:
   AutoFork.Checked = Not AutoFork.Checked
@@ -983,18 +979,6 @@ Private Sub AutoFork_Click() 'Botsareus 3/23/2014 auto forking
   Exit Sub
 b:
   AutoFork.Checked = False
-End Sub
-
-Private Sub DeleteAllShapes_Click()
-  DeleteAllObstacles
-End Sub
-
-Private Sub DeleteShape_Click()
-  If obstaclefocus <> 0 Then
-    DeleteObstacle (obstaclefocus)
-    obstaclefocus = 0
-    DeleteShape.Enabled = False
-  End If
 End Sub
 
 'Botsareus 10/26/2014 A good idea from 'Spyke'
@@ -1021,9 +1005,6 @@ Private Sub AutoTag_Click()
   Next t
 End Sub
 
-Private Sub DeleteTenObstacles_Click()
-  DeleteTenRandomObstacles
-End Sub
 
 Private Sub DisableArep_Click() 'Botsareus 4/17/2013 The new disable asexrepro button
   DisableArep.Checked = Not DisableArep.Checked
@@ -1076,9 +1057,6 @@ Private Sub DontDecayWstShots_Click() 'Botsareus 9/28/2013 Don't decay waste sho
   TmpOpts.NoWShotDecay = DontDecayWstShots.Checked
 End Sub
 
-Private Sub DrawSpiral_Click()
-  Obstacles.DrawSpiral
-End Sub
 
 Private Sub fisica_Click()
   optionsform.SSTab1.Tab = 1
@@ -1093,9 +1071,6 @@ Private Sub genact_Click()
   ActivForm.Show
 End Sub
 
-Private Sub HorizontalMaze_Click()
-  Obstacles.DrawHorizontalMaze
-End Sub
 
 Private Sub intOptionsOpen_Click()
   optionsform.SSTab1.Tab = 5
@@ -1121,9 +1096,6 @@ Private Sub loadpiccy_Click()
 fine:
 End Sub
 
-Private Sub CheckerMaze_Click()
-  Obstacles.DrawCheckerboardMaze
-End Sub
 
 Private Sub makenewspecies_Click()
   If robfocus > 0 Then
@@ -1184,9 +1156,6 @@ Private Sub pause_Click()
   MDIForm1.unpause.Enabled = True
 End Sub
 
-Private Sub PolarIce_Click()
-  Obstacles.DrawPolarIceMaze
-End Sub
 
 Private Sub removepiccy_Click() 'Botsareus 3/24/2012 Added code that deletes the background picture
   Form1.PiccyMode = False
@@ -1253,12 +1222,6 @@ End Sub
 Private Sub SaveSimWithoutMutations_Click()
   SaveWithoutMutations = True
   simsave
-End Sub
-
-
-Private Sub shapes_Click()
-  ObstacleForm.InitShapesDialog
-  ObstacleForm.Show
 End Sub
 
 Private Sub showEyeDesign_Click()
@@ -1538,8 +1501,8 @@ End Sub
 Public Sub ZoomIn()
   If Form1.visiblew > RobSize * 4 Then
     If robfocus > 0 Then
-      xc = rob(robfocus).pos.x
-      yc = rob(robfocus).pos.y
+      xc = robManager.GetPosition(robfocus).x
+      yc = robManager.GetPosition(robfocus).y
     Else
       xc = Form1.visiblew / 2 + Form1.ScaleLeft
       yc = Form1.visibleh / 2 + Form1.ScaleTop
@@ -1569,8 +1532,8 @@ End Sub
 
 Public Sub Follow() 'Botsareus 11/29/2013 Zoom follow selected robot
     If robfocus > 0 And Form1.visiblew < 6000 And visualize Then
-      xc = rob(robfocus).pos.x
-      yc = rob(robfocus).pos.y
+      xc = robManager.GetPosition(robfocus).x
+      yc = robManager.GetPosition(robfocus).y
       Form1.ScaleTop = yc - Form1.ScaleHeight / 2
       Form1.ScaleLeft = xc - Form1.ScaleWidth / 2
   End If
@@ -1998,8 +1961,6 @@ Form1.Active = True 'Botsareus 2/21/2013 moved active here to enable to pause in
   TmpOpts.allowHorizontalShapeDrift = False
   TmpOpts.allowVerticalShapeDrift = False
   DeleteShape.Enabled = False
-  mazeCorridorWidth = 500
-  mazeWallThickness = 50
   TmpOpts.shapesAreSeeThrough = False
   HighLightTeleportersMenu.Checked = True
   DontDecayNrgShots.Checked = False
@@ -2155,7 +2116,6 @@ If dir(MDIForm1.MainDir + "\settings\lastexit.set") <> "" Then
         'moved savesett here
         If optionsform.Visible = False Then
           TmpOpts = SimOpts
-          optionsform.ObsRepop
         End If
         optionsform.savesett MDIForm1.MainDir + "\settings\lastexit.set" 'save last settings
         
@@ -2177,7 +2137,6 @@ Else
         'copyed savesett here
         If optionsform.Visible = False Then
           TmpOpts = SimOpts
-          optionsform.ObsRepop
         End If
         optionsform.savesett MDIForm1.MainDir + "\settings\lastexit.set" 'save last settings
   
@@ -2301,9 +2260,6 @@ Private Sub selorg_Click()
   FreezeOrganism robfocus
 End Sub
 
-Private Sub TrashCompactor_Click()
-  Obstacles.InitTrashCompactorMaze
-End Sub
 
 Private Sub ucci_Click()
   KillRobot robfocus 'Botsareus 6/12/2016 Bugfix
@@ -2317,10 +2273,6 @@ If GetAsyncKeyState(vbKeyF12) Then
       Form1.unfocus
       unpause.Enabled = False
 End If
-End Sub
-
-Private Sub VerticaMaze_Click()
-  Obstacles.DrawVerticalMaze
 End Sub
 
 Public Sub enablesim()

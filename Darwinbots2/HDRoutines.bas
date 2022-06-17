@@ -165,11 +165,13 @@ Public Sub PlaceOrganism(clist() As Integer, x As Single, y As Single)
   Dim dx As Single, dy As Single
   k = 0
   
-  dx = x - rob(clist(0)).pos.x
-  dy = y - rob(clist(0)).pos.y
+  dx = x - robManager.GetPosition(clist(0)).x
+  dy = y - robManager.GetPosition(clist(0)).y
   While clist(k) > 0
-    rob(clist(k)).pos.x = rob(clist(k)).pos.x + dx
-    rob(clist(k)).pos.y = rob(clist(k)).pos.y + dy
+    Dim pos As Vector
+    pos = robManager.GetPosition(clist(k))
+    pos = VectorAdd(pos, VectorSet(dx, dy))
+    robManager.SetRobotPosition clist(k), pos
     rob(clist(k)).BucketPos.x = -2
     rob(clist(k)).BucketPos.y = -2
     UpdateBotBucket clist(k)
@@ -397,12 +399,7 @@ Public Sub SaveSimulation(path As String)
   Put #1, , SimOpts.DayNightCycleCounter
   Put #1, , SimOpts.Daytime
   Put #1, , SimOpts.SunThresholdMode
-  Put #1, , numObstacles
-  
-  For x = 1 To numObstacles
-    SaveObstacle 1, x
-  Next x
-  
+    
   For k = 0 To SimOpts.SpeciesNum - 1
     Put #1, , SimOpts.Specie(k).CantSee
     Put #1, , SimOpts.Specie(k).DisableDNA
@@ -750,11 +747,6 @@ Public Sub LoadSimulation(path As String)
   Get #1, , SimOpts.DayNightCycleCounter
   Get #1, , SimOpts.Daytime
   Get #1, , SimOpts.SunThresholdMode
-  Get #1, , numObstacles
-         
-  For x = 1 To numObstacles
-    LoadObstacle 1, x
-  Next x
   
   For k = 0 To SimOpts.SpeciesNum - 1
     Get #1, , SimOpts.Specie(k).CantSee
@@ -917,14 +909,19 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
   Dim MessedUpMutations As Boolean
   Dim longtmp As Long
   
+  Dim pos As Vector
+  
   MessedUpMutations = False
   With rob(r)
     Get #n, , .Veg
     Get #n, , .wall
     Get #n, , .Fixed
     
-    Get #n, , .pos.x
-    Get #n, , .pos.y
+    Get #n, , pos.x
+    Get #n, , pos.y
+    
+    robManager.SetRobotPosition r, pos
+    
     Get #n, , .vel.x
     Get #n, , .vel.y
     Get #n, , .aim
@@ -1283,9 +1280,12 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .wall
     Put #n, , .Fixed
     
+    Dim pos As Vector
+    pos = robManager.GetRobotPosition(r)
+    
     ' fisiche
-    Put #n, , .pos.x
-    Put #n, , .pos.y
+    Put #n, , pos.x
+    Put #n, , pos.y
     Put #n, , .vel.x
     Put #n, , .vel.y
     Put #n, , .aim
@@ -1519,57 +1519,6 @@ Sub salvarob(n As Integer, path As String)
   If MsgBox("Do you want to change robot's name to " + extractname(path) + " ?", vbYesNo, "Robot DNA saved") = vbYes Then
     rob(n).FName = extractname(path)
   End If
-End Sub
-
-
-' saves a Obstacle
-Private Sub SaveObstacle(n As Integer, t As Integer)
-    
-  Const Fe As Byte = 254
-
-  With Obstacles.Obstacles(t)
-    Put #n, , .exist
-    Put #n, , .pos
-    Put #n, , .Width
-    Put #n, , .Height
-    Put #n, , .color
-    Put #n, , .vel
-    
-    'write any future data here
-    
-    Put #n, , Fe
-    Put #n, , Fe
-    Put #n, , Fe
-    'don't you dare put anything after this!
-    
-  End With
-End Sub
-
-' loads an Obstacle
-Private Sub LoadObstacle(n As Integer, t As Integer)
-  Dim k As Integer
-  Dim Fe As Byte
-
-  With Obstacles.Obstacles(t)
-    Get #n, , .exist
-    Get #n, , .pos
-    Get #n, , .Width
-    Get #n, , .Height
-    Get #n, , .color
-    Get #n, , .vel
-    
-    'burn through any new data from a different version
-    While FileContinue(n)
-      Get #n, , Fe
-    Wend
-    
-    'grab these three FE codes
-    Get #n, , Fe
-    Get #n, , Fe
-    Get #n, , Fe
-    
-    'don't you dare put anything after this!
-  End With
 End Sub
 
 'generate mrates file

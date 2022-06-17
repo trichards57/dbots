@@ -121,32 +121,32 @@ Begin VB.Form optionsform
       TabCaption(2)   =   "Physics and Costs"
       TabPicture(2)   =   "OptionsForm.frx":0038
       Tab(2).ControlEnabled=   0   'False
-      Tab(2).Control(0)=   "Frame20"
-      Tab(2).Control(1)=   "Frame21"
+      Tab(2).Control(0)=   "Frame21"
+      Tab(2).Control(1)=   "Frame20"
       Tab(2).ControlCount=   2
       TabCaption(3)   =   "Mutations"
       TabPicture(3)   =   "OptionsForm.frx":0054
       Tab(3).ControlEnabled=   0   'False
-      Tab(3).Control(0)=   "DisableMutationsCheck"
+      Tab(3).Control(0)=   "Frame13"
       Tab(3).Control(1)=   "Frame14"
-      Tab(3).Control(2)=   "Frame13"
+      Tab(3).Control(2)=   "DisableMutationsCheck"
       Tab(3).ControlCount=   3
       TabCaption(4)   =   "Restart and League"
       TabPicture(4)   =   "OptionsForm.frx":0070
       Tab(4).ControlEnabled=   0   'False
-      Tab(4).Control(0)=   "btnSetSB"
-      Tab(4).Control(1)=   "btnSetF2"
-      Tab(4).Control(2)=   "btnSetF1"
-      Tab(4).Control(3)=   "Frame7"
-      Tab(4).Control(4)=   "Restart"
-      Tab(4).Control(5)=   "Label19"
+      Tab(4).Control(0)=   "Label19"
+      Tab(4).Control(1)=   "Restart"
+      Tab(4).Control(2)=   "Frame7"
+      Tab(4).Control(3)=   "btnSetF1"
+      Tab(4).Control(4)=   "btnSetF2"
+      Tab(4).Control(5)=   "btnSetSB"
       Tab(4).ControlCount=   6
       TabCaption(5)   =   "Internet"
       TabPicture(5)   =   "OptionsForm.frx":008C
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "Simulazione"
+      Tab(5).Control(0)=   "Label41"
       Tab(5).Control(1)=   "Label42"
-      Tab(5).Control(2)=   "Label41"
+      Tab(5).Control(2)=   "Simulazione"
       Tab(5).ControlCount=   3
       Begin VB.CommandButton btnSetSB 
          Caption         =   "Set SB settings"
@@ -1995,7 +1995,6 @@ Begin VB.Form optionsform
          _ExtentX        =   6160
          _ExtentY        =   1715
          _Version        =   393217
-         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"OptionsForm.frx":0547
@@ -3639,14 +3638,12 @@ End Sub
 Private Sub Initial_Position_MouseDown(button As Integer, Shift As Integer, x As Single, y As Single)
   If button = vbLeftButton Then
     DragBegin Initial_Position
-    PaintObstacles
   End If
 End Sub
 
 Private Sub IPB_MouseDown(button As Integer, Shift As Integer, x As Single, y As Single)
   If button = vbLeftButton Then
     DragBegin Initial_Position
-    PaintObstacles
   End If
 End Sub
 
@@ -4422,42 +4419,6 @@ datirob.Visible = False
 ActivForm.Visible = False
 Shape2.FillColor = IIf(UseOldColor, &H511206, vbBlack)
 
-'Botsareus 1/5/2014 Repopulate obstacle array
-If Form1.Visible Then ObsRepop
-PaintObstacles
-End Sub
-
-Sub ObsRepop()
-xObstacle = Obstacles.Obstacles
-Dim o As Integer
-For o = 1 To UBound(xObstacle)
-If xObstacle(o).exist Then
-With xObstacle(o)
- .pos.x = .pos.x / SimOpts.FieldWidth
- .pos.y = .pos.y / SimOpts.FieldHeight
- .Width = .Width / SimOpts.FieldWidth
- .Height = .Height / SimOpts.FieldHeight
-End With
-End If
-Next
-End Sub
-
-Private Sub PaintObstacles() 'Botsareus 1/5/2014 The obstacle paint code
-On Error GoTo fine: 'Bug fix for no obstacles
-IPB.Cls
-Dim o As Integer
-For o = 1 To UBound(xObstacle)
-If xObstacle(o).exist Then
-With xObstacle(o)
- IPB.Line (.pos.x * IPB.ScaleWidth, .pos.y * IPB.ScaleHeight)-((.pos.x + .Width) * IPB.ScaleWidth, (.pos.y + .Height) * IPB.ScaleHeight), .color, BF
-End With
-End If
-Next
-
-Exit Sub
-fine:
-
-ReDim xObstacle(0)
 End Sub
 
 Private Sub Form_Load()
@@ -4848,8 +4809,6 @@ Sub LoadSettings_Click() 'opensettings
     DispSettings
     validate = False
     
-    PaintObstacles 'Botsareus 11/15/2015 Minor bug fix to paint obstacles
-
   End If
   Exit Sub
 fine:
@@ -5073,33 +5032,6 @@ skipthisspecie4:
   Write #1, TmpOpts.shapesAreVisable
   
   Dim o As Integer
-  
-  'count walls first
-  Dim numXobs As Integer
-  
-  For o = 1 To UBound(xObstacle)
-  If xObstacle(o).exist Then
-  With xObstacle(o)
-    numXobs = numXobs + 1
-  End With
-  End If
-  Next
-  
-  Write #1, numXobs
-
-  For o = 1 To UBound(xObstacle)
-  If xObstacle(o).exist Then
-  With xObstacle(o)
-    Write #1, .color
-    Write #1, .Width
-    Write #1, .Height
-    Write #1, .vel.x
-    Write #1, .vel.y
-    Write #1, .pos.x
-    Write #1, .pos.y
-  End With
-  End If
-  Next
   
   Write #1, 0
   Write #1, 0
@@ -5432,26 +5364,7 @@ Public Sub ReadSettFromFile()
   If Not EOF(1) Then Input #1, TmpOpts.shapesAreSeeThrough
   If Not EOF(1) Then Input #1, TmpOpts.shapesAbsorbShots
   If Not EOF(1) Then Input #1, TmpOpts.shapesAreVisable
-  
-  Dim numXobs As Integer
-  
-  If Not EOF(1) Then Input #1, numXobs
-
-  ReDim xObstacle(numXobs)
-  Dim o As Integer
-  For o = 1 To numXobs
-  With xObstacle(o)
-    If Not EOF(1) Then Input #1, .color
-    If Not EOF(1) Then Input #1, .Width
-    If Not EOF(1) Then Input #1, .Height
-    If Not EOF(1) Then Input #1, .vel.x
-    If Not EOF(1) Then Input #1, .vel.y
-    If Not EOF(1) Then Input #1, .pos.x
-    If Not EOF(1) Then Input #1, .pos.y
-    .exist = True
-  End With
-  Next
-  
+    
   Dim disc As Integer
   
   If Not EOF(1) Then Input #1, disc

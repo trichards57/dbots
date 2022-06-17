@@ -99,7 +99,9 @@ Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Si
     ShAngle = ShAngle + Random(-20, 20) / 200
     
     angle = VectorSet(Cos(ShAngle), -Sin(ShAngle))
-    s.Position = VectorAdd(rob(n).pos, VectorScalar(angle, rob(n).radius))
+    Dim pos As Vector
+    pos = robManager.GetRobotPosition(n)
+    s.Position = VectorAdd(pos, VectorScalar(angle, rob(n).radius))
     
     'Botsareus 6/23/2016 Takes care of shot position bug - so it matches the painted robot position
     If offset Then
@@ -288,7 +290,7 @@ Public Sub updateshots()
                     taste h, s.OldPosition.x, s.OldPosition.y, s.shottype
                     s.flash = True
                 End If
-                If numObstacles > 0 Then DoShotObstacleCollisions s
+                
                 s.OldPosition = s.Position
                 s.Position = VectorAdd(s.Position, s.Velocity) 'Euler integration
                 
@@ -763,7 +765,7 @@ Private Function NewShotCollision(ByRef sh As Shot) As Integer
       'Make sure the bot is eligable to be hit by the shot.  It has to exist, it can't have been the one who
       'fired the shot, it can't be a wall bot and it has to be close enough that an impact is possible.  Note that for perf reasons we
       'ignore edge cases here where the field is a torus and a shot wraps around so it's possible to miss collisons in such cases.
-        If rob(robnum).exist And (sh.parent <> robnum) And (Abs(sh.OldPosition.x - rob(robnum).pos.x) < MaxBotShotSeperation And Abs(sh.OldPosition.y - rob(robnum).pos.y) < MaxBotShotSeperation) Then
+        If rob(robnum).exist And (sh.parent <> robnum) And (Abs(sh.OldPosition.x - robManager.GetRobotPosition(robnum).x) < MaxBotShotSeperation And Abs(sh.OldPosition.y - robManager.GetRobotPosition(robnum).y) < MaxBotShotSeperation) Then
           
             r = rob(robnum).radius ' + 5 ' Tweak the bot radius up a bit to handle the issue with bots appearing a little larger than then are
          
@@ -771,7 +773,7 @@ Private Function NewShotCollision(ByRef sh As Shot) As Integer
             'Note that this routine is called before the position for both the bot and the shot is updated this cycle.  This means
             'we are looking forward in time, from the current positions to where they will be at the end of this cycle.  This is why
             'we can use .pos and not .opos
-            B0 = rob(robnum).pos
+            B0 = robManager.GetRobotPosition(robnum)
           
             'Botsareus 6/22/2016 The robots actual velocity and non collision velocity can be different - correct here
             B0 = VectorSub(B0, rob(robnum).vel)
@@ -870,8 +872,8 @@ Public Sub Vshoot(n As Integer, ByRef s As Shot)
     With s
         ShAngle = Random(1, 1256) / 200
         .Stored = False
-        .Position.x = (rob(n).pos.x + Cos(ShAngle) * rob(n).radius)
-        .Position.y = (rob(n).pos.y - Sin(ShAngle) * rob(n).radius)
+        .Position.x = (robManager.GetRobotPosition(n).x + Cos(ShAngle) * rob(n).radius)
+        .Position.y = (robManager.GetRobotPosition(n).y - Sin(ShAngle) * rob(n).radius)
   
         .Velocity.x = absx(ShAngle, RobSize / 3, 0, 0, 0) ' set shot speed x seems to not work well at high bot speeds
         .Velocity.y = absy(ShAngle, RobSize / 3, 0, 0, 0) ' set shot speed y

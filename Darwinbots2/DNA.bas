@@ -378,10 +378,11 @@ Private Sub findang()
   Dim c As Single  'robot's xpos
   Dim d As Single  'robot's ypos
   Dim e As Single  'angle to target
-  b = PopIntStack ' * Form1.yDivisor
-  a = PopIntStack ' * Form1.xDivisor
-  c = rob(currbot).pos.x / Form1.xDivisor
-  d = rob(currbot).pos.y / Form1.yDivisor
+  b = PopIntStack
+  a = PopIntStack
+  
+  c = robManager.GetPosition(currbot).x / Form1.xDivisor
+  d = robManager.GetPosition(currbot).y / Form1.yDivisor
   e = angnorm(angle(c, d, a, b)) * 200
   PushIntStack e
 End Sub
@@ -395,8 +396,8 @@ Private Sub finddist()
   Dim e As Single  'distance to target
   b = PopIntStack * Form1.yDivisor
   a = PopIntStack * Form1.xDivisor
-  c = rob(currbot).pos.x
-  d = rob(currbot).pos.y
+  c = robManager.GetRobotPosition(currbot).x
+  d = robManager.GetRobotPosition(currbot).y
   e = Sqr(((c - a) ^ 2 + (d - b) ^ 2))
   If Abs(e) > 2000000000# Then
     e = Sgn(e) * 2000000000#

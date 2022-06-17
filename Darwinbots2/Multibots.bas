@@ -6,7 +6,7 @@ Option Explicit
 '
 
 ' moves the organism of which robot n is part to the position x,y
-Public Sub ReSpawn(n As Integer, X As Single, Y As Single)
+Public Sub ReSpawn(n As Integer, x As Single, y As Single)
   Dim clist(50) As Integer 'changed from 20 to 50
   Dim Min As Single, nmin As Integer
   Dim t As Integer, dx As Single, dy As Single
@@ -16,15 +16,15 @@ Public Sub ReSpawn(n As Integer, X As Single, Y As Single)
   Min = 999999999999#
   t = 0
   While clist(t) > 0
-    If ((rob(clist(t)).pos.X - X) ^ 2 + (rob(clist(t)).pos.Y - Y) ^ 2) <= Min Then
-      Min = (rob(clist(t)).pos.X - X) ^ 2 + (rob(clist(t)).pos.Y - Y) ^ 2
+    If ((robManager.GetRobotPosition(clist(t)).x - x) ^ 2 + (robManager.GetRobotPosition(clist(t)).y - y) ^ 2) <= Min Then
+      Min = (robManager.GetRobotPosition(clist(t)).x - x) ^ 2 + (robManager.GetRobotPosition(clist(t)).y - y) ^ 2
       nmin = clist(t)
     End If
     t = t + 1
     If t > 50 Then GoTo getout
   Wend
-  dx = X - rob(nmin).pos.X
-  dy = Y - rob(nmin).pos.Y
+  dx = x - robManager.GetRobotPosition(nmin).x
+  dy = y - robManager.GetRobotPosition(nmin).y
   
   'Botsareus 7/15/2016 Bug fix: corrects by radii difference between the two robots
   radiidif = rob(n).radius - rob(nmin).radius
@@ -34,14 +34,14 @@ Public Sub ReSpawn(n As Integer, X As Single, Y As Single)
   
   t = 0
   While clist(t) > 0
-    rob(clist(t)).pos.X = rob(clist(t)).pos.X + dx
-    rob(clist(t)).pos.Y = rob(clist(t)).pos.Y + dy
+  Dim pos As Vector
+  
+    pos.x = robManager.GetRobotPosition(clist(t)).x + dx
+    pos.y = robManager.GetRobotPosition(clist(t)).y + dy
+    robManager.SetRobotPosition clist(t), pos
     'Botsareus 7/6/2016 Make sure to resolve actvel
-    rob(clist(t)).opos.X = rob(clist(t)).pos.X
-    rob(clist(t)).opos.Y = rob(clist(t)).pos.Y
-    'Bot is already part of a bucket...
-    'rob(clist(t)).BucketPos.x = -2
-    'rob(clist(t)).BucketPos.Y = -2
+    rob(clist(t)).opos.x = pos.x
+    rob(clist(t)).opos.y = pos.y
     UpdateBotBucket clist(t)
     t = t + 1
   Wend

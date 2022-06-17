@@ -48,9 +48,10 @@ Public Sub UpdateSim()
   Dim k As Long 'robots moved last attempt
   Dim k2 As Long 'robots moved total
   Dim ingdist As Single
-  Dim pozdif As vector
-  Dim newpoz As vector
-  Dim posdif As vector
+  Dim pozdif As Vector
+  Dim newpoz As Vector
+  Dim posdif As Vector
+  Dim pos As Vector
   '
   
   
@@ -95,8 +96,6 @@ Public Sub UpdateSim()
   If SimOpts.Costs(DYNAMICCOSTINCLUDEPLANTS) <> 0 Then
     CurrentPopulation = CurrentPopulation + totvegsDisplayed      'Include Plants in target population
   End If
-  
-  'If (SimOpts.TotRunCycle + 200) Mod 2000 = 0 Then MsgBox "sup" & SimOpts.TotRunCycle 'debug only
   
   If SimOpts.TotRunCycle Mod 10 = 0 Then
     For i = 10 To 2 Step -1
@@ -172,7 +171,7 @@ Public Sub UpdateSim()
     'Botsareus 6/22/2016 to figure out actual velocity of the bot incase there is a collision event
     For t = 1 To MaxRobs
         If rob(t).exist Then
-            rob(t).opos = rob(t).pos
+            rob(t).opos = robManager.GetRobotPosition(t)
         End If
     Next
   
@@ -182,12 +181,11 @@ Public Sub UpdateSim()
     For t = 1 To MaxRobs
         If rob(t).exist Then
             'Only if the robots position was already configured
-            If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then rob(t).actvel = VectorSub(rob(t).pos, rob(t).opos)
+            pos = robManager.GetRobotPosition(t)
+            If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then rob(t).actvel = VectorSub(pos, rob(t).opos)
         End If
     Next
   
-  If numObstacles > 0 Then MoveObstacles
-   
   For t = 1 To MaxRobs 'Panda 8/14/2013 to figure out how much vegys to repopulate across all robots
    If rob(t).exist Then  'Botsareus 8/14/2013 We have to make sure the robot is alive first
     AllChlr = AllChlr + rob(t).chloroplasts

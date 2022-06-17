@@ -29,8 +29,7 @@ End Function
 Private Sub preparerob(t As Integer, path As String)
     Dim col1 As Long, col2 As Long, col3 As Long
     Dim k As Integer
-    rob(t).pos.x = Random(50, Form1.ScaleWidth)
-    rob(t).pos.y = Random(50, Form1.ScaleHeight)
+    robManager.SetRobotPosition t, VectorSet(Random(50, Form1.ScaleWidth), Random(50, Form1.ScaleHeight))
     rob(t).aim = Random(0, 628) / 100
     rob(t).aimvector = VectorSet(Cos(rob(t).aim), Sin(rob(t).aim))
     rob(t).exist = True
