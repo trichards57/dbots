@@ -1,11 +1,6 @@
 Attribute VB_Name = "Common"
 Option Explicit
 
-Public Type vector
-  x As Single
-  y As Single
-End Type
-
 Public Const PI As Single = 3.14159265
 Public timerthis As Long
 
@@ -92,25 +87,25 @@ Private Function gasdev() As Single
   End If
 End Function
 
-Public Function Dot(V1 As vector, V2 As vector) As Single
+Public Function Dot(V1 As Vector, V2 As Vector) As Single
   Dot = V1.x * V2.x + V1.y * V2.y
 End Function
 
-Public Function Cross(V1 As vector, V2 As vector) As Single
+Public Function Cross(V1 As Vector, V2 As Vector) As Single
   Cross = V1.x * V2.y - V1.y * V2.x
 End Function
 
-Public Function VectorAdd(V1 As vector, V2 As vector) As vector
+Public Function VectorAdd(V1 As Vector, V2 As Vector) As Vector
   VectorAdd.x = V1.x + V2.x
   VectorAdd.y = V1.y + V2.y
 End Function
 
-Public Function VectorSub(V1 As vector, V2 As vector) As vector
+Public Function VectorSub(V1 As Vector, V2 As Vector) As Vector
   VectorSub.x = V1.x - V2.x
   VectorSub.y = V1.y - V2.y
 End Function
 
-Public Function VectorScalar(ByRef V1 As vector, ByRef k As Single) As vector
+Public Function VectorScalar(ByRef V1 As Vector, ByRef k As Single) As Vector
   If Abs(k) > 32000 Then k = Sgn(k) * 32000
   If Abs(V1.x) > 32000 Then V1.x = Sgn(V1.x) * 32000
   If Abs(V1.y) > 32000 Then V1.y = Sgn(V1.y) * 32000
@@ -118,7 +113,7 @@ Public Function VectorScalar(ByRef V1 As vector, ByRef k As Single) As vector
   VectorScalar.y = V1.y * k
 End Function
 
-Public Function VectorUnit(V1 As vector) As vector 'unit vector.  Called vector unit to keep nomenclature consistant
+Public Function VectorUnit(V1 As Vector) As Vector 'unit vector.  Called vector unit to keep nomenclature consistant
   Dim mag As Single
   
   mag = VectorInvMagnitude(V1)
@@ -127,7 +122,7 @@ Public Function VectorUnit(V1 As vector) As vector 'unit vector.  Called vector 
   VectorUnit.y = V1.y * mag
 End Function
 
-Public Function VectorMagnitude(V1 As vector) As Single
+Public Function VectorMagnitude(V1 As Vector) As Single
   ' This might seem overly complicated compared to sqr(X^2 + Y^2),
   ' But it gives better numerical behavior
   Dim minVal As Single
@@ -141,7 +136,7 @@ Public Function VectorMagnitude(V1 As vector) As Single
   End If
 End Function
 
-Public Function VectorInvMagnitude(V1 As vector) As Single
+Public Function VectorInvMagnitude(V1 As Vector) As Single
   Dim mag As Single
   mag = VectorMagnitude(V1)
   
@@ -152,23 +147,23 @@ Public Function VectorInvMagnitude(V1 As vector) As Single
   End If
 End Function
 
-Public Function VectorMagnitudeSquare(ByRef V1 As vector) As Single
+Public Function VectorMagnitudeSquare(ByRef V1 As Vector) As Single
   If Abs(V1.x) > 32000 Then V1.x = Sgn(V1.x) * 32000
   If Abs(V1.y) > 32000 Then V1.y = Sgn(V1.y) * 32000
   VectorMagnitudeSquare = V1.x * V1.x + V1.y * V1.y
 End Function
 
-Public Function VectorSet(ByVal x As Single, ByVal y As Single) As vector
+Public Function VectorSet(ByVal x As Single, ByVal y As Single) As Vector
   VectorSet.x = x
   VectorSet.y = y
 End Function
 
-Public Function VectorMax(ByRef x As vector, ByRef y As vector) As vector
+Public Function VectorMax(ByRef x As Vector, ByRef y As Vector) As Vector
   VectorMax.x = Max(x.x, y.x)
   VectorMax.y = Max(x.y, y.y)
 End Function
 
-Public Function VectorMin(ByRef x As vector, ByRef y As vector) As vector
+Public Function VectorMin(ByRef x As Vector, ByRef y As Vector) As Vector
   VectorMin.x = Min(x.x, y.x)
   VectorMin.y = Min(x.y, y.y)
 End Function

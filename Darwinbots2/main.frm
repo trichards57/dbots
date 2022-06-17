@@ -6,18 +6,18 @@ Begin VB.Form Form1
    BackColor       =   &H00400000&
    BorderStyle     =   0  'None
    Caption         =   "Form1"
-   ClientHeight    =   8445
-   ClientLeft      =   30
-   ClientTop       =   90
-   ClientWidth     =   12045
+   ClientHeight    =   8436
+   ClientLeft      =   36
+   ClientTop       =   96
+   ClientWidth     =   12036
    FillColor       =   &H00C00000&
    ForeColor       =   &H00511206&
    Icon            =   "main.frx":0000
    LinkTopic       =   "Form1"
    MDIChild        =   -1  'True
    MinButton       =   0   'False
-   ScaleHeight     =   8445
-   ScaleWidth      =   12045
+   ScaleHeight     =   8436
+   ScaleWidth      =   12036
    Begin VB.Timer SecTimer 
       Interval        =   1000
       Left            =   2040
@@ -85,7 +85,7 @@ Begin VB.Form Form1
       Caption         =   $"main.frx":08CA
       BeginProperty Font 
          Name            =   "MS Sans Serif"
-         Size            =   9.75
+         Size            =   9.6
          Charset         =   0
          Weight          =   700
          Underline       =   0   'False
@@ -101,52 +101,52 @@ Begin VB.Form Form1
       Width           =   9855
    End
    Begin VB.Image InternetModePopFileProblem 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":0959
       Top             =   5400
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Image InternetModeBackPressure 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":0CCB
       Top             =   5040
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Image InternetModeStart 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":103D
       Top             =   4680
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Image InternetModeOff 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":13AF
       Top             =   4320
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Image ServerGood 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":1721
       Top             =   3600
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Image ServerBad 
-      Height          =   255
+      Height          =   204
       Left            =   5280
       Picture         =   "main.frx":1A93
       Top             =   3960
       Visible         =   0   'False
-      Width           =   240
+      Width           =   192
    End
    Begin VB.Label InternetMode 
       BackColor       =   &H80000007&
@@ -170,12 +170,12 @@ Begin VB.Form Form1
       Width           =   3225
    End
    Begin VB.Image TeleporterMask 
-      Height          =   720
+      Height          =   576
       Left            =   240
       Picture         =   "main.frx":1E05
       Top             =   7560
       Visible         =   0   'False
-      Width           =   11520
+      Width           =   9216
    End
    Begin VB.Image Teleporter 
       Appearance      =   0  'Flat
@@ -320,9 +320,6 @@ Private Sub Form_Load()
   TotalRobots = 0
   robfocus = 0
   MDIForm1.DisableRobotsMenu
-  maxshotarray = 50
-  shotpointer = 1
-  ReDim Shots(maxshotarray)
   dispskin = True
   
   FlashColor(1) = vbBlack         ' Hit with memory shot
@@ -847,18 +844,20 @@ Public Sub DrawShots()
   DrawWidth = Int(50 / (ScaleWidth / RobSize) + 1)
   If DrawWidth > 2 Then DrawWidth = 2
   Dim t As Long
+  Dim s As Shot
   FillStyle = 0
-  For t = 1 To maxshotarray
-    If Shots(t).flash And MDIForm1.displayShotImpactsToggle Then
-       If Shots(t).shottype < 0 And Shots(t).shottype >= -7 Then
-        FillColor = FlashColor(Shots(t).shottype + 10)
-        Form1.Circle (Shots(t).OldPosition.x, Shots(t).OldPosition.y), 20, FlashColor(Shots(t).shottype + 10)
+  For t = 1 To ShotManager.GetMaxShot()
+    s = ShotManager.GetShot(t)
+    If s.flash And MDIForm1.displayShotImpactsToggle Then
+       If s.shottype < 0 And s.shottype >= -7 Then
+        FillColor = FlashColor(s.shottype + 10)
+        Form1.Circle (s.OldPosition.x, s.OldPosition.y), 20, FlashColor(s.shottype + 10)
       Else
         FillColor = vbBlack
-        Form1.Circle (Shots(t).OldPosition.x, Shots(t).OldPosition.y), 20, vbBlack
+        Form1.Circle (s.OldPosition.x, s.OldPosition.y), 20, vbBlack
       End If
-    ElseIf Shots(t).Exists And Shots(t).stored = False Then
-      PSet (Shots(t).Position.x, Shots(t).Position.y), Shots(t).color
+    ElseIf s.Exists And s.Stored = False Then
+      PSet (s.Position.x, s.Position.y), s.color
     End If
   Next t
   FillColor = BackColor
@@ -1160,15 +1159,8 @@ MDIForm1.menuupdate
   Next t
   MaxRobs = 0
   Init_Buckets
-  ReDim Shots(50)
-  maxshotarray = 50
-  shotpointer = 1
   
-  For t = 1 To maxshotarray
-    Shots(t).Exists = False
-    Shots(t).flash = False
-    Shots(t).stored = False
-  Next t
+  ShotManager.CLEAR
   
   For t = 1 To MAXOBSTACLES
     Obstacles.Obstacles(t).exist = False
@@ -1292,8 +1284,6 @@ Sub startloaded()
   'side B is the sum of the maximum bot velocity and the maximum shot velocity, the latter of which can be robsize/3 + the bot
   'max velocity since bot velocity is added to shot velocity.
   MaxBotShotSeperation = Sqr((FindRadius(0, -1) ^ 2) + ((SimOpts.MaxVelocity * 2 + RobSize / 3) ^ 2))
-
-  shotpointer = 1
   
   defaultWidth = 0.2
   defaultHeight = 0.2
@@ -1889,7 +1879,6 @@ missingdir:
   End If
   
   Erase rob
-  Erase Shots
   End
 End Sub
 

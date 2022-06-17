@@ -50,12 +50,12 @@ End Function
 'NEVER allow anything after end, which must be = DNALen
 'ALWAYS assume that DNA is sized right
 'ALWAYS size DNA correctly when mutating
-Private Function EraseUnit(ByRef unit As block)
-  unit.tipo = -1
+Private Function EraseUnit(ByRef unit As Block)
+  unit.type = -1
   unit.value = -1
 End Function
 
-Public Function MakeSpace(ByRef dna() As block, ByVal beginning As Long, ByVal length As Long, Optional DNALength As Integer = -1) As Boolean
+Public Function MakeSpace(ByRef dna() As Block, ByVal beginning As Long, ByVal length As Long, Optional DNALength As Integer = -1) As Boolean
   'add length elements after beginning.  Beginning doesn't move places
   'returns true if the space was created,
   'false otherwise
@@ -83,7 +83,7 @@ Public Function MakeSpace(ByRef dna() As block, ByVal beginning As Long, ByVal l
 getout:
 End Function
 
-Public Sub Delete(ByRef dna() As block, ByRef beginning As Long, ByRef elements As Long, Optional DNALength As Integer = -1)
+Public Sub Delete(ByRef dna() As Block, ByRef beginning As Long, ByRef elements As Long, Optional DNALength As Integer = -1)
   'delete elements starting at beginning
   Dim t As Integer
   If DNALength < 0 Then DNALength = DnaLen(dna)
@@ -233,7 +233,7 @@ Private Sub Amplification(robn As Integer) 'Botsareus 12/10/2013
     floor = floor * SimOpts.MutCurrMult
     If .Mutables.mutarray(AmplificationUP) < floor Then .Mutables.mutarray(AmplificationUP) = floor 'Botsareus 10/5/2015 Prevent freezing
   
-    Dim tempDNA() As block
+    Dim tempDNA() As Block
     Dim start As Long
     Dim second As Long
     Dim counter As Long
@@ -281,7 +281,7 @@ skip:
     Loop Until t >= UBound(.dna) - 1
     
     'add "end" to end of the DNA
-    .dna(UBound(.dna)).tipo = 10
+    .dna(UBound(.dna)).type = 10
     .dna(UBound(.dna)).value = 1
   End With
 getout:
@@ -303,7 +303,7 @@ Private Sub Translocation(robn As Integer) 'Botsareus 12/10/2013
     floor = floor * SimOpts.MutCurrMult
     If .Mutables.mutarray(TranslocationUP) < floor Then .Mutables.mutarray(TranslocationUP) = floor  'Botsareus 10/5/2015 Prevent freezing
     
-    Dim tempDNA() As block
+    Dim tempDNA() As Block
     Dim start As Long
     Dim second As Long
     Dim counter As Long
@@ -352,7 +352,7 @@ Private Sub Translocation(robn As Integer) 'Botsareus 12/10/2013
 skip:
     Next t
     'add "end" to end of the DNA
-    .dna(UBound(.dna)).tipo = 10
+    .dna(UBound(.dna)).type = 10
     .dna(UBound(.dna)).value = 1
   End With
 getout:
@@ -564,23 +564,23 @@ Private Sub ChangeDNA2(robn As Integer, ByVal nth As Integer, ByVal DNAsize As I
     'special cases
     If nth < DNAsize - 2 Then
       'for .shoot store
-      If .dna(nth + 1).tipo = 0 And .dna(nth + 1).value = shoot And .dna(nth + 2).tipo = 7 And .dna(nth + 2).value = 1 Then
+      If .dna(nth + 1).type = 0 And .dna(nth + 1).value = shoot And .dna(nth + 2).type = 7 And .dna(nth + 2).value = 1 Then
         .dna(nth).value = Choose(Int(rndy * 7) + 1, -1, -2, -3, -4, -6, -8, sysvar(randomsysvar).value) 'Botsareus 10/6/2015 Better values
-        .dna(nth).tipo = 0
+        .dna(nth).type = 0
         holddetail = " changed dna location " & nth & " to " & .dna(nth).value
         special = True
       End If
       'for .focuseye store
-      If .dna(nth + 1).tipo = 0 And .dna(nth + 1).value = FOCUSEYE And .dna(nth + 2).tipo = 7 And .dna(nth + 2).value = 1 Then
+      If .dna(nth + 1).type = 0 And .dna(nth + 1).value = FOCUSEYE And .dna(nth + 2).type = 7 And .dna(nth + 2).value = 1 Then
         .dna(nth).value = Int(rndy * 9) - 4
-        .dna(nth).tipo = 0
+        .dna(nth).type = 0
         holddetail = " changed dna location " & nth & " to " & .dna(nth).value
         special = True
       End If
       'for .tieloc store
-      If .dna(nth + 1).tipo = 0 And .dna(nth + 1).value = tieloc And .dna(nth + 2).tipo = 7 And .dna(nth + 2).value = 1 Then
+      If .dna(nth + 1).type = 0 And .dna(nth + 1).value = tieloc And .dna(nth + 2).type = 7 And .dna(nth + 2).value = 1 Then
         .dna(nth).value = Choose(Int(rndy * 5) + 1, -1, -3, -4, -6, sysvar(randomsysvar).value) 'Botsareus 10/6/2015 Better values 'Botsareus 3/22/2016 Better values
-        .dna(nth).tipo = 0
+        .dna(nth).type = 0
         holddetail = " changed dna location " & nth & " to " & .dna(nth).value
         special = True
       End If
@@ -592,14 +592,14 @@ Private Sub ChangeDNA2(robn As Integer, ByVal nth As Integer, ByVal DNAsize As I
       .LastMut = .LastMut + 1
     Else 'other cases
       If nth < DNAsize - 1 And Int(rndy * 3) = 0 Then '1/3 chance functional
-        .dna(nth).tipo = 0
+        .dna(nth).type = 0
         .dna(nth).value = sysvarOUT(randomsysvar).value
         holddetail = " changed dna location " & nth & " to number ." & sysvarOUT(randomsysvar).Name
         logmutation robn, IIf(IsPoint, "Point Mutation 2", "Copy Error 2") & holddetail & " during cycle" & Str(SimOpts.TotRunCycle)
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
         
-        .dna(nth + 1).tipo = 7
+        .dna(nth + 1).type = 7
         .dna(nth + 1).value = 1
         holddetail = " changed dna location " & (nth + 1) & " to store"
         logmutation robn, IIf(IsPoint, "Point Mutation 2", "Copy Error 2") & holddetail & " during cycle" & Str(SimOpts.TotRunCycle)
@@ -610,14 +610,14 @@ Private Sub ChangeDNA2(robn As Integer, ByVal nth As Integer, ByVal DNAsize As I
           Do
             randomsysvar = Int(rndy * 1000)
           Loop Until sysvar(randomsysvar).Name <> ""
-          .dna(nth).tipo = 0
+          .dna(nth).type = 0
           .dna(nth).value = sysvar(randomsysvar).value + Int(rndy * 32) * 1000
           holddetail = " changed dna location " & nth & " to number " & .dna(nth).value
         Else
           Do
             randomsysvar = Int(rndy * 256)
           Loop Until sysvarIN(randomsysvar).Name <> ""
-          .dna(nth).tipo = 1
+          .dna(nth).type = 1
           .dna(nth).value = sysvarIN(randomsysvar).value
           holddetail = " changed dna location " & nth & " to *number *." & sysvarIN(randomsysvar).Name
         End If
@@ -633,8 +633,8 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
   'we need to rework .lastmutdetail
   Dim Max As Long
   Dim temp As String
-  Dim bp As block
-  Dim tempbp As block
+  Dim bp As Block
+  Dim tempbp As Block
   Dim Name As String
   Dim oldname As String
   Dim t As Long
@@ -644,7 +644,7 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
      
   For t = nth To (nth + length - 1) 'if length is 1, it's only one bp we're mutating, remember?
     If t >= .DnaLen Then GoTo getout 'don't mutate end either
-    If .dna(t).tipo = 10 Then GoTo getout 'mutations can't cross control barriers
+    If .dna(t).type = 10 Then GoTo getout 'mutations can't cross control barriers
     
     If Random(0, 99) < PointWhatToChange Then
       '''''''''''''''''''''''''''''''''''''''''
@@ -661,7 +661,7 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
       
 
       old = .dna(t).value
-      If .dna(t).tipo = 0 Or .dna(t).tipo = 1 Then '(number or *number)
+      If .dna(t).type = 0 Or .dna(t).type = 1 Then '(number or *number)
         Do
             If Abs(old) <= 1000 Then   'Botsareus 3/19/2016 Simplified
                 If Int(rndy * 2) = 0 Then  '1/2 chance the mutation is large
@@ -677,12 +677,12 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
         
-        logmutation robn, MutationType(Mtype) + " changed " + TipoDetok(.dna(t).tipo) + " from" + Str(old) + " to" + Str(.dna(t).value) + " at position" + Str(t) + " during cycle" + Str(SimOpts.TotRunCycle)
+        logmutation robn, MutationType(Mtype) + " changed " + TipoDetok(.dna(t).type) + " from" + Str(old) + " to" + Str(.dna(t).value) + " at position" + Str(t) + " during cycle" + Str(SimOpts.TotRunCycle)
         
       Else
         'find max legit value
         'this should really be done a better way
-        bp.tipo = .dna(t).tipo
+        bp.type = .dna(t).type
         Max = 0
         Do
           temp = ""
@@ -697,7 +697,7 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
           .dna(t).value = Random(1, Max)
         Loop While .dna(t).value = old
 
-        bp.tipo = .dna(t).tipo
+        bp.type = .dna(t).type
         bp.value = old
         
         tempbp = .dna(t)
@@ -710,18 +710,18 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
         .Mutations = .Mutations + 1
         .LastMut = .LastMut + 1
         
-        logmutation robn, MutationType(Mtype) + " changed value of " + TipoDetok(.dna(t).tipo) + " from " + _
+        logmutation robn, MutationType(Mtype) + " changed value of " + TipoDetok(.dna(t).type) + " from " + _
           oldname + " to " + Name + " at position" + Str(t) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
       End If
     Else
-      bp.tipo = .dna(t).tipo
+      bp.type = .dna(t).type
       bp.value = .dna(t).value
       Do
-        .dna(t).tipo = Random(0, 20)
-      Loop While .dna(t).tipo = bp.tipo Or TipoDetok(.dna(t).tipo) = ""
+        .dna(t).type = Random(0, 20)
+      Loop While .dna(t).type = bp.type Or TipoDetok(.dna(t).type) = ""
       Max = 0
-      If .dna(t).tipo >= 2 Then
+      If .dna(t).type >= 2 Then
         Do
           temp = ""
           Max = Max + 1
@@ -744,8 +744,8 @@ Private Sub ChangeDNA(robn As Integer, ByVal nth As Long, Optional ByVal length 
       .Mutations = .Mutations + 1
       .LastMut = .LastMut + 1
       
-      logmutation robn, MutationType(Mtype) + " changed the " + TipoDetok(bp.tipo) + ": " + _
-          oldname + " to the " + TipoDetok(.dna(t).tipo) + ": " + Name + " at position" + Str(t) + " during cycle" + _
+      logmutation robn, MutationType(Mtype) + " changed the " + TipoDetok(bp.type) + ": " + _
+          oldname + " to the " + TipoDetok(.dna(t).type) + ": " + Name + " at position" + Str(t) + " during cycle" + _
           Str(SimOpts.TotRunCycle)
       
     End If
@@ -796,7 +796,7 @@ Private Sub Reversal(robn As Integer)
   Dim low As Long
   Dim high As Long
   Dim templong As Long
-  Dim tempblock As block
+  Dim tempblock As Block
   Dim t As Long
   Dim second As Long
   
@@ -964,7 +964,7 @@ Public Function delgene(n As Integer, g As Integer) As Boolean
   End If
 End Function
 
-Private Sub DeleteSpecificGene(ByRef dna() As block, ByVal k As Integer)
+Private Sub DeleteSpecificGene(ByRef dna() As Block, ByVal k As Integer)
   Dim i As Long, f As Long
   
   i = genepos(dna, k)

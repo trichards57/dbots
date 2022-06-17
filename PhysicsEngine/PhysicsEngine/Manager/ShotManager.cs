@@ -1,29 +1,40 @@
 ﻿using PhysicsEngine.Model;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace PhysicsEngine.Manager
 {
     [Guid("0E1EEC48-FF16-4E41-B4D8-FEB855A5C019")]
     public interface IShotManager
     {
+        [DispId(7)]
+        void Clear();
+
         [DispId(2)]
-        Shot GetShot(int i);
+        int CreateShot();
+
+        [DispId(8)]
+        void DeleteShot(int a);
+
+        [DispId(6)]
+        int GetMaxShot();
 
         [DispId(1)]
-        int NewShot(short parentBot, short shotType, float value, float startEnergy, float startRange,
-            [MarshalAs(UnmanagedType.BStr)] string fromSpecies,
-            [MarshalAs(UnmanagedType.Bool)] bool fromVeg,
-            int color, short memoryLocation, short memoryValue, float shotAim, Vector startPosition,
-            Vector startVelocity,
-            [MarshalAs(UnmanagedType.Bool)] bool offset = false);
+        Shot GetShot(int i);
+
+        [DispId(4)]
+        void LoadShots(string file);
 
         [DispId(3)]
-        int CreateShot();
+        void SaveShots(string file);
+
+        [DispId(5)]
+        void SetShot(int i, ref Shot value);
     }
 
     [Guid("E514AE43-3D40-48A3-9C62-D54058826EAA"), ClassInterface(ClassInterfaceType.None)]
@@ -31,11 +42,12 @@ namespace PhysicsEngine.Manager
     {
         private readonly Dictionary<int, Shot> _shots = new Dictionary<int, Shot>();
 
-        public Shot GetShot(int i)
+        public ShotManager()
+        { }
+
+        public void Clear()
         {
-            if (_shots.ContainsKey(i))
-                return _shots[i];
-            return new Shot();
+            _shots.Clear();
         }
 
         public int CreateShot()
@@ -43,51 +55,75 @@ namespace PhysicsEngine.Manager
             return FirstSlot();
         }
 
-        public int NewShot(short parentBot, short shotType, float value, float startEnergy, float startRange,
-                    [MarshalAs(UnmanagedType.BStr)] string fromSpecies,
-            [MarshalAs(UnmanagedType.Bool)] bool fromVeg,
-            int color, short memoryLocation, short memoryValue, float shotAim, Vector startPosition,
-            Vector startVelocity,
-            [MarshalAs(UnmanagedType.Bool)] bool offset = false)
+        public void DeleteShot(int a)
         {
-            var i = FirstSlot();
+            _shots.Remove(a);
+        }
 
-            if (i == -1)
-                return -1; // Ran out of spaces for shots, return an invalid ID
+        public int GetMaxShot()
+        {
+            return _shots.Count > 0 ? _shots.Select(kvp => kvp.Key).Max() : 1;
+        }
 
-            var shot = new Shot
+        public Shot GetShot(int i)
+        {
+            Shot? res = null;
+
+            if (_shots.ContainsKey(i))
+                res = _shots[i];
+
+            if (res == null)
             {
-                Exists = true,
-                Age = 0,
-                Parent = parentBot,
-                FromSpecies = fromSpecies,
-                FromVeg = fromVeg,
-                Color = color,
-                Value = (float)Math.Round(value)
-            };
-
-            if (shotType > 0 || shotType == -100)
-                shot.Type = shotType;
-            else
-            {
-                shot.Type = (short)-(Math.Abs(shotType) % 8);
-                if (shot.Type == 0) shot.Type = -8;
+                res = new Shot();
+                _shots[i] = res.Value;
             }
 
-            if (shot.Type == -2)
-                shot.Color = 0xFFFFFF;
+            return res.Value;
+        }
 
-            shot.MemoryLocation = memoryLocation;
-            shot.MemoryValue = memoryValue;
-            shot.Position = startPosition;
-            shot.Velocity = startVelocity;
-            shot.OldPosition = startPosition - startVelocity;
-            shot.Energy = startEnergy;
-            shot.Range = startRange;
+        public void LoadShots(string file)
+        {
+            try
+            {
+                var newShots = JsonSerializer.Deserialize<Dictionary<int, Shot>>(File.ReadAllText(file));
 
-            _shots[i] = shot;
+                _shots.Clear();
 
-            return i;
+                foreach (var kvp in newShots)
+                    _shots.Add(kvp.Key, kvp.Value);
+            }
+            catch (IOException ex)
+            {
+                Debug.WriteLine($"Could not read shots : {ex}");
+            }
+        }
+
+        public void SaveShots(string file)
+        {
+            try
+            {
+                ClearRemoved();
+                File.WriteAllText(file, JsonSerializer.Serialize(_shots, new JsonSerializerOptions { IncludeFields = true }));
+            }
+            catch (IOException ex)
+            {
+                Debug.WriteLine($"Could not write shots : {ex}");
+            }
+        }
+
+        public void SetShot(int i, ref Shot value)
+        {
+            if (value.Exists)
+                _shots[i] = value;
+            else
+                _shots.Remove(i);
+        }
+
+        private void ClearRemoved()
+        {
+            var keys = _shots.Where(s => !s.Value.Exists).Select(s => s.Key).ToList();
+            foreach (var key in keys)
+                _shots.Remove(key);
         }
 
         private int FirstSlot()

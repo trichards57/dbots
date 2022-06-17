@@ -7,11 +7,6 @@ Private Type boolstack
   pos As Integer
 End Type
 
-Type block
-  tipo As Integer
-  value As Integer
-End Type
-
 Dim CurrentFlow As Byte
 Const CLEAR As Byte = 0
 Const COND As Byte = 1
@@ -83,8 +78,8 @@ Private Sub ExecuteDNA(ByVal n As Integer)
   With rob(n)
   a = 1
   rob(n).condnum = 0 ' EricL 4/6/2006 reset the COND statement counter to 0
-  While Not (.dna(a).tipo = 10 And .dna(a).value = 1) And a <= 32000 And a < UBound(.dna) 'Botsareus 6/16/2012 Added upper bounds check (This seems like overkill but I had situations where 'end' command did not exisit)
-    tipo = .dna(a).tipo
+  While Not (.dna(a).type = 10 And .dna(a).value = 1) And a <= 32000 And a < UBound(.dna) 'Botsareus 6/16/2012 Added upper bounds check (This seems like overkill but I had situations where 'end' command did not exisit)
+    tipo = .dna(a).type
     Select Case tipo
       Case 0 'number
         If CurrentFlow <> CLEAR Then

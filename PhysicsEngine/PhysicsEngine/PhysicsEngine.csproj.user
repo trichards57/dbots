@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Program Files %28x86%29\Microsoft Visual Studio\VB98\VB6.EXE</StartProgram>
-    <StartArguments>"C:\Users\trich\source\repos\dbots\Darwinbots2\Iersera.vbp"</StartArguments>
+    <StartArguments>"C:\Users\trich\source\repos\trichards57\dbots\Darwinbots2\Iersera.vbp"</StartArguments>
     <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
 </Project>

@@ -8,15 +8,15 @@ Begin VB.Form optionsform
    AutoRedraw      =   -1  'True
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Simulation Settings"
-   ClientHeight    =   6765
-   ClientLeft      =   45
-   ClientTop       =   285
+   ClientHeight    =   6768
+   ClientLeft      =   48
+   ClientTop       =   288
    ClientWidth     =   10560
    KeyPreview      =   -1  'True
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   6765
+   ScaleHeight     =   6768
    ScaleWidth      =   10560
    ShowInTaskbar   =   0   'False
    StartUpPosition =   2  'CenterScreen
@@ -81,7 +81,7 @@ Begin VB.Form optionsform
       Top             =   0
       Width           =   10500
       _ExtentX        =   18521
-      _ExtentY        =   11800
+      _ExtentY        =   11811
       _Version        =   393216
       Style           =   1
       Tabs            =   6
@@ -121,32 +121,32 @@ Begin VB.Form optionsform
       TabCaption(2)   =   "Physics and Costs"
       TabPicture(2)   =   "OptionsForm.frx":0038
       Tab(2).ControlEnabled=   0   'False
-      Tab(2).Control(0)=   "Frame21"
-      Tab(2).Control(1)=   "Frame20"
+      Tab(2).Control(0)=   "Frame20"
+      Tab(2).Control(1)=   "Frame21"
       Tab(2).ControlCount=   2
       TabCaption(3)   =   "Mutations"
       TabPicture(3)   =   "OptionsForm.frx":0054
       Tab(3).ControlEnabled=   0   'False
-      Tab(3).Control(0)=   "Frame13"
+      Tab(3).Control(0)=   "DisableMutationsCheck"
       Tab(3).Control(1)=   "Frame14"
-      Tab(3).Control(2)=   "DisableMutationsCheck"
+      Tab(3).Control(2)=   "Frame13"
       Tab(3).ControlCount=   3
       TabCaption(4)   =   "Restart and League"
       TabPicture(4)   =   "OptionsForm.frx":0070
       Tab(4).ControlEnabled=   0   'False
-      Tab(4).Control(0)=   "Label19"
-      Tab(4).Control(1)=   "Restart"
-      Tab(4).Control(2)=   "Frame7"
-      Tab(4).Control(3)=   "btnSetF1"
-      Tab(4).Control(4)=   "btnSetF2"
-      Tab(4).Control(5)=   "btnSetSB"
+      Tab(4).Control(0)=   "btnSetSB"
+      Tab(4).Control(1)=   "btnSetF2"
+      Tab(4).Control(2)=   "btnSetF1"
+      Tab(4).Control(3)=   "Frame7"
+      Tab(4).Control(4)=   "Restart"
+      Tab(4).Control(5)=   "Label19"
       Tab(4).ControlCount=   6
       TabCaption(5)   =   "Internet"
       TabPicture(5)   =   "OptionsForm.frx":008C
       Tab(5).ControlEnabled=   0   'False
-      Tab(5).Control(0)=   "Label41"
+      Tab(5).Control(0)=   "Simulazione"
       Tab(5).Control(1)=   "Label42"
-      Tab(5).Control(2)=   "Simulazione"
+      Tab(5).Control(2)=   "Label41"
       Tab(5).ControlCount=   3
       Begin VB.CommandButton btnSetSB 
          Caption         =   "Set SB settings"
@@ -299,8 +299,8 @@ Begin VB.Form optionsform
             ToolTipText     =   "Maximum bot velocity"
             Top             =   3840
             Width           =   4215
-            _ExtentX        =   7435
-            _ExtentY        =   873
+            _ExtentX        =   7430
+            _ExtentY        =   868
             _Version        =   393216
             LargeChange     =   36
             SmallChange     =   5
@@ -315,8 +315,8 @@ Begin VB.Form optionsform
             ToolTipText     =   "Controls how elastic bots act during collisions."
             Top             =   4680
             Width           =   4215
-            _ExtentX        =   7435
-            _ExtentY        =   873
+            _ExtentX        =   7430
+            _ExtentY        =   868
             _Version        =   393216
             LargeChange     =   1
             Min             =   -10
@@ -471,8 +471,8 @@ Begin VB.Form optionsform
                TabIndex        =   139
                Top             =   480
                Width           =   2415
-               _ExtentX        =   4260
-               _ExtentY        =   370
+               _ExtentX        =   4255
+               _ExtentY        =   381
                _Version        =   393216
                LargeChange     =   1
                Min             =   1
@@ -546,8 +546,8 @@ Begin VB.Form optionsform
                TabIndex        =   135
                Top             =   240
                Width           =   255
-               _ExtentX        =   450
-               _ExtentY        =   503
+               _ExtentX        =   445
+               _ExtentY        =   508
                _Version        =   327681
                BuddyControl    =   "CustomWaste"
                BuddyDispid     =   196650
@@ -844,8 +844,8 @@ Begin VB.Form optionsform
                   ToolTipText     =   "Set the gradient for light transmission through the water. A value of zero means no light reduction at any depth."
                   Top             =   780
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   Value           =   1
                   BuddyControl    =   "Gradient"
@@ -867,8 +867,8 @@ Begin VB.Form optionsform
                   ToolTipText     =   "Set the light intensity to feed your veggies"
                   Top             =   480
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   BuddyControl    =   "LightText"
                   BuddyDispid     =   196666
@@ -916,8 +916,8 @@ Begin VB.Form optionsform
                   ToolTipText     =   "When a veg gets NRG, what percentage should go into body points?"
                   Top             =   240
                   Width           =   2355
-                  _ExtentX        =   4154
-                  _ExtentY        =   1005
+                  _ExtentX        =   4149
+                  _ExtentY        =   1016
                   _Version        =   393216
                   LargeChange     =   10
                   Max             =   100
@@ -1002,8 +1002,8 @@ Begin VB.Form optionsform
                   TabIndex        =   108
                   Top             =   1040
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   487
                   _Version        =   327681
                   BuddyControl    =   "RepopAmountText"
                   BuddyDispid     =   196675
@@ -1021,8 +1021,8 @@ Begin VB.Form optionsform
                   TabIndex        =   109
                   Top             =   280
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   Value           =   1
                   BuddyControl    =   "MaxPopText"
@@ -1044,8 +1044,8 @@ Begin VB.Form optionsform
                   TabIndex        =   110
                   Top             =   660
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   Value           =   100
                   BuddyControl    =   "MinVegText"
@@ -1068,8 +1068,8 @@ Begin VB.Form optionsform
                   TabIndex        =   111
                   Top             =   1380
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   BuddyControl    =   "RepopCooldownText"
                   BuddyDispid     =   196674
@@ -1196,8 +1196,8 @@ Begin VB.Form optionsform
                   ToolTipText     =   "Set how fast you want your corpses to decay away."
                   Top             =   240
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   BuddyControl    =   "DecayText"
                   BuddyDispid     =   196685
@@ -1218,8 +1218,8 @@ Begin VB.Form optionsform
                   ToolTipText     =   "Set how fast you want your corpses to decay away."
                   Top             =   600
                   Width           =   255
-                  _ExtentX        =   450
-                  _ExtentY        =   503
+                  _ExtentX        =   445
+                  _ExtentY        =   508
                   _Version        =   327681
                   BuddyControl    =   "FrequencyText"
                   BuddyDispid     =   196684
@@ -1308,8 +1308,8 @@ Begin VB.Form optionsform
                ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
                Top             =   3240
                Width           =   255
-               _ExtentX        =   450
-               _ExtentY        =   450
+               _ExtentX        =   445
+               _ExtentY        =   445
                _Version        =   327681
                Value           =   200
                OrigLeft        =   4320
@@ -1328,8 +1328,8 @@ Begin VB.Form optionsform
                ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
                Top             =   480
                Width           =   255
-               _ExtentX        =   450
-               _ExtentY        =   503
+               _ExtentX        =   445
+               _ExtentY        =   508
                _Version        =   327681
                Value           =   100
                BuddyControl    =   "ChartInterval"
@@ -1376,7 +1376,7 @@ Begin VB.Form optionsform
          Width           =   1095
       End
       Begin VB.ListBox SpecList 
-         Height          =   2400
+         Height          =   2352
          ItemData        =   "OptionsForm.frx":03C3
          Left            =   240
          List            =   "OptionsForm.frx":03C5
@@ -1459,8 +1459,8 @@ Begin VB.Form optionsform
             TabIndex        =   43
             Top             =   1005
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   582
+            _ExtentX        =   445
+            _ExtentY        =   572
             _Version        =   327681
             Value           =   100000
             BuddyControl    =   "CyclesHi"
@@ -1482,8 +1482,8 @@ Begin VB.Form optionsform
             TabIndex        =   44
             Top             =   1500
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   582
+            _ExtentX        =   445
+            _ExtentY        =   593
             _Version        =   327681
             Value           =   10000
             BuddyControl    =   "CyclesLo"
@@ -1533,8 +1533,8 @@ Begin VB.Form optionsform
             TabIndex        =   33
             Top             =   420
             Width           =   4215
-            _ExtentX        =   7435
-            _ExtentY        =   397
+            _ExtentX        =   7430
+            _ExtentY        =   402
             _Version        =   393216
             LargeChange     =   1
             Min             =   -5
@@ -1562,7 +1562,7 @@ Begin VB.Form optionsform
             Caption         =   "1 X"
             BeginProperty Font 
                Name            =   "MS Sans Serif"
-               Size            =   8.25
+               Size            =   7.8
                Charset         =   0
                Weight          =   700
                Underline       =   0   'False
@@ -1579,7 +1579,7 @@ Begin VB.Form optionsform
             Caption         =   "alta"
             BeginProperty Font 
                Name            =   "MS Sans Serif"
-               Size            =   8.25
+               Size            =   7.8
                Charset         =   0
                Weight          =   700
                Underline       =   0   'False
@@ -1597,7 +1597,7 @@ Begin VB.Form optionsform
             Caption         =   "bassa"
             BeginProperty Font 
                Name            =   "MS Sans Serif"
-               Size            =   8.25
+               Size            =   7.8
                Charset         =   0
                Weight          =   700
                Underline       =   0   'False
@@ -1666,8 +1666,8 @@ Begin VB.Form optionsform
             TabIndex        =   26
             Top             =   1140
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   5
             BuddyControl    =   "txtMaxRounds"
@@ -1685,8 +1685,8 @@ Begin VB.Form optionsform
             TabIndex        =   27
             Top             =   720
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   5
             BuddyControl    =   "txtMinRounds"
@@ -1850,8 +1850,8 @@ Begin VB.Form optionsform
             Top             =   3000
             Visible         =   0   'False
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             BuddyControl    =   "Prop"
             BuddyDispid     =   196739
@@ -1901,8 +1901,8 @@ Begin VB.Form optionsform
             TabIndex        =   13
             Top             =   2520
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             BuddyControl    =   "Fixed"
             BuddyDispid     =   196738
@@ -1992,9 +1992,10 @@ Begin VB.Form optionsform
          TabIndex        =   79
          Top             =   4680
          Width           =   3495
-         _ExtentX        =   6165
-         _ExtentY        =   1720
+         _ExtentX        =   6160
+         _ExtentY        =   1715
          _Version        =   393217
+         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"OptionsForm.frx":0547
@@ -2222,8 +2223,8 @@ Begin VB.Form optionsform
             ToolTipText     =   "Set the initial number of copies for this robot type"
             Top             =   480
             Width           =   240
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             BuddyControl    =   "SpecQty"
             BuddyDispid     =   196759
@@ -2243,8 +2244,8 @@ Begin VB.Form optionsform
             ToolTipText     =   "Initial energy assigned to this type"
             Top             =   1440
             Width           =   240
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   1000
             BuddyControl    =   "SpecNrg"
@@ -2332,8 +2333,8 @@ Begin VB.Form optionsform
             AutoRedraw      =   -1  'True
             Height          =   1695
             Left            =   120
-            ScaleHeight     =   1635
-            ScaleWidth      =   2715
+            ScaleHeight     =   1644
+            ScaleWidth      =   2724
             TabIndex        =   48
             Top             =   2760
             Width           =   2775
@@ -2343,8 +2344,8 @@ Begin VB.Form optionsform
                FillStyle       =   0  'Solid
                Height          =   1455
                Left            =   120
-               ScaleHeight     =   1395
-               ScaleWidth      =   2475
+               ScaleHeight     =   1404
+               ScaleWidth      =   2484
                TabIndex        =   51
                Top             =   120
                Width           =   2535
@@ -2358,8 +2359,8 @@ Begin VB.Form optionsform
                Height          =   135
                Index           =   0
                Left            =   600
-               ScaleHeight     =   135
-               ScaleWidth      =   1215
+               ScaleHeight     =   132
+               ScaleWidth      =   1212
                TabIndex        =   50
                Top             =   960
                Visible         =   0   'False
@@ -2374,8 +2375,8 @@ Begin VB.Form optionsform
                Height          =   255
                Index           =   0
                Left            =   1200
-               ScaleHeight     =   255
-               ScaleWidth      =   255
+               ScaleHeight     =   252
+               ScaleWidth      =   252
                TabIndex        =   49
                Top             =   960
                Visible         =   0   'False
@@ -3382,7 +3383,7 @@ nextR = 0
     
     ReDim dbls(UBound(rob(0).dna))
     For x = 0 To UBound(rob(0).dna)
-    dbls(x) = Rnd(-(angle(0, 0, Rnd(-rob(0).dna(x).value) - 0.5, Rnd(-rob(0).dna(x).tipo) - 0.5)))
+    dbls(x) = Rnd(-(angle(0, 0, Rnd(-rob(0).dna(x).value) - 0.5, Rnd(-rob(0).dna(x).type) - 0.5)))
     Next 'pre seeds
     
     For x = 0 To UBound(rob(0).dna)

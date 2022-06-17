@@ -11,6 +11,8 @@ namespace PhysicsEngine.Model
         [MarshalAs(UnmanagedType.SafeArray)]
         public Block[] Dna;
 
+        public int DnaLength;
+
         public float Energy;
 
         [MarshalAs(UnmanagedType.Bool)]
@@ -25,6 +27,7 @@ namespace PhysicsEngine.Model
         [MarshalAs(UnmanagedType.Bool)]
         public bool FromVeg;
 
+        public short GeneNumber;
         public short MemoryLocation;
 
         public short MemoryValue;

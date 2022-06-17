@@ -15,14 +15,14 @@ Public savingtofile As Boolean 'make sure that when we are saving to file do not
 Public Sub calc_dnamatrix()
 'calculate dna matrix
 Dim result As String
-Dim y As block
+Dim y As Block
 Dim y_tipo As Byte
 Dim y_value As Byte
 Dim count As Byte
 
 For y_tipo = 0 To 8
  For y_value = 0 To 13
-  y.tipo = y_tipo + 2
+  y.type = y_tipo + 2
   y.value = y_value + 1
   Parse result, y
   If result <> "" Then
@@ -157,14 +157,14 @@ here:
   If DNApos > UBound(rob(n).dna()) Then
     ReDim Preserve rob(n).dna(DNApos + 1)
   End If
-  rob(n).dna(DNApos).tipo = 10
+  rob(n).dna(DNApos).type = 10
   rob(n).dna(DNApos).value = 1
   'ReDim Preserve rob(n).DNA(DnaLen(rob(n).DNA())) ' EricL commented out March 15, 2006
   ReDim Preserve rob(n).dna(DNApos)  'EricL - Added March 15, 2006
   'Botsareus 6/5/2013 Bug fix to do with leading zero on def
   If useref Then
-    If rob(n).dna(0).tipo = 0 And rob(n).dna(0).value = 0 And _
-       Not rob(n).dna(1).tipo = 9 _
+    If rob(n).dna(0).type = 0 And rob(n).dna(0).value = 0 And _
+       Not rob(n).dna(1).type = 9 _
     Then
         For DNApos = 0 To UBound(rob(n).dna) - 1
             rob(n).dna(DNApos) = rob(n).dna(DNApos + 1)
@@ -238,12 +238,12 @@ End Function
 ' this is all done byref, so be sure to understand that your variables
 ' WILL change after going through this subfunction.  Be sure to save any
 ' data you don't want modified elsewhere
-Public Sub Parse(ByRef Command As String, ByRef bp As block, Optional n As Integer = 0, Optional converttosysvar As Boolean = True)
+Public Sub Parse(ByRef Command As String, ByRef bp As Block, Optional n As Integer = 0, Optional converttosysvar As Boolean = True)
   Dim detok As Boolean
   detok = IIf(Command = "", True, False)
   
   If detok Then
-    Select Case bp.tipo
+    Select Case bp.type
       Case 0 'number
         If converttosysvar = True Then
           Command = SysvarDetok(bp.value, n)
@@ -284,10 +284,10 @@ Public Sub Parse(ByRef Command As String, ByRef bp As block, Optional n As Integ
     If bp.value = 0 Then bp = FlowTok(LCase(Command))
     If bp.value = 0 Then bp = MasterFlowTok(LCase(Command))
     If bp.value = 0 And Left(Command, 1) = "*" Then
-      bp.tipo = 1
+      bp.type = 1
       bp.value = SysvarTok(Right(Command, Len(Command) - 1), n)
     ElseIf bp.value = 0 Then
-      bp.tipo = 0
+      bp.type = 0
       bp.value = SysvarTok(Command, n)
     End If
   End If
@@ -371,9 +371,9 @@ Private Function BasicCommandDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function BasicCommandTok(s As String) As block
+Private Function BasicCommandTok(s As String) As Block
   BasicCommandTok.value = 0
-  BasicCommandTok.tipo = 2
+  BasicCommandTok.type = 2
   Select Case s
     Case "add"
       BasicCommandTok.value = 1
@@ -446,9 +446,9 @@ Private Function AdvancedCommandDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function AdvancedCommandTok(s As String) As block
+Private Function AdvancedCommandTok(s As String) As Block
   AdvancedCommandTok.value = 0
-  AdvancedCommandTok.tipo = 3
+  AdvancedCommandTok.type = 3
   Select Case s
     Case "angle"
       AdvancedCommandTok.value = 1
@@ -501,9 +501,9 @@ Private Function BitwiseCommandDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function BitwiseCommandTok(s As String) As block
+Private Function BitwiseCommandTok(s As String) As Block
   BitwiseCommandTok.value = 0
-  BitwiseCommandTok.tipo = 4
+  BitwiseCommandTok.type = 4
   Select Case s
     Case "~"
       BitwiseCommandTok.value = 1
@@ -552,9 +552,9 @@ Private Function ConditionsDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function ConditionsTok(s As String) As block
+Private Function ConditionsTok(s As String) As Block
   ConditionsTok.value = 0
-  ConditionsTok.tipo = 5
+  ConditionsTok.type = 5
   Select Case s
     Case "<"
       ConditionsTok.value = 1
@@ -607,9 +607,9 @@ Private Function LogicDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function LogicTok(s As String) As block
+Private Function LogicTok(s As String) As Block
   LogicTok.value = 0
-  LogicTok.tipo = 6
+  LogicTok.type = 6
   Select Case s
     Case "and"
       LogicTok.value = 1
@@ -670,9 +670,9 @@ Private Function StoresDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function StoresTok(s As String) As block
+Private Function StoresTok(s As String) As Block
   StoresTok.value = 0
-  StoresTok.tipo = 7
+  StoresTok.type = 7
   Select Case s
     Case "store"
       StoresTok.value = 1
@@ -721,9 +721,9 @@ Private Function FlowDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function FlowTok(s As String) As block
+Private Function FlowTok(s As String) As Block
   FlowTok.value = 0
-  FlowTok.tipo = 9
+  FlowTok.type = 9
   Select Case s
     Case "cond"
       FlowTok.value = 1
@@ -746,8 +746,8 @@ Private Function MasterFlowDetok(n As Integer) As String
   End Select
 End Function
 
-Private Function MasterFlowTok(s As String) As block
-  MasterFlowTok.tipo = 10
+Private Function MasterFlowTok(s As String) As Block
+  MasterFlowTok.type = 10
   Select Case s
     Case "end"
       MasterFlowTok.value = 1
@@ -3169,7 +3169,7 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
   Dim coding As Boolean
   
   Dim x As Integer
-  Dim dna() As block
+  Dim dna() As Block
   Dim vlen As Integer
   Dim Insert As Integer
   dna = rob(n).dna
@@ -3198,13 +3198,13 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
   t = 1
   gene = 0
   lastgene = 0
-  While Not (dna(t).tipo = 10 And dna(t).value = 1)
+  While Not (dna(t).type = 10 And dna(t).value = 1)
     
     temp = ""
    'Gene breaks
     With rob(n)
       ' If a Start or Else
-      If dna(t).tipo = 9 And (dna(t).value = 2 Or dna(t).value = 3) Then
+      If dna(t).type = 9 And (dna(t).value = 2 Or dna(t).value = 3) Then
         If coding And Not ingene Then ' if terminating a coding region and not following a cond
            DetokenizeDNA = DetokenizeDNA + vbCrLf + "''''''''''''''''''''''''  " + "Gene: " + Str(gene) + " Ends at position " + Str(t - 1) + "  '''''''''''''''''''''''"
         End If
@@ -3216,7 +3216,7 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
         coding = True
       End If
       ' If a Cond
-      If dna(t).tipo = 9 And (dna(t).value = 1) Then
+      If dna(t).type = 9 And (dna(t).value = 1) Then
         If coding Then ' indicate gene ended before cond base pair
           DetokenizeDNA = DetokenizeDNA + vbCrLf + "''''''''''''''''''''''''  " + "Gene: " + Str(gene) + " Ends at position " + Str(t - 1) + "  '''''''''''''''''''''''" + vbCrLf
         End If
@@ -3225,7 +3225,7 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
         coding = True
       End If
       ' If a stop
-      If dna(t).tipo = 9 And dna(t).value = 4 Then
+      If dna(t).type = 9 And dna(t).value = 4 Then
         If coding Then GeneEnd = True
         ingene = False
         coding = False
@@ -3248,12 +3248,12 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
       lastgene = gene
     End If
        
-    converttosysvar = IIf(dna(t + 1).tipo = 7, True, False)
+    converttosysvar = IIf(dna(t + 1).type = 7, True, False)
     Parse temp, dna(t), n, converttosysvar
     If temp = "" Then temp = "VOID" 'alert user that there is an invalid DNA entry.
       'This is probably a BUG!
     
-    tempint = dna(t).tipo
+    tempint = dna(t).type
     
     'formatting
     If tempint = 5 Or tempint = 6 Or tempint = 7 Or tempint = 9 Then temp = temp + vbCrLf
@@ -3268,7 +3268,7 @@ Public Function DetokenizeDNA(n As Integer, Optional Position As Integer) As Str
     If Position > 0 And t = Position Then DetokenizeDNA = DetokenizeDNA & " '[<POSITION MARKER]" & Chr(13) & Chr(10) 'Botsareus 2/25/2013 Makes the program easy to debug
     t = t + 1
   Wend
-   If Not (dna(t - 1).tipo = 9 And dna(t - 1).value = 4) And coding Then ' End of DNA without a stop.
+   If Not (dna(t - 1).type = 9 And dna(t - 1).value = 4) And coding Then ' End of DNA without a stop.
     DetokenizeDNA = DetokenizeDNA + "''''''''''''''''''''''''  " + "Gene: " + Str(gene) + " Ends at position " + Str(t - 1) + "  '''''''''''''''''''''''" + vbCrLf
   End If
 

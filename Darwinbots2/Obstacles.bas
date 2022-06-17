@@ -411,7 +411,10 @@ End Function
 Public Function DoShotObstacleCollisions(ByVal n As Long)
 Dim i As Integer
   
-  With Shots(n)
+  Dim s As Shot
+  s = ShotManager.GetShot(n)
+  
+  With s
   For i = 1 To numObstacles
     If Obstacles(i).exist Then
       If .Position.x >= Obstacles(i).pos.x And _
@@ -429,6 +432,8 @@ Dim i As Integer
     End If
   Next i
   End With
+  
+  ShotManager.SetShot n, s
 End Function
 
 Public Function DoObstacleCollisions(n As Integer)

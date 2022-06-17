@@ -9,3 +9,8 @@ lastran.set
 /PhysicsEngine/Debug
 /PhysicsEngine/x64
 /PhysicsEngine/.vs
+/.vs
+/Darwinbots2/saves
+/DBLaunch/DBLaunch/obj
+/LocalDBIM/DarwinBotsIM/obj
+/PhysicsEngine/packages

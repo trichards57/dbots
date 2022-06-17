@@ -425,11 +425,11 @@ Public Sub makeoccurrlist(n As Integer)
     Next t
     t = 1
     k = 1
-    While Not (.dna(t).tipo = 10 And .dna(t).value = 1) And t <= 32000 And t < UBound(.dna) 'Botsareus 6/16/2012 Added code to check upper bounds
+    While Not (.dna(t).type = 10 And .dna(t).value = 1) And t <= 32000 And t < UBound(.dna) 'Botsareus 6/16/2012 Added code to check upper bounds
       
-      If .dna(t).tipo = 0 Then 'number
+      If .dna(t).type = 0 Then 'number
       
-        If .dna(t + 1).tipo = 7 Then 'DNA is going to store to this value, so it's probably a sysvar
+        If .dna(t + 1).type = 7 Then 'DNA is going to store to this value, so it's probably a sysvar
           
           If .dna(t).value < 8 And .dna(t).value > 0 Then 'if we are dealing with one of the first 8 sysvars
             .occurr(.dna(t).value) = .occurr(.dna(t).value) + 1 'then the occur listing for this fxn is incremented
@@ -451,7 +451,7 @@ Public Sub makeoccurrlist(n As Integer)
         
       End If
       
-      If .dna(t).tipo = 1 Then '*number
+      If .dna(t).type = 1 Then '*number
         If .dna(t).value > 500 And .dna(t).value < 510 Then 'the bot is referencing an eye
           .occurr(8) = .occurr(8) + 1 'eyes
         End If

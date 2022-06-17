@@ -184,8 +184,6 @@ Private Type PhysicBot
   AddedMass As Single
 End Type
 
-Private Declare Function UpdateBotPosition Lib "PhysicEngine" Alias "_UpdateBotPosition@8" (ByRef bot As PhysicBot, ByVal maxSpeed As Single, ByVal ZeroMomentum As Boolean) As Long
-
 ' robot structure
 Private Type robot
 
@@ -274,7 +272,7 @@ Private Type robot
   ' virtual machine
   epimem(14) As Integer
   mem(1000) As Integer      ' memory array
-  dna() As block            ' program array
+  dna() As Block            ' program array
   
   lastopp As Long           ' Index of last object in the focus eye.  Could be a bot or shape or something else.
   lastopptype As Integer    ' Indicates the type of lastopp.
@@ -347,7 +345,7 @@ Private Type robot
   SubSpecies As Integer             ' Indicates this bot's subspecies.  Changed when mutation or virus infection occurs
   fertilized As Integer             ' If non-zero, indicates this bot has been fertilized via a sperm shot.  This bot can choose to sexually reproduce
                                     ' with this DNA until the counter hits 0.  Will be zero if unfertilized.
-  spermDNA() As block               ' Contains the DNA this bot has been fertilized with.
+  spermDNA() As Block               ' Contains the DNA this bot has been fertilized with.
   spermDNAlen As Integer
   
   tag As String * 50
@@ -549,10 +547,10 @@ ReDim ndna2(length2)
 
 'if step is 1 then normal nucli
 For t = 0 To UBound(rob(r1).dna)
- ndna1(t).nucli = DNAtoInt(rob(r1).dna(t).tipo, rob(r1).dna(t).value)
+ ndna1(t).nucli = DNAtoInt(rob(r1).dna(t).type, rob(r1).dna(t).value)
 Next
 For t = 0 To UBound(rob(r2).dna)
- ndna2(t).nucli = DNAtoInt(rob(r2).dna(t).tipo, rob(r2).dna(t).value)
+ ndna2(t).nucli = DNAtoInt(rob(r2).dna(t).type, rob(r2).dna(t).value)
 Next
       
 'Step3 Figure out genetic distance
@@ -561,7 +559,7 @@ simplematch ndna1, ndna2
 DoGeneticDistance = GeneticDistance(ndna1, ndna2)
 End Function
 
-Private Sub crossover(ByRef rob1() As block2, ByRef rob2() As block2, ByRef Outdna() As block)
+Private Sub crossover(ByRef rob1() As block2, ByRef rob2() As block2, ByRef Outdna() As Block)
 Dim i As Integer 'layer
 Dim n1 As Integer 'start pos
 Dim n2 As Integer
@@ -599,13 +597,13 @@ If res1 - n1 > 0 And res2 - n2 > 0 Then 'run both sides
     If Int(rndy * 2) = 0 Then 'which side?
         ReDim Preserve Outdna(upperbound + res1 - n1)
         For a = n1 To res1 - 1
-            Outdna(upperbound + 1 + a - n1).tipo = rob1(a).tipo
+            Outdna(upperbound + 1 + a - n1).type = rob1(a).tipo
             Outdna(upperbound + 1 + a - n1).value = rob1(a).value
         Next
     Else
         ReDim Preserve Outdna(upperbound + res2 - n2)
         For a = n2 To res2 - 1
-            Outdna(upperbound + 1 + a - n2).tipo = rob2(a).tipo
+            Outdna(upperbound + 1 + a - n2).type = rob2(a).tipo
             Outdna(upperbound + 1 + a - n2).value = rob2(a).value
         Next
     End If
@@ -613,7 +611,7 @@ ElseIf res1 - n1 > 0 Then 'run one side
     If Int(rndy * 2) = 0 Then
         ReDim Preserve Outdna(upperbound + res1 - n1)
         For a = n1 To res1 - 1
-            Outdna(upperbound + 1 + a - n1).tipo = rob1(a).tipo
+            Outdna(upperbound + 1 + a - n1).type = rob1(a).tipo
             Outdna(upperbound + 1 + a - n1).value = rob1(a).value
         Next
     End If
@@ -621,7 +619,7 @@ ElseIf res2 - n2 > 0 Then 'run other side
     If Int(rndy * 2) = 0 Then
         ReDim Preserve Outdna(upperbound + res2 - n2)
         For a = n2 To res2 - 1
-            Outdna(upperbound + 1 + a - n2).tipo = rob2(a).tipo
+            Outdna(upperbound + 1 + a - n2).type = rob2(a).tipo
             Outdna(upperbound + 1 + a - n2).value = rob2(a).value
         Next
     End If
@@ -638,7 +636,7 @@ ReDim Preserve Outdna(upperbound + resn - nn)
 whatside = Int(rndy * 2) = 0
 
 For a = nn To resn - 1
-    Outdna(upperbound + 1 + a - nn).tipo = IIf(whatside, rob1(a).tipo, rob2(a - nn + res2).tipo) 'left hand side or right hand?
+    Outdna(upperbound + 1 + a - nn).type = IIf(whatside, rob1(a).tipo, rob2(a - nn + res2).tipo) 'left hand side or right hand?
     Outdna(upperbound + 1 + a - nn).value = IIf(IIf(rob1(a).tipo = rob2(a - nn + res2).tipo And Abs(rob1(a).value) > 999 And Abs(rob2(a - nn + res2).value) > 999, Int(rndy * 2) = 0, whatside), rob1(a).value, rob2(a - nn + res2).value)  'if typo is different or in var range then all left/right hand, else choose a random side
 Next
 Loop
@@ -778,26 +776,37 @@ End Function
 Public Sub UpdatePosition(ByVal n As Integer)
   Dim t As Integer
   Dim vt As Single
- 
+  
   With rob(n)
   
-  Dim bot As PhysicBot
-  bot.AddedMass = .AddedMass
-  bot.Fixed = .Fixed
-  bot.impulseInd = .impulseInd
-  bot.mass = .mass
-  bot.pos = .pos
-  bot.vel = .vel
+  'Following line commented out since mass is set earlier in CalcMass
+  '.mass = (.body / 1000) + (.shell / 200) 'set value for mass
+  If .mass + .AddedMass < 0.25 Then .mass = 0.25 - .AddedMass ' a fudge since Euler approximation can't handle it when mass -> 0
   
-  UpdateBotPosition bot, SimOpts.MaxVelocity, SimOpts.ZeroMomentum
-  .pos = bot.pos
-  .vel = bot.vel
-  UpdateBotBucket n
-  
+  If Not .Fixed Then
+    ' speed normalization
+    
+    .vel = VectorAdd(.vel, VectorScalar(.impulseInd, 1 / (.mass + .AddedMass)))
+        
+    vt = VectorMagnitudeSquare(.vel)
+    If vt > SimOpts.MaxVelocity * SimOpts.MaxVelocity Then
+      .vel = VectorScalar(VectorUnit(.vel), SimOpts.MaxVelocity)
+      vt = SimOpts.MaxVelocity * SimOpts.MaxVelocity
+    End If
+    
+    .pos = VectorAdd(.pos, .vel)
+    UpdateBotBucket n
+   ' If .pos.x > 10000000 Then t = 1 / 0 ' Crash inducing line for debugging
+  Else
+    .vel = VectorSet(0, 0)
+  End If
+    
   'Have to do these here for both fixed and unfixed bots to avoid build up of forces in case fixed bots become unfixed.
   .impulseInd = VectorSet(0, 0)
   .ImpulseRes = .impulseInd
   .ImpulseStatic = 0
+  
+  If SimOpts.ZeroMomentum = True Then .vel = VectorSet(0, 0)
   
   .lastup = .mem(dirup)
   .lastdown = .mem(dirdn)
@@ -808,7 +817,7 @@ Public Sub UpdatePosition(ByVal n As Integer)
   .mem(dirdx) = 0
   .mem(dirsx) = 0
   
-  .mem(velscalar) = iceil(VectorMagnitude(.vel))
+  .mem(velscalar) = iceil(Sqr(vt))
   .mem(vel) = iceil(Cos(.aim) * .vel.x + Sin(.aim) * .vel.y * -1)
   .mem(veldn) = .mem(vel) * -1
   .mem(veldx) = iceil(Sin(.aim) * .vel.x + Cos(.aim) * .vel.y)
@@ -1022,7 +1031,7 @@ Dim length As Long
   
   'shoot it!
   If .mem(VshootSys) <> 0 And .Vtimer = 1 Then 'Botsareus 10/5/2015 Bugfix for negative values in vshoot
-    If .virusshot <= maxshotarray And .virusshot > 0 Then Vshoot n, rob(n).virusshot
+    If .virusshot <= ShotManager.GetMaxShot() And .virusshot > 0 Then Vshoot n, rob(n).virusshot
     
     .mem(VshootSys) = 0
     .mem(Vtimer) = 0
@@ -2332,13 +2341,13 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
 
       ReDim dna1(UBound(rob(female).dna))
       For t = 0 To UBound(dna1)
-       dna1(t).tipo = rob(female).dna(t).tipo
+       dna1(t).tipo = rob(female).dna(t).type
        dna1(t).value = rob(female).dna(t).value
       Next
       
       ReDim dna2(UBound(rob(female).spermDNA))
       For t = 0 To UBound(dna2)
-       dna2(t).tipo = rob(female).spermDNA(t).tipo
+       dna2(t).tipo = rob(female).spermDNA(t).type
        dna2(t).value = rob(female).spermDNA(t).value
       Next
       
@@ -2421,12 +2430,12 @@ If rob(female).body < 5 Then Exit Function 'Botsareus 3/27/2014 An attempt to pr
       
       'Step5 do crossover
     
-      Dim Outdna() As block
+      Dim Outdna() As Block
       ReDim Outdna(0)
       crossover dna1, dna2, Outdna
       
       'Bug fix remove starting zero
-      If Outdna(0).value = 0 And Outdna(0).tipo = 0 Then
+      If Outdna(0).value = 0 And Outdna(0).type = 0 Then
         For t = 1 To UBound(Outdna)
          Outdna(t - 1) = Outdna(t)
         Next
@@ -2811,8 +2820,8 @@ Public Sub KillRobot(n As Integer)
     MDIForm1.DisableRobotsMenu
   End If
   
-  If rob(n).virusshot > 0 And rob(n).virusshot <= maxshotarray Then
-    Shots(rob(n).virusshot).Exists = False ' We have to kill any stored shots for this bot
+  If rob(n).virusshot > 0 And rob(n).virusshot <= ShotManager.GetMaxShot() Then
+    ShotManager.DeleteShot rob(n).virusshot
     rob(n).virusshot = 0
   End If
   

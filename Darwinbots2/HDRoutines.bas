@@ -230,24 +230,6 @@ nexttie:
   Next i
 End Function
 
-Public Function RemapAllShots(numOfShots As Long)
-  Dim i As Long, j As Integer
-  
-  For i = 1 To numOfShots
-    If Shots(i).Exists Then
-      For j = 1 To MaxRobs
-        If rob(j).exist And Shots(i).parent = rob(j).oldBotNum Then
-          Shots(i).parent = j
-          If Shots(i).stored Then rob(j).virusshot = i
-          GoTo nextshot
-        End If
-      Next j
-      Shots(i).stored = False ' Could not find parent.  Should probalby never happen but if it does, release the shot
-    End If
-nextshot:
-  Next i
-End Function
-
 Public Function GetFilePath(FileName As String) As String
   Dim i As Long
   For i = Len(FileName) To 1 Step -1
@@ -440,11 +422,10 @@ Public Sub SaveSimulation(path As String)
     Put #1, , SimOpts.Specie(k).CantReproduce
   Next k
   
-  Put #1, , maxshotarray
+  Dim shotsPath As String
+  shotsPath = path + ".shots"
   
-  For j = 1 To maxshotarray
-    SaveShot 1, j
-  Next j
+  ShotManager.SaveShots shotsPath
   
   Put #1, , SimOpts.MaxAbsNum
     
@@ -793,15 +774,10 @@ Public Sub LoadSimulation(path As String)
   For k = 0 To SimOpts.SpeciesNum - 1
     Get #1, , SimOpts.Specie(k).CantReproduce
   Next k
-  
-  Get #1, , maxshotarray
-      
-  ReDim Shots(maxshotarray)
-             
-  For j = 1 To maxshotarray
-    LoadShot 1, j
-  Next j
-  RemapAllShots maxshotarray
+   
+  Dim shotsPath As String
+  shotsPath = path + ".shots"
+  ShotManager.LoadShots shotsPath
   
   SimOpts.MaxAbsNum = MaxRobs
   Get #1, , SimOpts.MaxAbsNum
@@ -991,12 +967,12 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     Get #n, , k: ReDim .dna(k)
     
     For t = 1 To k
-      Get #n, , .dna(t).tipo
+      Get #n, , .dna(t).type
       Get #n, , .dna(t).value
     Next t
     
     'Force an end base pair to protect against DNA corruption
-    .dna(k).tipo = 10
+    .dna(k).type = 10
     .dna(k).value = 1
         
         
@@ -1158,7 +1134,7 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     .spermDNAlen = 0
     If FileContinue(n) Then Get #n, , .spermDNAlen: ReDim .spermDNA(.spermDNAlen)
     For t = 1 To .spermDNAlen
-      If FileContinue(n) Then Get #n, , .spermDNA(t).tipo
+      If FileContinue(n) Then Get #n, , .spermDNA(t).type
       If FileContinue(n) Then Get #n, , .spermDNA(t).value
     Next t
     
@@ -1350,7 +1326,7 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .mem()
     k = DnaLen(rob(r).dna()): Put #n, , k
     For t = 1 To k
-      Put #n, , .dna(t).tipo
+      Put #n, , .dna(t).type
       Put #n, , .dna(t).value
     Next t
     
@@ -1441,7 +1417,7 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     
     Put #n, , .spermDNAlen
     For t = 1 To .spermDNAlen
-      Put #n, , .spermDNA(t).tipo
+      Put #n, , .spermDNA(t).type
       Put #n, , .spermDNA(t).value
     Next t
     Put #n, , .fertilized
@@ -1583,112 +1559,6 @@ Private Sub LoadObstacle(n As Integer, t As Integer)
     Get #n, , .vel
     
     'burn through any new data from a different version
-    While FileContinue(n)
-      Get #n, , Fe
-    Wend
-    
-    'grab these three FE codes
-    Get #n, , Fe
-    Get #n, , Fe
-    Get #n, , Fe
-    
-    'don't you dare put anything after this!
-  End With
-End Sub
-
-'Saves a Shot
-'New routine by EricL
-Private Sub SaveShot(n As Integer, t As Long)
-  Dim k As Integer
-  Dim x As Integer
-  
-  Const Fe As Byte = 254
-
-  With Shots(t)
-    Put #n, , .Exists       ' exists?
-    Put #n, , .Position         ' position vector
-    Put #n, , .OldPosition        ' old position vector
-    Put #n, , .velocity    ' velocity vector
-    Put #n, , .parent      ' who shot it?
-    Put #n, , .age         ' shot age
-    Put #n, , .Energy         ' energy carrier
-    Put #n, , .Range       ' shot range (the maximum .nrg ever was)
-    Put #n, , .value       ' power of shot for negative shots (or amt of shot, etc.), value to write for > 0
-    Put #n, , .color       ' colour
-    Put #n, , .shottype    ' carried location/value couple
-    Put #n, , .fromveg     ' does shot come from veg?
-    Put #n, , CInt(Len(.fromSpecies))
-    Put #n, , .fromSpecies  ' Which species fired the shot
-    Put #n, , .memoryLocation      ' Memory location for custom poison and venom
-    Put #n, , .memoryValue      ' Value to insert into custom venom location
-    
-    ' Somewhere to store genetic code for a virus or sperm
-    If (.shottype = -7 Or .shottype = -8) And .Exists And .DnaLen > 0 Then
-      Put #n, , .DnaLen
-      For x = 1 To .DnaLen
-        Put #n, , .dna(x).tipo
-        Put #n, , .dna(x).value
-      Next x
-    Else
-      k = 0: Put #n, , k
-    End If
-    
-    Put #n, , .genenum     ' which gene to copy in host bot
-    Put #n, , .stored      ' for virus shots (and maybe future types) this shot is stored inside the bot until it's ready to be launched
-  
-    'write any future data here
-    
-    Put #n, , Fe
-    Put #n, , Fe
-    Put #n, , Fe
-    'don't you dare put anything after this!
-  End With
-End Sub
-
-'Loads a Shot
-'New routine from EricL
-Private Sub LoadShot(n As Integer, t As Long)
-  Dim k As Integer
-  Dim x As Integer
-  Dim Fe As Byte
-
-  With Shots(t)
-    Get #n, , .exist       ' exists?
-    Get #n, , .pos         ' position vector
-    Get #n, , .opos        ' old position vector
-    Get #n, , .velocity    ' velocity vector
-    Get #n, , .parent      ' who shot it?
-    Get #n, , .age         ' shot age
-    Get #n, , .nrg         ' energy carrier
-    Get #n, , .Range       ' shot range (the maximum .nrg ever was)
-    Get #n, , .value       ' power of shot for negative shots (or amt of shot, etc.), value to write for > 0
-    Get #n, , .color       ' colour
-    Get #n, , .shottype    ' carried location/value couple
-    Get #n, , .fromveg     ' does shot come from veg?
-    
-    Get #n, , k: .FromSpecie = Space(k)
-    Get #n, , .FromSpecie  ' Which species fired the shot
-    
-    Get #n, , .memloc      ' Memory location for custom poison and venom
-    Get #n, , .Memval      ' Value to insert into custom venom location
-
-    
-    ' Somewhere to store genetic code for a virus
-    Get #n, , k
-    If k > 0 Then
-      ReDim .dna(k)
-      For x = 1 To k
-        Get #n, , .dna(x).tipo
-        Get #n, , .dna(x).value
-      Next x
-    End If
-    
-    .DnaLen = k
-    
-    Get #n, , .genenum     ' which gene to copy in host bot
-    Get #n, , .stored      ' for virus shots (and maybe future types) this shot is stored inside the bot until it's ready to be launched
-    
-   'burn through any new data from a different version
     While FileContinue(n)
       Get #n, , Fe
     Wend
