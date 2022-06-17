@@ -129,7 +129,7 @@ Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Si
         s.color = vbCyan
         s.GeneNumber = val
         s.Stored = True
-        If Not copygene(a, s.GeneNumber) Then
+        If Not copygene(s, s.GeneNumber) Then
             s.Exists = False
             s.Stored = False
             newshot = -1
@@ -233,7 +233,7 @@ Public Sub updateshots()
                 If (s.shottype = -100) Or (s.Stored = True) Then
                     h = 0  ' It's purely an ornimental shot like a poff or it's a virus shot that hasn't been fired yet
                 Else
-                    h = NewShotCollision(t) ' go off and check for collisions with bots.
+                    h = NewShotCollision(s) ' go off and check for collisions with bots.
                 End If
                 
                 'babies born into a stream of shots from its parent shouldn't die
@@ -275,20 +275,20 @@ Public Sub updateshots()
                         End If
                     Else
                         Select Case s.shottype
-                            Case -1: releasenrg h, t
-                            Case -2: takenrg h, t
-                            Case -3: takeven h, t
-                            Case -4: takewaste h, t
-                            Case -5: takepoison h, t
-                            Case -6: releasebod h, t
-                            Case -7: addgene h, t
-                            Case -8: takesperm h, t ' bot hit by a sperm shot for sexual reproduction
+                            Case -1: releasenrg h, s
+                            Case -2: takenrg h, s
+                            Case -3: takeven h, s
+                            Case -4: takewaste h, s
+                            Case -5: takepoison h, s
+                            Case -6: releasebod h, s
+                            Case -7: addgene h, s
+                            Case -8: takesperm h, s ' bot hit by a sperm shot for sexual reproduction
                          End Select
                     End If
                     taste h, s.OldPosition.x, s.OldPosition.y, s.shottype
                     s.flash = True
                 End If
-                If numObstacles > 0 Then DoShotObstacleCollisions t
+                If numObstacles > 0 Then DoShotObstacleCollisions s
                 s.OldPosition = s.Position
                 s.Position = VectorAdd(s.Position, s.Velocity) 'Euler integration
                 
@@ -366,7 +366,7 @@ Public Sub defacate(n As Integer) 'only used to get rid of massive amounts of wa
 End Sub
 
 ' robot n, hit by shot t, releases energy
-Public Sub releasenrg(ByVal n As Integer, ByVal t As Long)
+Public Sub releasenrg(ByVal n As Integer, ByRef s As Shot)
   'n=robot number
   't=shot number
     Dim vel As Vector
@@ -387,9 +387,6 @@ Public Sub releasenrg(ByVal n As Integer, ByVal t As Long)
     Dim EnergyLost As Single
       
     If rob(n).nrg <= 0.5 Then Exit Sub
-    
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
     
     vel = VectorSub(rob(n).actvel, s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
                                                                'the shot to the hit bot
@@ -446,7 +443,7 @@ Public Sub releasenrg(ByVal n As Integer, ByVal t As Long)
         rob(s.parent).mem(220) = rob(s.parent).Kills
     End If
 End Sub
-Private Sub releasebod(ByVal n As Integer, ByVal t As Long) 'a robot is shot by a -6 shot and releases energy directly from body points
+Private Sub releasebod(ByVal n As Integer, ByRef s As Shot) 'a robot is shot by a -6 shot and releases energy directly from body points
     'much more effective against a corpse
     Dim vel As Vector
     Dim Range As Single
@@ -455,9 +452,6 @@ Private Sub releasebod(ByVal n As Integer, ByVal t As Long) 'a robot is shot by 
     Dim EnergyLost As Single
     
     If rob(n).body <= 0 Then Exit Sub
-    
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
     
     vel = VectorSub(rob(n).actvel, s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
                                                    'the shot to the hit bot
@@ -554,13 +548,10 @@ Private Sub releasebod(ByVal n As Integer, ByVal t As Long) 'a robot is shot by 
 End Sub
 
 ' robot n takes the energy carried by shot t
-Private Sub takenrg(ByVal n As Integer, ByVal t As Long)
+Private Sub takenrg(ByVal n As Integer, ByRef s As Shot)
     Dim partial As Single
     Dim overflow As Single
-       
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
-         
+                
     If rob(n).Corpse Then Exit Sub
     
     If s.Range < 0.00001 Then
@@ -587,15 +578,12 @@ Private Sub takenrg(ByVal n As Integer, ByVal t As Long)
     rob(n).radius = FindRadius(n)
 End Sub
 '  robot takes a venomous shot and becomes seriously messed up
-Private Sub takeven(ByVal n As Integer, ByVal t As Long)
+Private Sub takeven(ByVal n As Integer, ByRef s As Shot)
     Dim power As Single
     Dim temp As Single
       
     If rob(n).Corpse Then Exit Sub
     
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
-
     power = CSng(s.Energy / CSng((s.Range * (RobSize / 3))) * s.value)
   
     If power < 1 Then Exit Sub
@@ -645,19 +633,15 @@ Private Sub takeven(ByVal n As Integer, ByVal t As Long)
 End Sub
 
 '  Robot n takes shot t and adds its value to his waste reservoir
-Private Sub takewaste(ByVal n As Integer, ByVal t As Long)
+Private Sub takewaste(ByVal n As Integer, ByRef s As Shot)
     Dim power As Single
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
   
     power = s.Energy / (s.Range * (RobSize / 3)) * s.value
     If power >= 0 Then rob(n).Waste = rob(n).Waste + power
 End Sub
 ' Robot receives poison shot and becomes disorientated
-Private Sub takepoison(ByVal n As Integer, ByVal t As Long)
+Private Sub takepoison(ByVal n As Integer, ByRef s As Shot)
     Dim power As Single
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
 
     If rob(n).Corpse Then Exit Sub
     
@@ -686,12 +670,10 @@ Private Sub takepoison(ByVal n As Integer, ByVal t As Long)
 End Sub
 
 'Robot is hit by sperm shot and becomes fertilized for potential sexual reproduction
-Private Sub takesperm(ByVal n As Integer, ByVal t As Long)
+Private Sub takesperm(ByVal n As Integer, ByRef s As Shot)
     If rob(n).fertilized < -10 Then Exit Sub 'block sex repro when necessary
 
     Dim x As Integer
-    Dim s As Shot
-    s = ShotManager.GetShot(t)
 
     If s.DNALength = 0 Then Exit Sub
     rob(n).fertilized = 10                      ' bots stay fertilized for 10 cycles currently
@@ -706,7 +688,7 @@ End Sub
 'Argument: The shot number to check
 'Returns: bot number of the hit bot if a collison occurred, 0 otherwise
 'Side Effect: On a hit, changes the shot position to be the point of impact with the bot
-Private Function NewShotCollision(shotnum As Long) As Integer
+Private Function NewShotCollision(ByRef sh As Shot) As Integer
     Dim robnum As Integer
     Dim B0 As Vector 'Position of bot at time 0
     Dim b As Vector 'Position of bot at time 0 < t < 1
@@ -732,9 +714,6 @@ Private Function NewShotCollision(shotnum As Long) As Integer
     Dim DdotP As Single
     Dim usetime0 As Boolean
     Dim usetime1 As Boolean
-    
-    Dim sh As Shot
-    sh = ShotManager.GetShot(shotnum)
     
     ' Check for collisions with the field edges
     With sh
@@ -865,18 +844,14 @@ FinialCollisionDetected:
       'collision so that in the case where a return shot is generated, that return shot starts from the point of impact and not
       'from wherever the shot would have ended up at the end of the cycle had it not collided (which it did!)
         sh.Position = VectorAdd(VectorScalar(vs, earliestCollision), S0)
-        ShotManager.SetShot shotnum, sh
     End If
 End Function
 
 'Botsareus 10/5/2015 Bug fix for negative values in virus
-Public Sub Vshoot(n As Integer, thisshot As Long)
+Public Sub Vshoot(n As Integer, ByRef s As Shot)
 'here we shoot a virus
     Dim tempa As Single
     Dim ShAngle As Single
-
-    Dim s As Shot
-    s = ShotManager.GetShot(thisshot)
 
     If Not s.Exists Or Not s.Stored Then Exit Sub
   
@@ -907,8 +882,6 @@ Public Sub Vshoot(n As Integer, thisshot As Long)
         .OldPosition.x = .Position.x - .Velocity.x
         .OldPosition.y = .Position.y - .Velocity.y
     End With
-    
-    ShotManager.SetShot thisshot, s
 End Sub
 
 Public Function MakeVirus(robn As Integer, ByVal gene As Integer) As Boolean
@@ -917,15 +890,12 @@ Public Function MakeVirus(robn As Integer, ByVal gene As Integer) As Boolean
 End Function
 
 ' copy gene number p from robot that fired shot n into shot n dna (virus)
-Public Function copygene(n As Long, ByVal p As Integer) As Boolean
+Public Function copygene(ByRef s As Shot, ByVal p As Integer) As Boolean
     Dim t As Integer
     Dim parent As Integer
     Dim genelen As Integer
     Dim GeneStart As Long
     Dim GeneEnding As Integer
-    
-    Dim s As Shot
-    s = ShotManager.GetShot(n)
     
     parent = s.parent
     
@@ -952,22 +922,17 @@ Public Function copygene(n As Long, ByVal p As Integer) As Boolean
     
     s.DNALength = genelen
     
-    ShotManager.SetShot n, s
-    
     copygene = True
 End Function
 
 ' adds gene from shot p to robot n dna
-Public Function addgene(ByVal n As Integer, ByVal p As Long) As Integer
+Public Function addgene(ByVal n As Integer, ByRef s As Shot) As Integer
     Dim t As Long
     Dim Insert As Long
     Dim vlen As Long   'length of the DNA code of the virus
     Dim Position As Integer   'gene position to insert the virus
     Dim power As Single
-  
-    Dim s As Shot
-    s = ShotManager.GetShot(p)
-  
+    
   'Dead bodies and virus immune bots can't catch a virus
     If rob(n).Corpse Or (rob(n).VirusImmune) Then Exit Function
   

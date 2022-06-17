@@ -1031,7 +1031,12 @@ Dim length As Long
   
   'shoot it!
   If .mem(VshootSys) <> 0 And .Vtimer = 1 Then 'Botsareus 10/5/2015 Bugfix for negative values in vshoot
-    If .virusshot <= ShotManager.GetMaxShot() And .virusshot > 0 Then Vshoot n, rob(n).virusshot
+    If .virusshot <= ShotManager.GetMaxShot() And .virusshot > 0 Then
+        Dim vs As Shot
+        vs = ShotManager.GetShot(rob(n).virusshot)
+        Vshoot n, vs
+        ShotManager.SetShot rob(n).virusshot, vs
+    End If
     
     .mem(VshootSys) = 0
     .mem(Vtimer) = 0

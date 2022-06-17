@@ -408,12 +408,8 @@ Dim botbottomedge As Single
   End If
 End Function
 
-Public Function DoShotObstacleCollisions(ByVal n As Long)
+Public Function DoShotObstacleCollisions(ByRef s As Shot)
 Dim i As Integer
-  
-  Dim s As Shot
-  s = ShotManager.GetShot(n)
-  
   With s
   For i = 1 To numObstacles
     If Obstacles(i).exist Then
@@ -423,17 +419,15 @@ Dim i As Integer
          .Position.y <= Obstacles(i).pos.y + Obstacles(i).Height Then
            If SimOpts.shapesAbsorbShots Then .Exists = False
            If .OldPosition.x < Obstacles(i).pos.x Or .OldPosition.x > (Obstacles(i).pos.x + Obstacles(i).Width) Then
-             .velocity.x = -.velocity.x
+             .Velocity.x = -.Velocity.x
            End If
            If .OldPosition.y < Obstacles(i).pos.y Or .OldPosition.y > (Obstacles(i).pos.y + Obstacles(i).Height) Then
-             .velocity.y = -.velocity.y
+             .Velocity.y = -.Velocity.y
            End If
       End If
     End If
   Next i
   End With
-  
-  ShotManager.SetShot n, s
 End Function
 
 Public Function DoObstacleCollisions(n As Integer)
