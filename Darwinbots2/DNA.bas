@@ -67,10 +67,9 @@ Private Sub ExecuteDNA(ByVal n As Integer)
   'be populated below for those genes that activate this cycle.  Used for displaying
   'Gene Activations.  Only initialized and populated for the robot with the focus or if the bot's console
   'is open.
-  If (n = robfocus) Or Not (rob(n).console Is Nothing) Then
-  '  rob(n).genenum = CountGenes(rob(n).DNA) ' EricL 4/6/2006 This keeps the gene number up to date
-    ReDim rob(n).ga(rob(n).genenum)
-    For i = 0 To rob(n).genenum
+  If n = robfocus Then
+        ReDim rob(n).ga(rob(n).genenum)
+        For i = 0 To rob(n).genenum
       rob(n).ga(i) = False
     Next i
   End If
@@ -143,7 +142,7 @@ Private Sub ExecuteDNA(ByVal n As Integer)
         If CurrentFlow = body Or CurrentFlow = ELSEBODY Then
           If CondStateIsTrue Then  ' Check the Bool stack.  If empty or True on top, do the stores.  Don't if False.
             ExecuteStores .dna(a).value
-            If n = robfocus Or Not (rob(n).console Is Nothing) Then rob(n).ga(currgene) = True   'EricL  This gene fired this cycle!  Populate ga()
+            If n = robfocus Then rob(n).ga(currgene) = True   'EricL  This gene fired this cycle!  Populate ga()
           End If
         End If
       Case 8 'reserved for a future type
@@ -1147,7 +1146,7 @@ rob(currbot).nrg = rob(currbot).nrg - (SimOpts.Costs(FLOWCOST) * SimOpts.Costs(C
       If Not ingene Then CurrentCondFlag = NEXTBODY
       If CurrentCondFlag And (CurrentFlow = ELSEBODY Or CurrentFlow = body) Then 'Botsareus 3/24/2012 Fixed a bug where: any else gene was showing activation
         ' Need to check this for the case where the gene body doesn't have any stores to trigger the activation dialog
-        If bot = robfocus Or Not (rob(bot).console Is Nothing) Then rob(bot).ga(currgene) = True   'EricL  This gene fired this cycle!  Populate ga()
+        If bot = robfocus Then rob(bot).ga(currgene) = True   'EricL  This gene fired this cycle!  Populate ga()
       End If
       CurrentFlow = CLEAR
       Select Case n
@@ -1219,17 +1218,6 @@ Public Sub ExecRobs()
     If t Mod 250 = 0 Then DoEvents
     If robManager.GetExists(t) And Not rob(t).Corpse And Not rob(t).DisableDNA Then
       ExecuteDNA t
-      If Not (rob(t).console Is Nothing) And DisplayActivations Then
-         rob(t).console.textout ""
-         rob(t).console.textout "***ROBOT GENES EXECUTION***" 'Botsareus 3/24/2012 looks a little better now
-         For k = 1 To rob(t).genenum
-          If rob(t).ga(k) Then
-            rob(t).console.textout CStr(k) & " executed"
-          Else
-            rob(t).console.textout CStr(k) & " not executed" 'Botsareus 3/24/2012 looks a little better now
-          End If
-        Next k
-      End If
       If t = robfocus And ActivForm.Visible Then
           exechighlight t
       End If

@@ -264,7 +264,6 @@ Private Type robot
   Point2MutCycle As Long    ' Botsareus 12/10/2013 The new point2 cycle
   
   condnum As Integer        ' number of conditions (used for cost calculations)
-  console As Consoleform    ' console object associated to the robot
   
   ' informative
   SonNumber As Integer      ' number of sons
@@ -2759,16 +2758,7 @@ Public Function posto() As Integer
   GiveAbsNum posto
 End Function
 
-' Kills the robot and writes a snapshot record
 Public Sub KillRobot(n As Integer)
-
-  If SimOpts.DeadRobotSnp Then
-    If rob(n).Veg And SimOpts.SnpExcludeVegs Then
-    Else
-      AddRecord n
-    End If
-  End If
-
  Dim newsize As Long
  Dim x As Long
  
@@ -2787,9 +2777,9 @@ Public Sub KillRobot(n As Integer)
   If Not MDIForm1.nopoff Then
     makepoff n
   End If
-  If Not (rob(n).console Is Nothing) Then rob(n).console.textout "Robot has died." 'EricL 3/19/2006 Indicate robot has died in console
+  
   If robfocus = n Then
-    robfocus = 0 ' EricL 6/9/2006 get rid of the eye viewer thingy now that the bot is dead.
+    robfocus = 0
     MDIForm1.DisableRobotsMenu
   End If
   
@@ -2817,19 +2807,7 @@ Public Sub KillRobot(n As Integer)
     'We take the array up in increments of 100 and down in increments of 250 so as not to grow and shrink the array in the same cycle
     newsize = UBound(rob())
     If MaxRobs + 250 < newsize And MaxRobs > 500 Then
-      ' MsgBox "About to shrink the rob array"
-      ' Form1.Timer2.Enabled = False
-      ' While Form1.InTimer2
-      '   'Do nothing
-      ' Wend
-      ' Form1.SecTimer.Enabled = False
-      ' Form1.Enabled = False
-      '        For x = 1 To 10000000
-      ' Next x
        ReDim Preserve rob(newsize - 250)
-      ' Form1.Enabled = True
-      ' Form1.SecTimer.Enabled = True
-      ' Form1.Timer2.Enabled = True
     End If
   End If
 End Sub

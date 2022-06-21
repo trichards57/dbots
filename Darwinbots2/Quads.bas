@@ -242,13 +242,11 @@ done:
 
 End Sub
 
-
 Private Sub CheckBotBucketForCollision(n As Integer, pos As Vector)
   Dim a As Integer, robnumber As Integer
   Dim k As Integer
   Dim distvector As Vector
   Dim dist As Single
-  'If pos.x = -2 Or pos.Y = -2 Then goto getout
 
   If Buckets(pos.x, pos.y).size = 0 Then GoTo getout
   a = 1
@@ -268,52 +266,49 @@ End Sub
 
 'Returns the absolute width of an eye
 Public Function AbsoluteEyeWidth(Width As Integer) As Integer
-  If Width = 0 Then
-    AbsoluteEyeWidth = 35
-  Else
-    AbsoluteEyeWidth = (Width Mod 1256) + 35
-    If AbsoluteEyeWidth <= 0 Then AbsoluteEyeWidth = 1256 + AbsoluteEyeWidth
-  End If
+    If Width = 0 Then
+        AbsoluteEyeWidth = 35
+    Else
+        AbsoluteEyeWidth = (Width Mod 1256) + 35
+        If AbsoluteEyeWidth <= 0 Then AbsoluteEyeWidth = 1256 + AbsoluteEyeWidth
+    End If
 End Function
-
 
 'Returns the absolute width of the narrowest eye of bot n
 Public Function NarrowestEye(n As Integer) As Integer
-Dim i As Integer
-Dim Width As Integer
+    Dim i As Integer
+    Dim Width As Integer
 
-  NarrowestEye = 1221
-  For i = 0 To 8
-    Width = AbsoluteEyeWidth(rob(n).mem(EYE1WIDTH + i))
-    If Width < NarrowestEye Then NarrowestEye = Width
-  Next i
+    NarrowestEye = 1221
+    For i = 0 To 8
+        Width = AbsoluteEyeWidth(rob(n).mem(EYE1WIDTH + i))
+        If Width < NarrowestEye Then NarrowestEye = Width
+    Next i
 End Function
 
 'Returns the distance an eye of absolute width w can see.
 'Eye sight distance S varies as a function of eye width according to:  S =  1 - ln(w)/4
 'where w is the absolute eyewidth as a multiple of the standard Pi/18 eyewidths
 Public Function EyeSightDistance(w As Integer, n1 As Integer) As Single 'Botsareus 2/3/2013 modified to except robot id
-  If w = 35 Then
-    EyeSightDistance = 1440 * eyestrength(n1)
-  Else
-    EyeSightDistance = 1440 * (1 - (Log(w / 35) / 4)) * eyestrength(n1)
-  End If
+    If w = 35 Then
+        EyeSightDistance = 1440 * eyestrength(n1)
+    Else
+        EyeSightDistance = 1440 * (1 - (Log(w / 35) / 4)) * eyestrength(n1)
+    End If
 End Function
 
-Private Function eyestrength(n1 As Integer) As Single 'Botsareus 2/3/2013 eye strength mod
-Const EyeEffectiveness As Byte = 3  'Botsareus 3/26/2013 For eye strength formula
-
-If SimOpts.Pondmode And robManager.GetRobotPosition(n1).y > 1 Then 'Botsareus 3/26/2013 Bug fix if robot Y pos is almost zero
-  eyestrength = (EyeEffectiveness / (robManager.GetRobotPosition(n1).y / 2000) ^ SimOpts.Gradient) ^ (6828 / SimOpts.FieldHeight)  'Botsareus 3/26/2013 Robots only effected by density, not light intensity
-Else
-  eyestrength = 1
-End If
-
-
-If Not SimOpts.Daytime Then eyestrength = eyestrength * 0.8
-
-If eyestrength > 1 Then eyestrength = 1
-
+Private Function eyestrength(n1 As Integer) As Single
+    Const EyeEffectiveness As Byte = 3
+    
+    If SimOpts.Pondmode And robManager.GetRobotPosition(n1).y > 1 Then
+      eyestrength = (EyeEffectiveness / (robManager.GetRobotPosition(n1).y / 2000) ^ SimOpts.Gradient) ^ (6828 / SimOpts.FieldHeight)
+    Else
+      eyestrength = 1
+    End If
+    
+    If Not SimOpts.Daytime Then eyestrength = eyestrength * 0.8
+    
+    If eyestrength > 1 Then eyestrength = 1
 End Function
 
 'New compare routine from EricL

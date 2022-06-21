@@ -1,5 +1,6 @@
 ﻿using PhysicsEngine.Model;
 using System;
+using System.Collections.Generic;
 
 namespace PhysicsEngine.Manager
 {
@@ -7,7 +8,11 @@ namespace PhysicsEngine.Manager
     {
         void AddBot(int id, ref Point position);
 
+        Point GetRobotBucket(int id);
+
         void Initialise(int fieldWidth, int fieldHeight);
+
+        void SetRobotBucket(int id, ref Point bucket);
     }
 
     public class BucketManager : IBucketManager
@@ -15,10 +20,19 @@ namespace PhysicsEngine.Manager
         public const int BucketSize = 4000;
 
         private Bucket[,] _buckets;
+        private Dictionary<int, Point> _robotToBucket;
 
         public void AddBot(int id, ref Point position)
         {
             _buckets[position.X, position.Y].RobotsIds.Add(id);
+        }
+
+        public Point GetRobotBucket(int id)
+        {
+            if (!_robotToBucket.ContainsKey(id))
+                _robotToBucket[id] = new Point(-2, -2);
+
+            return _robotToBucket[id];
         }
 
         public void Initialise(int fieldWidth, int fieldHeight)
@@ -69,6 +83,11 @@ namespace PhysicsEngine.Manager
         public void RemoveBot(int id, ref Point position)
         {
             _buckets[position.X, position.Y].RobotsIds.Remove(id);
+        }
+
+        public void SetRobotBucket(int id, ref Point bucket)
+        {
+            _robotToBucket[id] = bucket;
         }
     }
 }

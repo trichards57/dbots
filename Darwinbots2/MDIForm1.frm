@@ -1248,10 +1248,6 @@ SimOpts.SnpExcludeVegs = SnpDeadExRep.Checked
 TmpOpts.SnpExcludeVegs = SnpDeadExRep.Checked
 End Sub
 
-Private Sub SnpLiving_Click()
-Snapshot
-End Sub
-
 Private Sub Species_Click()
   If Not optionsform Is Nothing Then
     optionsform.SSTab1.Tab = 0
@@ -1333,7 +1329,6 @@ Private Sub Toolbar1_ButtonClick(ByVal button As MSComctlLib.button)
       Form1.pausefix = True 'Botsareus 3/15/2013 Figure out if simulation must start paused
     Case "cycle"
       DisplayActivations = False
-      Consoleform.cycle 1
     Case "limit"
       limitgraphics = Not limitgraphics 'Botsareus 7/13/2012 moved icon update to a seporate procedure
       menuupdate
@@ -1372,8 +1367,6 @@ Private Sub Toolbar1_ButtonClick(ByVal button As MSComctlLib.button)
         Form1.MousePointer = vbArrow
       End If
       insrob = Not insrob
-    Case "snapshot"
-      Snapshot
     Case "Ignore"
       'ignores errors when it encounters them with the hope that they'll fix themselves
       ignoreerror = Not ignoreerror
@@ -1473,10 +1466,6 @@ End Sub
 
 Private Sub col_Click()
   Form1.changerobcol
-End Sub
-
-Private Sub cons_Click()
-  Consoleform.openconsole
 End Sub
 
 Private Sub costi_Click()

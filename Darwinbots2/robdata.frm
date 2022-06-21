@@ -55,6 +55,7 @@ Begin VB.Form datirob
          _ExtentX        =   11557
          _ExtentY        =   11832
          _Version        =   393217
+         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"robdata.frx":0E42
@@ -624,10 +625,6 @@ Private Sub btnMark_Click() 'Botsareus 2/25/2013 Makes the program easy to debug
   If poz > 32000 Then poz = 32000
   Visible = True
   dnatext.text = DetokenizeDNA(robfocus, CInt(poz))
-End Sub
-
-Private Sub Command3_Click()
-  Consoleform.openconsole
 End Sub
 
 Private Sub Command1_Click()
