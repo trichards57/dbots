@@ -3,16 +3,16 @@ Object = "{FE0065C0-1B7B-11CF-9D53-00AA003C9CB6}#1.1#0"; "COMCT232.OCX"
 Begin VB.Form EnergyForm 
    BorderStyle     =   3  'Fixed Dialog
    Caption         =   "Energy Management"
-   ClientHeight    =   5025
+   ClientHeight    =   5016
    ClientLeft      =   2760
-   ClientTop       =   3750
-   ClientWidth     =   5610
+   ClientTop       =   3756
+   ClientWidth     =   5616
    Icon            =   "EnergyForm.frx":0000
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   5025
-   ScaleWidth      =   5610
+   ScaleHeight     =   5016
+   ScaleWidth      =   5616
    ShowInTaskbar   =   0   'False
    Begin VB.Frame Frame1 
       Caption         =   "Incoming Energy"
@@ -51,8 +51,8 @@ Begin VB.Form EnergyForm
             ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
             Top             =   240
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   100
             BuddyControl    =   "txtTide"
@@ -74,8 +74,8 @@ Begin VB.Form EnergyForm
             ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
             Top             =   600
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   100
             BuddyControl    =   "txtTideOf"
@@ -201,8 +201,8 @@ Begin VB.Form EnergyForm
             ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
             Top             =   1440
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   100
             AutoBuddy       =   -1  'True
@@ -225,8 +225,8 @@ Begin VB.Form EnergyForm
             ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
             Top             =   1920
             Width           =   255
-            _ExtentX        =   450
-            _ExtentY        =   503
+            _ExtentX        =   445
+            _ExtentY        =   508
             _Version        =   327681
             Value           =   100
             AutoBuddy       =   -1  'True
@@ -277,8 +277,8 @@ Begin VB.Form EnergyForm
          ToolTipText     =   "Set the length of day and night in game cycles. The value entered here represents one full cycle of both."
          Top             =   360
          Width           =   255
-         _ExtentX        =   450
-         _ExtentY        =   503
+         _ExtentX        =   445
+         _ExtentY        =   508
          _Version        =   327681
          Value           =   100
          AutoBuddy       =   -1  'True
@@ -318,25 +318,6 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' Copyright (c) 2006 Eric Lockard
-' eric@sulaadventures.com
-' All rights reserved.
-'
-'Redistribution and use in source and binary forms, with or without
-'modification, are permitted provided that:
-'
-'(1) source code distributions retain the above copyright notice and this
-'    paragraph in its entirety,
-'(2) distributions including binary code include the above copyright notice and
-'    this paragraph in its entirety in the documentation or other materials
-'    provided with the distribution, and
-'(3) Without the agreement of the author redistribution of this product is only allowed
-'    in non commercial terms and non profit distributions.
-'
-'THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
-'WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
-'MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-
 Option Explicit
 
 Private Sub DNCheck_Click()
@@ -347,22 +328,22 @@ Private Sub DNCheck_Click()
 End Sub
 
 Private Sub DNLength_Change()
-  If val(DNLength.text) > 32000 Then DNLength.text = 32000
-  TmpOpts.CycleLength = val(DNLength.text)
+  If val(DNLength.Text) > 32000 Then DNLength.Text = 32000
+  TmpOpts.CycleLength = val(DNLength.Text)
 End Sub
 
 Private Sub Form_Load()
-  DNLength.text = TmpOpts.CycleLength
+  DNLength.Text = TmpOpts.CycleLength
   DNLength.Enabled = TmpOpts.DayNight * True
   DNCycleUpDn.Enabled = TmpOpts.DayNight * True
   DNCheck.value = TmpOpts.DayNight * True
   
-  SunUpThreshold.text = TmpOpts.SunUpThreshold
+  SunUpThreshold.Text = TmpOpts.SunUpThreshold
   SunUpThreshold.Enabled = TmpOpts.SunUp * True
   SunUpUpDn.Enabled = TmpOpts.SunUp * True
   SunUp.value = TmpOpts.SunUp * True
   
-  SunDownThreshold.text = TmpOpts.SunDownThreshold
+  SunDownThreshold.Text = TmpOpts.SunDownThreshold
   SunDownThreshold.Enabled = TmpOpts.SunDown * True
   SunDownUpDn.Enabled = TmpOpts.SunDown * True
   SunDown.value = TmpOpts.SunDown * True
@@ -383,7 +364,7 @@ Private Sub SunDown_Click()
 End Sub
 
 Private Sub SunDownThreshold_Change()
-  TmpOpts.SunDownThreshold = val(SunDownThreshold.text)
+  TmpOpts.SunDownThreshold = val(SunDownThreshold.Text)
 End Sub
 
 Private Sub SunUp_Click()
@@ -393,7 +374,7 @@ Private Sub SunUp_Click()
 End Sub
 
 Private Sub SunUpThreshold_Change()
-  TmpOpts.SunUpThreshold = val(SunUpThreshold.text)
+  TmpOpts.SunUpThreshold = val(SunUpThreshold.Text)
 End Sub
 
 Private Sub ThresholdMode_Click(Index As Integer)

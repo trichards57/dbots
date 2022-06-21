@@ -3,16 +3,16 @@ Begin VB.Form grafico
    AutoRedraw      =   -1  'True
    BackColor       =   &H80000005&
    Caption         =   "Form2"
-   ClientHeight    =   10950
+   ClientHeight    =   10944
    ClientLeft      =   60
-   ClientTop       =   345
-   ClientWidth     =   7995
+   ClientTop       =   348
+   ClientWidth     =   7992
    Icon            =   "grafico.frx":0000
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   10950
-   ScaleWidth      =   7995
+   ScaleHeight     =   10944
+   ScaleWidth      =   7992
    ShowInTaskbar   =   0   'False
    Begin VB.CheckBox chk_GDsave 
       BackColor       =   &H00FFFFFF&
@@ -49,7 +49,7 @@ Begin VB.Form grafico
       Caption         =   "T"
       BeginProperty Font 
          Name            =   "Wingdings 2"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   2
          Weight          =   400
          Underline       =   0   'False
@@ -67,7 +67,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -87,7 +87,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -107,7 +107,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -127,7 +127,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -147,7 +147,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -167,7 +167,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -187,7 +187,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -207,7 +207,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -227,7 +227,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -247,7 +247,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -267,7 +267,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -287,7 +287,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -307,7 +307,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -327,7 +327,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -347,7 +347,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -367,7 +367,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -387,7 +387,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -407,7 +407,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -427,7 +427,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -447,7 +447,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -467,7 +467,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -487,7 +487,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -508,7 +508,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -529,7 +529,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -550,7 +550,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -571,7 +571,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -592,7 +592,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -613,7 +613,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -634,7 +634,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -655,7 +655,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -676,7 +676,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -697,7 +697,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -718,7 +718,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -739,7 +739,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -760,7 +760,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -781,7 +781,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -802,7 +802,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -823,7 +823,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -844,7 +844,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -865,7 +865,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -886,7 +886,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -907,7 +907,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -928,7 +928,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -949,7 +949,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -970,7 +970,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -991,7 +991,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1012,7 +1012,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1033,7 +1033,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1054,7 +1054,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1075,7 +1075,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1382,7 +1382,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1403,7 +1403,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1424,7 +1424,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1445,7 +1445,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1466,7 +1466,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1487,7 +1487,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1508,7 +1508,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1529,7 +1529,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1550,7 +1550,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1670,7 +1670,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1702,7 +1702,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1745,7 +1745,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1766,7 +1766,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1787,7 +1787,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1808,7 +1808,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1829,7 +1829,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1850,7 +1850,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1871,7 +1871,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1892,7 +1892,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -1913,7 +1913,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2022,7 +2022,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2043,7 +2043,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2064,7 +2064,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2085,7 +2085,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2106,7 +2106,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2127,7 +2127,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2148,7 +2148,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2169,7 +2169,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2190,7 +2190,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2211,7 +2211,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2232,7 +2232,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2253,7 +2253,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2274,7 +2274,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2295,7 +2295,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2316,7 +2316,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2337,7 +2337,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2358,7 +2358,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2379,7 +2379,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2400,7 +2400,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2421,7 +2421,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2442,7 +2442,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2474,7 +2474,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2495,7 +2495,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2526,7 +2526,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2547,7 +2547,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2567,7 +2567,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2587,7 +2587,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2607,7 +2607,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2627,7 +2627,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2647,7 +2647,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2667,7 +2667,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2687,7 +2687,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2707,7 +2707,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2727,7 +2727,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2747,7 +2747,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2767,7 +2767,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2787,7 +2787,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2807,7 +2807,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2827,7 +2827,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2847,7 +2847,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2867,7 +2867,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2887,7 +2887,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2907,7 +2907,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -2927,7 +2927,7 @@ Begin VB.Form grafico
       Caption         =   "10"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3035,7 +3035,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3056,7 +3056,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3077,7 +3077,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3098,7 +3098,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3119,7 +3119,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3140,7 +3140,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3161,7 +3161,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3182,7 +3182,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3203,7 +3203,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3246,7 +3246,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3278,7 +3278,7 @@ Begin VB.Form grafico
       Caption         =   "Cycles"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3308,7 +3308,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3428,7 +3428,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3449,7 +3449,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3470,7 +3470,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3491,7 +3491,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3512,7 +3512,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3533,7 +3533,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3554,7 +3554,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3575,7 +3575,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3596,7 +3596,7 @@ Begin VB.Form grafico
       Caption         =   "Label1"
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -3947,18 +3947,6 @@ On Error GoTo patch 'Botsareus 10/12/2013 Attempt to fix a 380 error viea patch
 patch:
 End Sub
 
-'Public Sub AddVal(n As String, x As Single, s As Integer)
-'  Dim k As Byte
-'  k = 0
-'  While k < MaxSeries And SerName(k) <> n
-'    k = k + 1
-'  Wend
-'  If SerName(k) <> n Then
-'    AddSeries n, RGB(Random(0, 255), Random(0, 255), Random(0, 255))
-'    s = MaxSeries - 1
-'  End If
-'  data(Pivot, s) = x
-'End Sub
 
 Public Sub NewPoints()
   Dim t As Byte
@@ -4152,8 +4140,6 @@ Private Function WhichGraphAmI() As Integer 'Botsareus 8/3/2012 use names for gr
       chartNumber = MUT_DNALENGTH_GRAPH
     Case "Total_Energy_per_Species_x1000-"
       chartNumber = ENERGY_SPECIES_GRAPH
-    Case "Dynamic_Costs"
-      chartNumber = DYNAMICCOSTS_GRAPH
     Case "Species_Diversity"
       chartNumber = SPECIESDIVERSITY_GRAPH
     Case "Average_Chloroplasts"

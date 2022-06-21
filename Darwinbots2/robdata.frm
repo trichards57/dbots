@@ -34,7 +34,7 @@ Begin VB.Form datirob
          Caption         =   "Mark a location"
          Height          =   240
          Left            =   2160
-         TabIndex        =   59
+         TabIndex        =   58
          Top             =   7150
          Width           =   1770
       End
@@ -42,7 +42,7 @@ Begin VB.Form datirob
          Caption         =   "Display memory post DNA execution but before cycle executes"
          Height          =   375
          Left            =   2160
-         TabIndex        =   58
+         TabIndex        =   57
          Top             =   7080
          Width           =   5775
       End
@@ -55,7 +55,6 @@ Begin VB.Form datirob
          _ExtentX        =   11557
          _ExtentY        =   11832
          _Version        =   393217
-         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"robdata.frx":0E42
@@ -72,7 +71,7 @@ Begin VB.Form datirob
       Begin VB.Label robtag 
          Height          =   255
          Left            =   40
-         TabIndex        =   62
+         TabIndex        =   61
          ToolTipText     =   "Double click to edit"
          Top             =   120
          Width           =   6615
@@ -88,7 +87,7 @@ Begin VB.Form datirob
          Caption         =   "Memory ->"
          Height          =   285
          Left            =   1605
-         TabIndex        =   53
+         TabIndex        =   52
          Top             =   6360
          Width           =   1365
       End
@@ -96,7 +95,7 @@ Begin VB.Form datirob
          Caption         =   "Discendenti"
          Height          =   300
          Left            =   90
-         TabIndex        =   46
+         TabIndex        =   45
          Tag             =   "15011"
          Top             =   6000
          Width           =   1410
@@ -105,7 +104,7 @@ Begin VB.Form datirob
          Caption         =   "Dna ->"
          Height          =   285
          Left            =   1605
-         TabIndex        =   45
+         TabIndex        =   44
          Top             =   6720
          Width           =   1365
       End
@@ -113,7 +112,7 @@ Begin VB.Form datirob
          Caption         =   "Mutation details->"
          Height          =   285
          Left            =   1605
-         TabIndex        =   44
+         TabIndex        =   43
          Tag             =   "15016"
          Top             =   7080
          Width           =   1365
@@ -123,16 +122,8 @@ Begin VB.Form datirob
          Height          =   285
          Index           =   0
          Left            =   90
-         TabIndex        =   43
-         Top             =   6720
-         Width           =   1425
-      End
-      Begin VB.CommandButton Command3 
-         Caption         =   "Open console"
-         Height          =   285
-         Left            =   90
          TabIndex        =   42
-         Top             =   6360
+         Top             =   6720
          Width           =   1425
       End
       Begin VB.CommandButton Repro 
@@ -154,7 +145,7 @@ Begin VB.Form datirob
          Caption         =   "Chloroplasts"
          Height          =   195
          Left            =   120
-         TabIndex        =   61
+         TabIndex        =   60
          Top             =   4800
          Width           =   1215
       End
@@ -163,7 +154,7 @@ Begin VB.Form datirob
          Caption         =   "VTimer"
          Height          =   195
          Left            =   2100
-         TabIndex        =   60
+         TabIndex        =   59
          Top             =   4800
          Width           =   795
       End
@@ -171,7 +162,7 @@ Begin VB.Form datirob
          Caption         =   "Radius"
          Height          =   255
          Left            =   120
-         TabIndex        =   57
+         TabIndex        =   56
          Top             =   2880
          Width           =   975
       End
@@ -180,7 +171,7 @@ Begin VB.Form datirob
          Caption         =   "radius"
          Height          =   255
          Left            =   2100
-         TabIndex        =   56
+         TabIndex        =   55
          Top             =   2880
          Width           =   795
       End
@@ -188,7 +179,7 @@ Begin VB.Form datirob
          Caption         =   "Velocity"
          Height          =   195
          Left            =   120
-         TabIndex        =   55
+         TabIndex        =   54
          Top             =   3120
          Width           =   1215
       End
@@ -197,7 +188,7 @@ Begin VB.Form datirob
          Caption         =   "velocity"
          Height          =   195
          Left            =   2100
-         TabIndex        =   54
+         TabIndex        =   53
          Top             =   3120
          Width           =   795
       End
@@ -206,7 +197,7 @@ Begin VB.Form datirob
          Caption         =   "VTimer"
          Height          =   195
          Left            =   2100
-         TabIndex        =   52
+         TabIndex        =   51
          Top             =   4560
          Width           =   795
       End
@@ -215,7 +206,7 @@ Begin VB.Form datirob
          Caption         =   "poison"
          Height          =   195
          Left            =   2100
-         TabIndex        =   51
+         TabIndex        =   50
          Top             =   4320
          Width           =   795
       End
@@ -223,7 +214,7 @@ Begin VB.Form datirob
          Caption         =   "Poison"
          Height          =   195
          Left            =   120
-         TabIndex        =   50
+         TabIndex        =   49
          Top             =   4320
          Width           =   1215
       End
@@ -231,7 +222,7 @@ Begin VB.Form datirob
          Caption         =   "Virus Timer"
          Height          =   195
          Left            =   120
-         TabIndex        =   49
+         TabIndex        =   48
          Top             =   4560
          Width           =   1215
       End
@@ -240,7 +231,7 @@ Begin VB.Form datirob
          Caption         =   "unique id"
          Height          =   225
          Left            =   2100
-         TabIndex        =   48
+         TabIndex        =   47
          Top             =   960
          Width           =   795
       End
@@ -257,7 +248,7 @@ Begin VB.Form datirob
          EndProperty
          Height          =   195
          Left            =   105
-         TabIndex        =   47
+         TabIndex        =   46
          Tag             =   "15999"
          ToolTipText     =   "The unique ID of this bot.  No other bot will ever have this number in the sim."
          Top             =   960
@@ -608,23 +599,23 @@ Private enlarged As Boolean
 Private showingMemory As Boolean
 Public ShowMemoryEarlyCycle As Boolean
 
-Private Sub robfname_DblClick() 'Botsareus 10/26/2014 Should make forking easyer
+Private Sub robfname_DblClick()
   Clipboard.CLEAR
   Clipboard.SetText robfname.Caption
 End Sub
 
 Public Sub ShowDna()
-  dnashow_Click 'Botsareus 1/25/2013 Show dna using the button
+  dnashow_Click
 End Sub
 
-Private Sub btnMark_Click() 'Botsareus 2/25/2013 Makes the program easy to debug
+Private Sub btnMark_Click()
   Visible = False
   Dim poz As Double
   poz = val(InputBox("""[<POSITION MARKER]"" will be displayed next to dna location. Specify position:"))
   poz = Abs(poz)
   If poz > 32000 Then poz = 32000
   Visible = True
-  dnatext.text = DetokenizeDNA(robfocus, CInt(poz))
+  dnatext.Text = DetokenizeDNA(robfocus, CInt(poz))
 End Sub
 
 Private Sub Command1_Click()
@@ -643,19 +634,19 @@ Private Sub dnashow_Click()
   Frame2.Width = 4695 + 8055
   enlarged = True
   If robManager.GetExists(robfocus) Then
-    dnatext.text = DetokenizeDNA(robfocus) ', CInt(poz))
+    dnatext.Text = DetokenizeDNA(robfocus)
   Else
-    dnatext.text = "This Robot is dead.  No DNA available."
+    dnatext.Text = "This Robot is dead.  No DNA available."
   End If
-  btnMark.Visible = True 'Botsareus 3/15/2013 Makes dna easyer to debug
+  btnMark.Visible = True
 End Sub
 
 Private Sub dnatext_Change()
-  robtag.Caption = Left(rob(robfocus).tag, 45) 'Botsareus 1/28/2014 New short description feature
+  robtag.Caption = Left(rob(robfocus).tag, 45)
 End Sub
 
 Private Sub Form_Activate()
-  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
+  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub MemoryCommand_Click()
@@ -666,11 +657,11 @@ Private Sub MemoryCommand_Click()
   Frame2.Width = 4695 + 8055
   enlarged = True
   If robManager.GetExists(robfocus) Then
-    dnatext.text = GetRobMemoryString(robfocus)
+    dnatext.Text = GetRobMemoryString(robfocus)
   Else
-    dnatext.text = "This Robot is dead.  No DNA available."
+    dnatext.Text = "This Robot is dead.  No DNA available."
   End If
-  btnMark.Visible = False 'Botsareus 3/15/2013 Makes dna easyer to debug
+  btnMark.Visible = False
 End Sub
 
 Private Function GetRobMemoryString(n As Integer) As String
@@ -684,7 +675,7 @@ Private Function GetRobMemoryString(n As Integer) As String
   For j = 1 To 100
     GetRobMemoryString = GetRobMemoryString + Str$((j - 1) * 10 + 1) + ":"
     For i = ((j - 1) * 10) + 1 To (j * 10)
-      GetRobMemoryString = GetRobMemoryString + vbTab + Str$(rob(n).mem(i)) 'space(6 - Len(Str$(rob(n).mem(i))))
+      GetRobMemoryString = GetRobMemoryString + vbTab + Str$(rob(n).mem(i))
     Next i
      GetRobMemoryString = GetRobMemoryString + vbCrLf
   Next j
@@ -702,8 +693,8 @@ Private Sub MutDetails_Click()
   dnatext.Width = 9050
   Frame2.Width = 4695 + 8055
   enlarged = True
-  dnatext.text = GiveMutationDetails(robfocus)
-  btnMark.Visible = False 'Botsareus 3/15/2013 Makes dna easyer to debug
+  dnatext.Text = GiveMutationDetails(robfocus)
+  btnMark.Visible = False
 End Sub
 
 Private Function GiveMutationDetails(robfocus) As String
@@ -711,12 +702,12 @@ Private Function GiveMutationDetails(robfocus) As String
   If GiveMutationDetails = "" Then GiveMutationDetails = "No mutations"
 End Function
 
-Private Sub robtag_DblClick() 'Botsareus 1/28/2014 Enter short description for robot
-  SetWindowPos hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
+Private Sub robtag_DblClick()
+  SetWindowPos hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
   rob(robfocus).tag = InputBox("Enter short description for robot. Can not be more then 45 characters long.", , Left(rob(robfocus).tag, 45))
   rob(robfocus).tag = Left(replacechars(rob(robfocus).tag), 45)
   robtag.Caption = rob(robfocus).tag
-  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE 'Botsareus 12/12/2012 Info form is always on top
+  SetWindowPos hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
 End Sub
 
 Private Sub ShrinkWin_Click()
@@ -728,13 +719,13 @@ End Sub
 
 Public Sub RefreshDna()
   If enlarged Then
-    dnatext.text = DetokenizeDNA(robfocus)
+    dnatext.Text = DetokenizeDNA(robfocus)
   End If
 End Sub
 
 Private Sub Form_Load()
   strings Me
-  rage.Caption = "Age (cycles)" 'EricL 4/13/2006 Override resource file because I don't have a resource editor handy :)
+  rage.Caption = "Age (cycles)"
   Me.Width = 3255
   enlarged = False
   ShowMemoryEarlyCycle = False
@@ -774,7 +765,7 @@ Public Sub infoupdate(n As Integer, nrg As Single, par As Long, mut As Long, age
     LastOwnLab.Caption = "Self"
   End If
   
-  If enlarged And showingMemory Then dnatext.text = GetRobMemoryString(n)
+  If enlarged And showingMemory Then dnatext.Text = GetRobMemoryString(n)
 End Sub
 
 Public Sub Form_Unload(Cancel As Integer)
@@ -789,7 +780,6 @@ End Sub
 
 Private Sub repro_Click(Index As Integer)
   If robnum.Caption = "0" Then Exit Sub
-  Reproduce robnum.Caption, 50 'Botsareus 11/3/2015 Bug fix
+  Reproduce robnum.Caption, 50
   Form1.Redraw
 End Sub
-

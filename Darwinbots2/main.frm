@@ -215,47 +215,10 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-' DarwinBots - copyright 2003 Carlo Comis
-' Revisions
-' V2.11, V2.12, V2.13, V2.14, V2.15 pondmode, V2.2, V2.3, V2.31, V2.32, V2.33, V2.34 by PurpleYouko
-' V2.35, 2.36.X, 2.37.X by PurpleYouko and Numsgil
-' Post V2.42 modifications copyright (c) 2006 2007 Eric Lockard  eric@sulaadventures.com
-
-' Post V2.45 modifications copyright (c) 2012, 2013, 2014, 2015, 2016 Paul Kononov a.k.a Botsareus
-'
-' All rights reserved.
-'
-'Redistribution and use in source and binary forms, with or without
-'modification, are permitted provided that:
-'
-'(1) source code distributions retain the above copyright notice and this
-'    paragraph in its entirety,
-'(2) distributions including binary code include the above copyright notice and
-'    this paragraph in its entirety in the documentation or other materials
-'    provided with the distribution, and
-'(3) Without the agreement of the author redistribution of this product is only allowed
-'    in non commercial terms and non profit distributions.
-'
-'THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
-'WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
-'MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-
 Option Explicit
 
 Const PIOVER4 = PI / 4
 
-Private Type Stack
-  val(100) As Double
-  pos As Integer
-End Type
-
-' for graphs
-Private Type Graph
-  opened As Boolean
-  graf As grafico
-End Type
-
-'Botsareus 11/29/2013 Allows for moving whole organism
 Private Type tmppostyp
   n As Integer
   x As Single
@@ -265,22 +228,18 @@ End Type
 Public camfix As Boolean 'Botsareus 2/23/2013 normalizes screen
 Public pausefix As Boolean 'Botsareus 3/6/2013 Figure out if simulation must start paused
 Public TotalOffspring As Long 'Botsareus 5/22/2013 For find best
-Public BackPic As String
 Public cyc As Integer          ' cycles/second
 Public dispskin As Boolean  ' skin drawing enabled?
 Public Active As Boolean    ' sim running?
 Public visiblew As Single     ' field visible portion (for zoom)
 Public visibleh As Long
 Public DNAMaxConds As Integer   ' max conditions per gene allowed by mutation
-Public PiccyMode As Boolean   'display that piccy or not?
-Public Newpic As Boolean      'IIs it a new picture?
 Public twipWidth As Single
 Public TwipHeight As Single
 Public FortyEightOverTwipWidth As Single
 Public FortyEightOverTwipHeight As Single
 Public xDivisor As Single
 Public yDivisor As Single
-Private Charts(NUMGRAPHS) As Graph        ' array of graph pointers
 Private tmprob_c As Byte
 Private tmppos(50) As tmppostyp
 Private p_reclev As Integer 'Botsareus 8/3/2012 for generational distance
@@ -289,47 +248,39 @@ Private MouseClickY As Long
 Private MouseClicked As Boolean
 Private ZoomFlag As Boolean        ' EricL True while mouse button four is held down - for zooming
 Private DraggingBot As Boolean     ' EricL True while mouse is down dragging bot around
-Private QStack As Stack
 
 Private Sub BoyLabl_Click()
-  BoyLabl.Visible = False
+    BoyLabl.Visible = False
 End Sub
 
 Private Sub Form_Load()
-  Dim i As Integer
-   
-  strings Me
-  
-  LoadSysVars
-  
-  If BackPic <> "" Then
-    Form1.Picture = LoadPicture(BackPic)
-  Else
-    Form1.Picture = Nothing
-  End If
-  
-  Form1.Top = 0
-  Form1.Left = 0
-  Form1.Width = MDIForm1.ScaleWidth
-  Form1.Height = MDIForm1.ScaleHeight
-  visiblew = SimOpts.FieldWidth
-  visibleh = SimOpts.FieldHeight
-  MDIForm1.visualize = True
-  MaxMem = 1000
-  maxfieldsize = SimOpts.FieldWidth * 2
-  TotalRobots = 0
-  robfocus = 0
-  MDIForm1.DisableRobotsMenu
-  dispskin = True
-  
-  FlashColor(1) = vbBlack         ' Hit with memory shot
-  FlashColor(-1 + 10) = vbRed     ' Hit with Nrg feeding shot
-  FlashColor(-2 + 10) = vbWhite   ' Hit with Nrg Shot
-  FlashColor(-3 + 10) = vbBlue    ' Hit with venom shot
-  FlashColor(-4 + 10) = vbGreen   ' Hit with waste shot
-  FlashColor(-5 + 10) = vbYellow  ' Hit with poison Shot
-  FlashColor(-6 + 10) = vbMagenta ' Hit with body feeding shot
-  FlashColor(-7 + 10) = vbCyan    ' Hit with virus shot
+    Dim i As Integer
+     
+    strings Me
+    
+    LoadSysVars
+    Form1.Top = 0
+    Form1.Left = 0
+    Form1.Width = MDIForm1.ScaleWidth
+    Form1.Height = MDIForm1.ScaleHeight
+    visiblew = SimOpts.FieldWidth
+    visibleh = SimOpts.FieldHeight
+    MDIForm1.visualize = True
+    MaxMem = 1000
+    maxfieldsize = SimOpts.FieldWidth * 2
+    TotalRobots = 0
+    robfocus = 0
+    MDIForm1.DisableRobotsMenu
+    dispskin = True
+    
+    FlashColor(1) = vbBlack         ' Hit with memory shot
+    FlashColor(-1 + 10) = vbRed     ' Hit with Nrg feeding shot
+    FlashColor(-2 + 10) = vbWhite   ' Hit with Nrg Shot
+    FlashColor(-3 + 10) = vbBlue    ' Hit with venom shot
+    FlashColor(-4 + 10) = vbGreen   ' Hit with waste shot
+    FlashColor(-5 + 10) = vbYellow  ' Hit with poison Shot
+    FlashColor(-6 + 10) = vbMagenta ' Hit with body feeding shot
+    FlashColor(-7 + 10) = vbCyan    ' Hit with virus shot
 End Sub
 
 '
@@ -338,89 +289,79 @@ End Sub
 
 ' redraws screen
 Public Sub Redraw()
-Dim t As Integer
-        Dim pos As Vector
-'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
-'It is a hacky way of doing it, but should be a bit faster since the computation is only preformed twice, other than preforming it in each subsection.
-For t = 1 To MaxRobs
-    If robManager.GetExists(t) Then
-        pos.x = robManager.GetRobotPosition(t).x - (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
-        pos.y = robManager.GetRobotPosition(t).y - (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
-        robManager.SetRobotPosition t, pos
-    End If
-Next
+    Dim t As Integer
+    Dim pos As Vector
+    'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
+    'It is a hacky way of doing it, but should be a bit faster since the computation is only preformed twice, other than preforming it in each subsection.
+    For t = 1 To MaxRobs
+        If robManager.GetExists(t) Then
+            pos.x = robManager.GetRobotPosition(t).x - (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
+            pos.y = robManager.GetRobotPosition(t).y - (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
+            robManager.SetRobotPosition t, pos
+        End If
+    Next
 
-
-  Dim count As Long
+    Dim count As Long
   
-  If PiccyMode Then
-    If Newpic Then
-      Me.AutoRedraw = True
-      Form1.Picture = LoadPicture(BackPic)
-      Newpic = False
-    End If
-  End If
-  Cls
+    Cls
     
-  DrawArena
-  DrawAllTies
-  DrawAllRobs
-  DrawShots
-  Me.AutoRedraw = True
+    DrawArena
+    DrawAllTies
+    DrawAllRobs
+    DrawShots
+    Me.AutoRedraw = True
   
-'Plase robots back
-For t = 1 To MaxRobs
-    If robManager.GetExists(t) Then
-        
-        pos.x = robManager.GetRobotPosition(t).x + (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
-        pos.y = robManager.GetRobotPosition(t).y + (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
-        
-        robManager.SetRobotPosition t, pos
-    End If
-Next
+    'Place robots back
+    For t = 1 To MaxRobs
+        If robManager.GetExists(t) Then
+            
+            pos.x = robManager.GetRobotPosition(t).x + (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
+            pos.y = robManager.GetRobotPosition(t).y + (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
+            
+            robManager.SetRobotPosition t, pos
+        End If
+    Next
 End Sub
 
 ' calculates the pixel/twip ratio, since some graphic methods
 ' need pixel values
 Function GetTwipWidth() As Single
-  Dim scw As Long, sch As Long, scm As Integer
-  Dim sct As Long, scl As Long
-  scm = Form1.ScaleMode
-  scw = Form1.ScaleWidth
-  sch = Form1.ScaleHeight
-  sct = Form1.ScaleTop
-  scl = Form1.ScaleLeft
-  Form1.ScaleMode = vbPixels
-  GetTwipWidth = Form1.ScaleWidth / scw
-  Form1.ScaleMode = scm
-  Form1.ScaleWidth = scw
-  Form1.ScaleHeight = sch
-  Form1.ScaleTop = sct
-  Form1.ScaleLeft = scl
+    Dim scw As Long, sch As Long, scm As Integer
+    Dim sct As Long, scl As Long
+    scm = Form1.ScaleMode
+    scw = Form1.ScaleWidth
+    sch = Form1.ScaleHeight
+    sct = Form1.ScaleTop
+    scl = Form1.ScaleLeft
+    Form1.ScaleMode = vbPixels
+    GetTwipWidth = Form1.ScaleWidth / scw
+    Form1.ScaleMode = scm
+    Form1.ScaleWidth = scw
+    Form1.ScaleHeight = sch
+    Form1.ScaleTop = sct
+    Form1.ScaleLeft = scl
 End Function
-
 
 ' calculates the pixel/twip ratio, since some graphic methods
 ' need pixel values
 Function GetTwipHeight() As Single
-  Dim scw As Long, sch As Long, scm As Integer
-  Dim sct As Long, scl As Long
-  scm = Form1.ScaleMode
-  scw = Form1.ScaleWidth
-  sch = Form1.ScaleHeight
-  sct = Form1.ScaleTop
-  scl = Form1.ScaleLeft
-  Form1.ScaleMode = vbPixels
-  GetTwipHeight = Form1.ScaleHeight / sch
-  Form1.ScaleMode = scm
-  Form1.ScaleWidth = scw
-  Form1.ScaleHeight = sch
-  Form1.ScaleTop = sct
-  Form1.ScaleLeft = scl
+    Dim scw As Long, sch As Long, scm As Integer
+    Dim sct As Long, scl As Long
+    scm = Form1.ScaleMode
+    scw = Form1.ScaleWidth
+    sch = Form1.ScaleHeight
+    sct = Form1.ScaleTop
+    scl = Form1.ScaleLeft
+    Form1.ScaleMode = vbPixels
+    GetTwipHeight = Form1.ScaleHeight / sch
+    Form1.ScaleMode = scm
+    Form1.ScaleWidth = scw
+    Form1.ScaleHeight = sch
+    Form1.ScaleTop = sct
+    Form1.ScaleLeft = scl
 End Function
 
 Private Sub DrawArena()
-    'Botsareus 8/16/2014 Draw Sun
     Dim sunstart As Long
     Dim sunstop As Long
     Dim sunadd As Long
@@ -428,24 +369,24 @@ Private Sub DrawArena()
     colr = vbYellow
     If TmpOpts.Tides > 0 Then colr = RGB(255 - 255 * BouyancyScaling, 255 - 255 * BouyancyScaling, 0)
     If SimOpts.Daytime Then
-    'Range calculation 0.25 + ~.75 pow 3
-    sunstart = (SunPosition - (0.25 + (SunRange ^ 3) * 0.75) / 2) * SimOpts.FieldWidth
-    sunstop = (SunPosition + (0.25 + (SunRange ^ 3) * 0.75) / 2) * SimOpts.FieldWidth
-    If sunstart < 0 Then
+        'Range calculation 0.25 + ~.75 pow 3
+        sunstart = (SunPosition - (0.25 + (SunRange ^ 3) * 0.75) / 2) * SimOpts.FieldWidth
+        sunstop = (SunPosition + (0.25 + (SunRange ^ 3) * 0.75) / 2) * SimOpts.FieldWidth
+        If sunstart < 0 Then
             sunadd = SimOpts.FieldWidth + sunstart
             Line (sunadd, 0)-(SimOpts.FieldWidth, SimOpts.FieldHeight / 100), colr, BF
             Line (sunadd, 0)-(sunadd, SimOpts.FieldHeight), colr
-        sunstart = 0
-    End If
-    If sunstop > SimOpts.FieldWidth Then
+            sunstart = 0
+        End If
+        If sunstop > SimOpts.FieldWidth Then
             sunadd = sunstop - SimOpts.FieldWidth
             Line (sunadd, 0)-(0, SimOpts.FieldHeight / 100), colr, BF
             Line (sunadd, 0)-(sunadd, SimOpts.FieldHeight), colr
-        sunstop = SimOpts.FieldWidth
-    End If
-    Line (sunstart, 0)-(sunstop, SimOpts.FieldHeight / 100), colr, BF
-    Line (sunstart, 0)-(sunstart, SimOpts.FieldHeight), colr
-    Line (sunstop, 0)-(sunstop, SimOpts.FieldHeight), colr
+            sunstop = SimOpts.FieldWidth
+        End If
+        Line (sunstart, 0)-(sunstop, SimOpts.FieldHeight / 100), colr, BF
+        Line (sunstart, 0)-(sunstart, SimOpts.FieldHeight), colr
+        Line (sunstop, 0)-(sunstop, SimOpts.FieldHeight), colr
     End If
 
     If MDIForm1.ZoomLock = 0 Then Exit Sub 'no need to draw boundaries if we aren't going to see them
@@ -457,38 +398,39 @@ End Sub
 
 ' draws memory monitor
 Private Sub DrawMonitor(n As Integer)
-With frmMonitorSet
     Dim rangered As Double
-    rangered = (.Monitor_ceil_r - .Monitor_floor_r) / 255
     Dim rangestart_r As Double
-    rangestart_r = rob(n).monitor_r - .Monitor_floor_r
     Dim valred As Double
-    valred = rangestart_r / rangered
-    If valred > 255 Then valred = 255
-    If valred < 0 Then valred = 0
-    '
     Dim rangegreen As Double
-    rangegreen = (.Monitor_ceil_g - .Monitor_floor_g) / 255
     Dim rangestart_g As Double
-    rangestart_g = rob(n).monitor_g - .Monitor_floor_g
     Dim valgreen As Double
-    valgreen = rangestart_g / rangegreen
-    If valgreen > 255 Then valgreen = 255
-    If valgreen < 0 Then valgreen = 0
-    '
     Dim rangeblue As Double
-    rangeblue = (.Monitor_ceil_b - .Monitor_floor_b) / 255
     Dim rangestart_b As Double
-    rangestart_b = rob(n).monitor_b - .Monitor_floor_b
-    Dim valblue As Double
-    valblue = rangestart_b / rangeblue
-    If valblue > 255 Then valblue = 255
-    If valblue < 0 Then valblue = 0
-    '
     Dim aspectmod As Double
-    aspectmod = TwipHeight / twipWidth
-    Line (robManager.GetRobotPosition(n).x - robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y - robManager.GetRadius(n) * 1.1 / aspectmod)-(robManager.GetRobotPosition(n).x + robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y + robManager.GetRadius(n) * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
-End With
+    
+    With frmMonitorSet
+        rangered = (.Monitor_ceil_r - .Monitor_floor_r) / 255
+        rangestart_r = rob(n).monitor_r - .Monitor_floor_r
+        valred = rangestart_r / rangered
+        If valred > 255 Then valred = 255
+        If valred < 0 Then valred = 0
+        
+        rangegreen = (.Monitor_ceil_g - .Monitor_floor_g) / 255
+        rangestart_g = rob(n).monitor_g - .Monitor_floor_g
+        valgreen = rangestart_g / rangegreen
+        If valgreen > 255 Then valgreen = 255
+        If valgreen < 0 Then valgreen = 0
+        
+        rangeblue = (.Monitor_ceil_b - .Monitor_floor_b) / 255
+        rangestart_b = rob(n).monitor_b - .Monitor_floor_b
+        Dim valblue As Double
+        valblue = rangestart_b / rangeblue
+        If valblue > 255 Then valblue = 255
+        If valblue < 0 Then valblue = 0
+        
+        aspectmod = TwipHeight / twipWidth
+        Line (robManager.GetRobotPosition(n).x - robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y - robManager.GetRadius(n) * 1.1 / aspectmod)-(robManager.GetRobotPosition(n).x + robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y + robManager.GetRadius(n) * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
+    End With
 End Sub
 
 ' draws rob perimeter
@@ -603,10 +545,7 @@ Private Sub DrawRobPer(n As Integer)
         If Percent > 0.98 Then Percent = 0.98
         Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.55, vbGreen, 0, (Percent * PI * 2#)
       End If
-      
-      
     End If
-  
 End Sub
 
 ' draws rob perimeter if in distance
@@ -624,8 +563,7 @@ Private Sub DrawRobDistPer(n As Integer)
   
   Form1.FillColor = rob(n).color
 
-    Circle (CentreX, CentreY), robManager.GetRadius(n), rob(n).color
-
+  Circle (CentreX, CentreY), robManager.GetRadius(n), rob(n).color
 End Sub
 
 ' draws rob aim
@@ -1039,16 +977,6 @@ Public Sub DrawAllTies()
   Next t
 End Sub
 
-
-
-'''''''''''''''''''''''''''''''''''''''''''''''''
-''''''''''''''''''''''''''''''''''''''''''''''
-'
-'   S Y S T E M
-'
-'''''''''''''''''''''''''''''''''''''''''
-''''''''''''''''''''''''''''''''''''''''''
-
 ' changes robot colour
 Sub changerobcol()
   ColorForm.setcolor rob(robfocus).color
@@ -1057,7 +985,6 @@ End Sub
 
 ' initializes a simulation.
 Sub StartSimul()
-   'Botsareus 5/8/2013 save the safemode for 'start new'
    optionsform.savesett MDIForm1.MainDir + "\settings\lastran.set" 'Botsareus 5/3/2013 Save the lastran setting
 
   'lets reset the autosafe data
@@ -1104,13 +1031,7 @@ MDIForm1.menuupdate
 
 
   SimOpts.SimGUID = CLng(Rnd)
-  
-  If BackPic <> "" Then
-    Form1.Picture = LoadPicture(BackPic)
-  Else
-    Form1.Picture = Nothing
-  End If
-  
+    
   Form1.Show
   Form1.ScaleWidth = SimOpts.FieldWidth
   Form1.ScaleHeight = SimOpts.FieldHeight
@@ -1135,7 +1056,6 @@ MDIForm1.menuupdate
   MDIForm1.SnpDeadExRep.Checked = SimOpts.SnpExcludeVegs
   
   SimOpts.TotBorn = 0
-  grafico.ResetGraph
   MaxMem = 1000
   maxfieldsize = SimOpts.FieldWidth * 2
   robfocus = 0
@@ -1180,8 +1100,6 @@ MDIForm1.menuupdate
     End If
   End If
  
-  strSimStart = Replace(Replace(Now, ":", "-"), "/", "-")
-  
   'sim running
 
   main
@@ -1232,11 +1150,6 @@ Sub startloaded()
   
   Init_Buckets
   
-  If BackPic <> "" Then 'Botsareus 3/15/2013 No more screensaver code (was broken)
-    Form1.Picture = LoadPicture(BackPic)
-  Else
-    Form1.Picture = Nothing
-  End If
   Form1.ScaleWidth = SimOpts.FieldWidth
   Form1.ScaleHeight = SimOpts.FieldHeight
   Form1.visiblew = SimOpts.FieldWidth
@@ -1285,8 +1198,7 @@ Sub startloaded()
   Vegs.cooldown = -SimOpts.RepopCooldown
   totnvegsDisplayed = -1 ' Just set this to -1 for the first cycle so the cost low water mark doesn't trigger.
   totvegs = -1 ' Set to -1 to avoid veggy reproduction on first cycle
-  totnvegs = SimOpts.Costs(DYNAMICCOSTTARGET) ' Just set this high for the first cycle so the cost low water mark doesn't trigger.
-
+  
   main
 End Sub
 
@@ -1592,7 +1504,7 @@ If lblSafeMode.Visible Then Exit Sub 'Botsareus 5/13/2013 Safemode restrictions
   If n = 0 And button = 1 And MDIForm1.insrob Then
    If Not lblSaving.Visible Then 'Botsareus 9/6/2014 Bug fix
     k = 0
-    While SimOpts.Specie(k).Name <> "" And SimOpts.Specie(k).Name <> MDIForm1.Combo1.text
+    While SimOpts.Specie(k).Name <> "" And SimOpts.Specie(k).Name <> MDIForm1.Combo1.Text
       k = k + 1
     Wend
     
@@ -1621,21 +1533,6 @@ Private Sub deletemark()
   Next t
 End Sub
 
-'Public Sub MouseWheelZoom()
-'  MsgBox "MouseWheel!"
-'End Sub
-'
-'
-Sub Form_Unload(Cancel As Integer)
-
-End Sub
-'  Dim t As Byte
-'
-'  If SimOpts.TotRunTime <> 0 Then
-'    Debug.Print SimOpts.TotRunCycle, SimOpts.TotRunTime, SimOpts.TotRunCycle / SimOpts.TotRunTime
-'  End If
-'End Sub
-
 ' seconds timer, used to periodically check _cycles_ counters
 ' expecially for internet transfers
 ' tricky!
@@ -1644,8 +1541,6 @@ Private Sub SecTimer_Timer()
   If Enabled = False Then Exit Sub '9/7/2013 Do not count the timer if form is disabled
 
   Static TenSecondsAgo(10) As Long
-  'Static SumOfLastTenSeconds As Long
-'  Static SecondLastCycle As Long
   Static LastDownload As Long
   Static LastMut As Long
   Static MutPhase As Integer
@@ -1687,17 +1582,7 @@ Private Sub SecTimer_Timer()
   
   TenSecondsAgo(SimOpts.TotRunTime Mod 10) = SimOpts.TotRunCycle
   SimOpts.CycSec = CSng(CSng(CSng(SimOpts.TotRunCycle) - CSng(TenSecondsAgo((SimOpts.TotRunTime + 1) Mod 10))) * 0.1)
-  
-  'Botsareus 6/5/2013 pipe code work in progress
-  '12/28/2013 Disabled for possible causing overflows
-'  If InternetMode.Visible = True Then
-'    Dim Request() As Byte
-'    Dim Response() As Byte
-'    Request = "{ ""Population"":""" & CStr(TotalRobotsDisplayed) & """, ""CyclesPerSecond"":""" & CStr(SimOpts.CycSec) & ","" ""Size"":""" & CStr(SimOpts.FieldHeight * SimOpts.FieldWidth) & """, ""MutationRate"":""" & CStr(SimOpts.MutCurrMult) & """ }"
-'    ReDim Response(0)
-'    PipeRPC1.PipeCall Request, Response
-'  End If
-  
+    
   cyccaption SimOpts.CycSec
 
   '(provides the mutation rates oscillation Botsareus 8/3/2013 moved to UpdateSim)
@@ -1705,42 +1590,6 @@ Private Sub SecTimer_Timer()
   'Botsareus 7/13/2012 calls update function for main icon menu
   MDIForm1.menuupdate
 End Sub
-
-'Botsareus 7/6/2013 Hide or show graphs
-Sub hide_graphs()
-Dim i As Byte
-For i = 1 To NUMGRAPHS
-  If Not (Charts(i).graf Is Nothing) Then
-   If Charts(i).graf.Visible Then
-   SetWindowPos Charts(i).graf.hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
-   End If
-  End If
-Next i
-End Sub
-Sub show_graphs()
-Dim i As Byte
-For i = 1 To NUMGRAPHS
-  If Not (Charts(i).graf Is Nothing) Then
-   If Charts(i).graf.Visible Then
-    SetWindowPos Charts(i).graf.hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE + SWP_NOSIZE
-   End If
-  End If
-Next i
-End Sub
-
-Function calc_graphs() As String
-Dim lg As String
-Dim i As Byte
-For i = 1 To NUMGRAPHS
-  If Not (Charts(i).graf Is Nothing) Then
-   If Charts(i).graf.Visible Then
-    lg = lg & vbCrLf & Charts(i).graf.Caption
-   End If
-  End If
-Next i
-calc_graphs = lg
-End Function
-
 
 ' main procedure. Oh yes!
 Private Sub main()
@@ -1762,9 +1611,7 @@ Private Sub main()
            
       UpdateSim
       MDIForm1.Follow ' 11/29/2013 zoom follow selected robot
-      
-
-      
+          
       ' redraws all:
       If MDIForm1.visualize Then
         Form1.Label1.Visible = False
@@ -1781,16 +1628,6 @@ Private Sub main()
         End With
       End If
             
-      ' feeds graphs with data:
-      If SimOpts.TotRunCycle Mod SimOpts.chartingInterval = 0 Then
-        For i = 1 To NUMGRAPHS
-          If Not (Charts(i).graf Is Nothing) Then
-           If Charts(i).graf.Visible Then  'Botsareus 2/23/2013 Do not update chart if invisable
-            FeedGraph i
-           End If
-          End If
-        Next i
-      End If
     End If
     DoEvents
     If MDIForm1.limitgraphics = True Then
@@ -1850,742 +1687,6 @@ End Sub
 '
 '   S E R V I C E S
 '
-
-' initializes a new graph
-Public Sub NewGraph(n As Integer, YLab As String)
-  If (Charts(n).graf Is Nothing) Then
-    Dim k As New grafico
-    Set Charts(n).graf = k
-    Charts(n).graf.ResetGraph
-    Charts(n).graf.Left = graphleft(n)
-    Charts(n).graf.Top = graphtop(n)
-
-  '  Charts(n).graf.SetYLabel YLab ' EricL - Don't need this line - dup of line below
-  Else
-    'Botsareus 1/5/2013 reposition graph
-    Charts(n).graf.Top = IIf(Charts(n).graf.Top <> Screen.Height And Charts(n).graf.Visible, 0, graphtop(n))
-    Charts(n).graf.Left = IIf(Charts(n).graf.Left <> Screen.Width And Charts(n).graf.Visible, 0, graphleft(n))
-  End If
-  
-   Charts(n).graf.chk_GDsave.value = IIf(graphsave(n), 1, 0)
-  'Charts(n).graf.SetYLabel YLab ' EricL 4/7/2006 Commented out - just no longer need to call SetYLabel
-  
-  'EricL 4/7/2006 Just set the caption directly now without adding "/ Cycles..." to teh end of the caption
-  Charts(n).graf.Caption = YLab
-  
-  Charts(n).graf.Show
-  
-  'EricL - 3/27/2006 Get the first data point and show the graph key right from the start
-  FeedGraph n
-  
-End Sub
-
-
-Public Sub CloseGraph(n As Integer)
-  If Not (Charts(n).graf Is Nothing) Then
-     Unload Charts(n).graf
-  End If
-End Sub
-
-' resets all graphs
-Public Sub ResetGraphs(i As Integer)
-  Dim k As Integer
-  
-  If i > 0 Then
-    If Not (Charts(i).graf Is Nothing) Then
-      Charts(i).graf.ResetGraph
-    End If
-  Else
-    For k = 1 To NUMGRAPHS
-      If Not (Charts(k).graf Is Nothing) Then
-        Charts(k).graf.ResetGraph
-          
-      End If
-    Next k
-  End If
-End Sub
-
-' feeds graphs with new data
-Public Sub FeedGraph(GraphNumber As Integer)
-  Dim nomi(MAXSPECIES) As String
-  Dim dati(MAXSPECIES, NUMGRAPHS) As Single
-  Dim t As Integer, k As Integer, p As Integer, i As Integer
-  Dim startingChart As Integer, endingChart As Integer
-  
-  ' This should never be the case.
-  If GraphNumber < 0 Or GraphNumber > NUMGRAPHS Then Exit Sub
-  
-  CalcStats nomi, dati, GraphNumber
-  
-  If GraphNumber = 0 Then
-    ' Update all the graphs
-    startingChart = 1
-    endingChart = NUMGRAPHS
-  Else
-    ' Only update one graph
-    startingChart = GraphNumber
-    endingChart = GraphNumber
-  End If
-    
-  t = Flex.last(nomi)
-   
-  For k = startingChart To endingChart
-    If k = 10 Then t = 1
-    For p = 1 To t
-      If Not (Charts(k).graf Is Nothing) Then
-        If k = 10 Then
-          Charts(k).graf.SetValues "Cost Multiplier", dati(1, k)
-          Charts(k).graf.SetValues "Population / Target", dati(2, k)
-          Charts(k).graf.SetValues "Upper Range", dati(3, k)
-          Charts(k).graf.SetValues "Lower Range", dati(4, k)
-          Charts(k).graf.SetValues "Zero Level", dati(5, k)
-          Charts(k).graf.SetValues "Reinstatement Level", dati(6, k)
-        Else
-          Charts(k).graf.SetValues nomi(p), dati(p, k)
-        End If
-      End If
-    Next p
-  Next k
-  For k = startingChart To endingChart
-    If Not (Charts(k).graf Is Nothing) Then
-      Charts(k).graf.NewPoints
-    End If
-  Next k
-End Sub
-
-
-'Botsareus 5/25/2013 onrounded math for custom graphs
-'our stack manipulations
-Private Sub PushQStack(ByVal value As Double)
-  Dim a As Integer
-  
-  If QStack.pos >= 101 Then 'next push will overfill
-    For a = 0 To 99
-      QStack.val(a) = QStack.val(a + 1)
-    Next a
-    QStack.val(100) = 0
-    QStack.pos = 100
-  End If
-  
-  QStack.val(QStack.pos) = value
-  QStack.pos = QStack.pos + 1
-End Sub
-
-Private Function PopQStack() As Double
-  QStack.pos = QStack.pos - 1
-      
-  If QStack.pos = -1 Then
-    QStack.pos = 0
-    QStack.val(0) = 0
-  End If
-  
-  PopQStack = QStack.val(QStack.pos)
-End Function
-
-Private Sub ClearQStack()
-  QStack.pos = 0
-  QStack.val(0) = 0
-End Sub
-Private Sub Qadd()
-  Dim a As Double
-  Dim b As Double
-  Dim c As Double
-  b = PopQStack
-  a = PopQStack
-  
-  If a > 2000000000 Then a = a Mod 2000000000
-  If b > 2000000000 Then b = b Mod 2000000000
-  
-  c = a + b
-  
-  If Abs(c) > 2000000000 Then c = c - Sgn(c) * 2000000000
-  PushQStack c
-End Sub
-
-Private Sub QSub() 'Botsareus 5/20/2012 new code to stop overflow
-  Dim a As Double
-  Dim b As Double
-  Dim c As Double
-  b = PopQStack
-  a = PopQStack
-  
-  
-  If a > 2000000000 Then a = a Mod 2000000000
-  If b > 2000000000 Then b = b Mod 2000000000
-  
-  c = a - b
-  
-  If Abs(c) > 2000000000 Then c = c - Sgn(c) * 2000000000
-  PushQStack c
-End Sub
-
-Private Sub Qmult()
-  Dim a As Double
-  Dim b As Double
-  Dim c As Double
-  b = PopQStack
-  a = PopQStack
-  c = CDbl(a) * CDbl(b)
-  If Abs(c) > 2000000000 Then c = Sgn(c) * 2000000000
-  PushQStack CDbl(c)
-End Sub
-
-Private Sub Qdiv()
-  Dim a As Double
-  Dim b As Double
-  b = PopQStack
-  a = PopQStack
-  If b <> 0 Then
-    PushQStack a / b
-  Else
-    PushQStack 0
-  End If
-End Sub
-Private Sub Qpow()
-    Dim a As Double
-    Dim b As Double
-    Dim c As Double
-    b = PopQStack
-    a = PopQStack
-    
-    If Abs(b) > 10 Then b = 10 * Sgn(b)
-    
-    If a = 0 Then
-      c = 0
-    Else
-      c = a ^ b
-    End If
-    If Abs(c) > 2000000000 Then c = Sgn(c) * 2000000000
-    PushQStack c
-End Sub
-' calculates data for the different graph types
-Private Sub CalcStats(ByRef nomi, ByRef dati, graphNum As Integer) 'Botsareus 8/3/2012 use names for graph id mod
-  Dim p As Integer, t As Integer, i As Integer, x As Integer
-  Dim population As Integer
-  Dim ListOSubSpecies(500, 10000) As Integer
-  Dim speciesListIndex(500) As Integer
-  Dim SubSpeciesNumber As Long
-  Dim l, ll As Long
-  Dim sim As Long
-  
-  
- ' Dim numbots As Integer
- 
-  For t = 0 To SimOpts.SpeciesNum
-    speciesListIndex(t) = 0
-  Next t
-
-  population = TotalRobotsDisplayed
-  
-  'EricL - Modified in 2.42.5 to handle each graph separatly for perf reasons
- ' numbots = 0
-  Select Case graphNum
-  Case 0, CUSTOM_1_GRAPH, CUSTOM_2_GRAPH, CUSTOM_3_GRAPH     ' Do all the graphs
-  
-'    t = Flex.last(nomi)
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, MUTATIONS_GRAPH) = dati(p, MUTATIONS_GRAPH) + .LastMut + .Mutations
-        dati(p, AVGAGE_GRAPH) = dati(p, AVGAGE_GRAPH) + (.age / 100) ' EricL 4/7/2006 Graph age in 100's of cycles
-        dati(p, OFFSPRING_GRAPH) = dati(p, OFFSPRING_GRAPH) + .SonNumber
-        dati(p, ENERGY_GRAPH) = dati(p, ENERGY_GRAPH) + .nrg
-        dati(p, DNALENGTH_GRAPH) = dati(p, DNALENGTH_GRAPH) + .DnaLen
-        dati(p, DNACOND_GRAPH) = dati(p, DNACOND_GRAPH) + .condnum
-        dati(p, MUT_DNALENGTH_GRAPH) = dati(p, MUT_DNALENGTH_GRAPH) + (.LastMut + .Mutations) / .DnaLen * 1000
-        dati(p, ENERGY_SPECIES_GRAPH) = Round(dati(p, ENERGY_SPECIES_GRAPH) + (.nrg + .body * 10) * 0.001, 2)
-        
-        
-        'Look through the subspecies we have seen so far and see if this bot has the same as any of them
-        i = 0
-        While i < speciesListIndex(p) And .SubSpecies <> ListOSubSpecies(p, i)
-          i = i + 1
-        Wend
-                                
-        If i = speciesListIndex(p) Then ' New sub species
-           ListOSubSpecies(p, i) = .SubSpecies
-           speciesListIndex(p) = speciesListIndex(p) + 1
-           dati(p, SPECIESDIVERSITY_GRAPH) = dati(p, SPECIESDIVERSITY_GRAPH) + 1
-        End If
-        If Not .Corpse Then
-          If .SubSpecies < 0 Then
-            SubSpeciesNumber = 32000 + CLng(Abs(.SubSpecies))
-          Else
-            SubSpeciesNumber = .SubSpecies
-          End If
-          
-          'Botsareus 8/3/2012 Generational Distance Graph
-           ll = FindGenerationalDistance(t)
-           If ll > dati(p, GENERATION_DIST_GRAPH) Then dati(p, GENERATION_DIST_GRAPH) = ll
-                    
-        End If
-      End If
-      End With
-    Next t
-    
-    t = Flex.last(nomi)
-    If dati(p, POPULATION_GRAPH) <> 0 Then
-    For p = 1 To t
-      dati(p, MUTATIONS_GRAPH) = Round(dati(p, MUTATIONS_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, AVGAGE_GRAPH) = Round(dati(p, AVGAGE_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, OFFSPRING_GRAPH) = Round(dati(p, OFFSPRING_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, ENERGY_GRAPH) = Round(dati(p, ENERGY_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, DNALENGTH_GRAPH) = Round(dati(p, DNALENGTH_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, DNACOND_GRAPH) = Round(dati(p, DNACOND_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-      dati(p, MUT_DNALENGTH_GRAPH) = Round(dati(p, MUT_DNALENGTH_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-  '    dati(P, ENERGY_SPECIES_GRAPH) = dati(P, ENERGY_SPECIES_GRAPH) / dati(P, POPULATION_GRAPH)
-    Next p
-    End If
-    dati(1, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(COSTMULTIPLIER)
-    
-    If SimOpts.Costs(DYNAMICCOSTTARGET) = 0 Then ' Divide by zero protection
-      dati(2, DYNAMICCOSTS_GRAPH) = population
-    Else
-      dati(2, DYNAMICCOSTS_GRAPH) = population / SimOpts.Costs(DYNAMICCOSTTARGET)
-    End If
-    
-    dati(3, DYNAMICCOSTS_GRAPH) = 1 + (SimOpts.Costs(DYNAMICCOSTTARGETUPPERRANGE) * 0.01)
-    dati(4, DYNAMICCOSTS_GRAPH) = 1 - (SimOpts.Costs(DYNAMICCOSTTARGETLOWERRANGE) * 0.01)
-    If SimOpts.Costs(DYNAMICCOSTTARGET) = 0 Then ' Divide by zero protection
-      dati(5, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(BOTNOCOSTLEVEL)
-      dati(6, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(COSTXREINSTATEMENTLEVEL)
-    Else
-      dati(5, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(BOTNOCOSTLEVEL) / SimOpts.Costs(DYNAMICCOSTTARGET)
-      dati(6, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(COSTXREINSTATEMENTLEVEL) / SimOpts.Costs(DYNAMICCOSTTARGET)
-    End If
-    
-    'Botsareus 5/25/2013 Logic for custom graph
-    Dim myquery As String
-    Select Case graphNum
-        Case CUSTOM_1_GRAPH
-            myquery = strGraphQuery1
-        Case CUSTOM_2_GRAPH
-            myquery = strGraphQuery2
-        Case CUSTOM_3_GRAPH
-            myquery = strGraphQuery3
-    End Select
-    
-    'Botsareus 5/25/2013 Very simple genetic distance is calculated when necessary
-    If myquery Like "*simpgenetic*" Then
-    
-        t = Flex.last(nomi)
-        For p = 1 To t
-          dati(p, GENETIC_DIST_GRAPH) = 0
-        Next p
-        
-        For t = 1 To MaxRobs
-          With rob(t)
-          If robManager.GetExists(t) And Not .Corpse Then
-    
-            p = Flex.Position(rob(t).FName, nomi)
-    
-            If .GenMut > 0 Then 'If there is not enough mutations for a graph check, skip it
-    
-                l = .OldGD
-                If l > dati(p, GENETIC_DIST_GRAPH) Then dati(p, GENETIC_DIST_GRAPH) = l
-    
-            Else
-    
-                .GenMut = .DnaLen / GeneticSensitivity 'we have enough mutations, reset counter
-    
-                Dim copyl As Single
-                copyl = 0
-    
-                For x = t + 1 To MaxRobs 'search trough all robots and figure out genetic distance for the once that have enough mutations
-                If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
-                    l = DoGeneticDistance(t, x) * 1000
-                    If l > copyl Then copyl = l 'here we store the max genetic distance for a given robot
-                End If
-    
-                If x = UBound(rob) Then Exit For
-                Next x
-    
-                If copyl > dati(p, GENETIC_DIST_GRAPH) Then dati(p, GENETIC_DIST_GRAPH) = copyl 'now we write this max distance
-                .OldGD = copyl 'since this robot will not checked for a while, we need to store it's genetic distance to be used later
-    
-            End If
-    
-    
-          End If
-          End With
-    
-        If t = UBound(rob) Then Exit For
-        Next t
-    End If
-    
-    If graphNum > 0 Then
-      For p = 1 To t
-        'calculate query
-        ClearQStack
-        'query logic
-        Dim splt() As String
-        splt = Split(myquery, " ")
-        Dim q As Integer
-        For q = 0 To UBound(splt)
-        'make sure data is lower case
-        splt(q) = LCase(splt(q))
-        'loop trough each element and compute it as nessisary
-            If splt(q) = CStr(val(splt(q))) Then
-                'push ze number
-                PushQStack (val(splt(q)))
-            Else
-                Select Case splt(q)
-                Case "pop"
-                    PushQStack dati(p, POPULATION_GRAPH)
-                Case "avgmut"
-                    PushQStack dati(p, MUTATIONS_GRAPH)
-                Case "avgage"
-                    PushQStack dati(p, AVGAGE_GRAPH)
-                Case "avgsons"
-                    PushQStack dati(p, OFFSPRING_GRAPH)
-                Case "avgnrg"
-                    PushQStack dati(p, ENERGY_GRAPH)
-                Case "avglen"
-                    PushQStack dati(p, DNALENGTH_GRAPH)
-                Case "avgcond"
-                    PushQStack dati(p, DNACOND_GRAPH)
-                Case "simnrg"
-                    PushQStack dati(p, ENERGY_SPECIES_GRAPH)
-                Case "specidiv"
-                    PushQStack dati(p, SPECIESDIVERSITY_GRAPH)
-                Case "maxgd"
-                    PushQStack dati(p, GENERATION_DIST_GRAPH)
-                Case "simpgenetic"
-                    PushQStack dati(p, GENETIC_DIST_GRAPH)
-                Case "add"
-                     Qadd
-                Case "sub"
-                    QSub
-                Case "mult"
-                    Qmult
-                Case "div"
-                    Qdiv
-                Case "pow"
-                    Qpow
-                End Select
-            End If
-        Next
-        'end query logic
-        
-        'make sure graph is greater then zero
-        Dim holdqstack As Double
-        holdqstack = PopQStack
-        If holdqstack < 0 Then holdqstack = 0
-        
-        dati(p, graphNum) = holdqstack
-      Next
-    End If
-    
-getout2:
-    
-  Case POPULATION_GRAPH
-    For t = 1 To MaxRobs
-      With rob(t)
-     ' If Not .wall And .exist Then
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-      End If
-      End With
-    Next t
-       
-  Case MUTATIONS_GRAPH
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, MUTATIONS_GRAPH) = dati(p, MUTATIONS_GRAPH) + .LastMut + .Mutations
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, MUTATIONS_GRAPH) = Round(dati(p, MUTATIONS_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-    
-    
-  Case AVGAGE_GRAPH
-   For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, AVGAGE_GRAPH) = dati(p, AVGAGE_GRAPH) + (.age / 100) ' EricL 4/7/2006 Graph age in 100's of cycles
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, AVGAGE_GRAPH) = Round(dati(p, AVGAGE_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-  Case OFFSPRING_GRAPH
-  For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, OFFSPRING_GRAPH) = dati(p, OFFSPRING_GRAPH) + .SonNumber
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, OFFSPRING_GRAPH) = Round(dati(p, OFFSPRING_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-   
-  Case ENERGY_GRAPH
-  For t = 1 To MaxRobs
-      With rob(t)
-      'If Not .wall And .exist Then
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, ENERGY_GRAPH) = dati(p, ENERGY_GRAPH) + .nrg
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, ENERGY_GRAPH) = Round(dati(p, ENERGY_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-   
-  Case DNALENGTH_GRAPH
-    For t = 1 To MaxRobs
-      With rob(t)
-      'If Not .wall And .exist Then
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, DNALENGTH_GRAPH) = dati(p, DNALENGTH_GRAPH) + .DnaLen
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, DNALENGTH_GRAPH) = Round(dati(p, DNALENGTH_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-   
-  Case DNACOND_GRAPH
-  For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, DNACOND_GRAPH) = dati(p, DNACOND_GRAPH) + .condnum
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, DNACOND_GRAPH) = Round(dati(p, DNACOND_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-   
-  Case MUT_DNALENGTH_GRAPH
-  For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, MUT_DNALENGTH_GRAPH) = dati(p, MUT_DNALENGTH_GRAPH) + (.LastMut + .Mutations) / .DnaLen * 1000
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, MUT_DNALENGTH_GRAPH) = Round(dati(p, MUT_DNALENGTH_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-
-   
-  Case ENERGY_SPECIES_GRAPH
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, ENERGY_SPECIES_GRAPH) = dati(p, ENERGY_SPECIES_GRAPH) + (.nrg + .body * 10) * 0.001
-      End If
-      End With
-    Next t
-    
-  Case DYNAMICCOSTS_GRAPH
-    dati(1, DYNAMICCOSTS_GRAPH) = Round(SimOpts.Costs(COSTMULTIPLIER), 4)
-    If SimOpts.Costs(DYNAMICCOSTTARGET) = 0 Then ' Divide by zero protection
-      dati(2, DYNAMICCOSTS_GRAPH) = population
-    Else
-      dati(2, DYNAMICCOSTS_GRAPH) = population / SimOpts.Costs(DYNAMICCOSTTARGET)
-    End If
-        
-    dati(3, DYNAMICCOSTS_GRAPH) = 1 + (SimOpts.Costs(DYNAMICCOSTTARGETUPPERRANGE) * 0.01)
-    dati(4, DYNAMICCOSTS_GRAPH) = 1 - (SimOpts.Costs(DYNAMICCOSTTARGETLOWERRANGE) * 0.01)
-    If SimOpts.Costs(DYNAMICCOSTTARGET) = 0 Then ' Divide by zero protection
-      dati(5, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(BOTNOCOSTLEVEL)
-      dati(6, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(COSTXREINSTATEMENTLEVEL)
-    Else
-      dati(5, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(BOTNOCOSTLEVEL) / SimOpts.Costs(DYNAMICCOSTTARGET)
-      dati(6, DYNAMICCOSTS_GRAPH) = SimOpts.Costs(COSTXREINSTATEMENTLEVEL) / SimOpts.Costs(DYNAMICCOSTTARGET)
-    End If
-    
-  Case SPECIESDIVERSITY_GRAPH
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        
-        'Look through the subspecies we have seen so far and see if this bot has the same as any of them
-        i = 0
-        While i < speciesListIndex(p) And .SubSpecies <> ListOSubSpecies(p, i)
-          i = i + 1
-        Wend
-                                
-        If i = speciesListIndex(p) Then ' New sub species
-           ListOSubSpecies(p, i) = .SubSpecies
-           speciesListIndex(p) = speciesListIndex(p) + 1
-           dati(p, SPECIESDIVERSITY_GRAPH) = dati(p, SPECIESDIVERSITY_GRAPH) + 1
-        End If
-        
-      End If
-      End With
-    Next t
-    
-  Case AVGCHLR_GRAPH 'Botsareus 8/31/2013 The new chloroplast graph
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) Then
-        p = Flex.Position(rob(t).FName, nomi)
-        dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
-        dati(p, AVGCHLR_GRAPH) = dati(p, AVGCHLR_GRAPH) + .chloroplasts
-      End If
-      End With
-    Next t
-    t = Flex.last(nomi)
-    For p = 1 To t
-      If dati(p, POPULATION_GRAPH) <> 0 Then dati(p, AVGCHLR_GRAPH) = Round(dati(p, AVGCHLR_GRAPH) / dati(p, POPULATION_GRAPH), 1)
-    Next p
-    
-getout3:
-    
-   Case GENETIC_DIST_GRAPH
-    'Botsareus 4/9/2013 Genetic Distance Graph uses the new GenMut and OldGD variables
-    
-
-    t = Flex.last(nomi)
-    For p = 1 To t
-      dati(p, GENETIC_DIST_GRAPH) = 0
-    Next p
-
-    'show the graph update label and set value to zero
-    GraphLab.Caption = "Updating Graph: 0%"
-    GraphLab.Visible = True
-
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) And Not .Corpse Then
-
-        p = Flex.Position(rob(t).FName, nomi)
-
-        If .GenMut > 0 Then 'If there is not enough mutations for a graph check, skip it
-
-            l = .OldGD
-            If l > dati(p, GENETIC_DIST_GRAPH) Then dati(p, GENETIC_DIST_GRAPH) = l
-
-        Else
-
-            .GenMut = .DnaLen / GeneticSensitivity 'we have enough mutations, reset counter
-
-            'Dim copyl As Single
-            copyl = 0
-
-            For x = t + 1 To MaxRobs 'search trough all robots and figure out genetic distance for the once that have enough mutations
-            If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
-                l = DoGeneticDistance(t, x) * 1000
-                If l > copyl Then copyl = l 'here we store the max genetic distance for a given robot
-
-                'update the graph label
-                GraphLab.Caption = "Updating Graph: " & Int(t / MaxRobs * 100) & "." & Int(x / MaxRobs * 99) & "%"
-                DoEvents
-            End If
-
-            If x = UBound(rob) Then Exit For
-            Next x
-
-            If copyl > dati(p, GENETIC_DIST_GRAPH) Then dati(p, GENETIC_DIST_GRAPH) = copyl 'now we write this max distance
-            .OldGD = copyl 'since this robot will not checked for a while, we need to store it's genetic distance to be used later
-            DoEvents
-
-        End If
-
-
-      End If
-      End With
-
-    If t = UBound(rob) Then Exit For
-    Next t
-
-    'hide the graph update label
-    GraphLab.Visible = False
-   
-   Case GENERATION_DIST_GRAPH
-    t = Flex.last(nomi)
-    
-    For p = 1 To t
-      dati(p, GENERATION_DIST_GRAPH) = 0
-    Next p
-    
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) And Not .Corpse Then
-        p = Flex.Position(rob(t).FName, nomi)
-           'Botsareus 8/3/2012 Generational Distance Graph
-           ll = FindGenerationalDistance(t)
-           If ll > dati(p, GENERATION_DIST_GRAPH) Then dati(p, GENERATION_DIST_GRAPH) = ll
-      End If
-      End With
-    Next t
-    
-    Case GENETIC_SIMPLE_GRAPH
-    
-    'show the graph update label and set value to zero
-    GraphLab.Caption = "Updating Graph: 0%"
-    GraphLab.Visible = True
-    
-    t = Flex.last(nomi)
-    For p = 1 To t
-      dati(p, GENETIC_SIMPLE_GRAPH) = 0
-    Next p
-
-    For t = 1 To MaxRobs
-      With rob(t)
-      If robManager.GetExists(t) And Not .Corpse Then
-        p = Flex.Position(rob(t).FName, nomi)
-            For x = t + 1 To MaxRobs
-            If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName Then  ' Must exist, and be of same species
-                l = DoGeneticDistance(t, x) * 1000
-                If l > dati(p, GENETIC_SIMPLE_GRAPH) Then dati(p, GENETIC_SIMPLE_GRAPH) = l 'here we store the max generational distance for a given robot
-            End If
-            Next x
-        GraphLab.Caption = "Updating Graph: " & Int(t / MaxRobs * 100) & "%"
-        DoEvents
-      End If
-      End With
-    Next t
-    
-    'hide the graph update label
-    GraphLab.Visible = False
-  End Select
-End Sub
-
-Private Function FindGenerationalDistance(ByVal id As Integer) 'Botsareus 8/3/2012 code to find generational distance
-p_reclev = 0
-score id, 1, 500, 4
-FindGenerationalDistance = p_reclev
-End Function
 
 ' recursively calculates the number of alive descendants of a rob
 Public Function discendenti(t As Integer, disce As Integer) As Integer

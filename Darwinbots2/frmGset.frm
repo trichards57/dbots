@@ -5,14 +5,14 @@ Begin VB.Form frmGset
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Global Settings"
    ClientHeight    =   5700
-   ClientLeft      =   45
-   ClientTop       =   315
-   ClientWidth     =   10770
+   ClientLeft      =   48
+   ClientTop       =   312
+   ClientWidth     =   10764
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   5700
-   ScaleWidth      =   10770
+   ScaleWidth      =   10764
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton btnOK 
@@ -37,40 +37,46 @@ Begin VB.Form frmGset
       TabIndex        =   3
       Top             =   0
       Width           =   10755
-      _ExtentX        =   18971
-      _ExtentY        =   9128
+      _ExtentX        =   18965
+      _ExtentY        =   9123
       _Version        =   393216
       Style           =   1
       Tabs            =   2
-      Tab             =   1
       TabsPerRow      =   4
       TabHeight       =   520
       BackColor       =   12632256
       TabCaption(0)   =   "Main settings"
       TabPicture(0)   =   "frmGset.frx":0000
-      Tab(0).ControlEnabled=   0   'False
+      Tab(0).ControlEnabled=   -1  'True
       Tab(0).Control(0)=   "chkIntRnd"
+      Tab(0).Control(0).Enabled=   0   'False
       Tab(0).Control(1)=   "chkEpiGene"
+      Tab(0).Control(1).Enabled=   0   'False
       Tab(0).Control(2)=   "ffmInitChlr"
+      Tab(0).Control(2).Enabled=   0   'False
       Tab(0).Control(3)=   "ffmFBSBO"
+      Tab(0).Control(3).Enabled=   0   'False
       Tab(0).Control(4)=   "chkSafeMode"
+      Tab(0).Control(4).Enabled=   0   'False
       Tab(0).Control(5)=   "ffmMainDir"
+      Tab(0).Control(5).Enabled=   0   'False
       Tab(0).Control(6)=   "Frame1"
+      Tab(0).Control(6).Enabled=   0   'False
       Tab(0).Control(7)=   "ffmCheatin"
+      Tab(0).Control(7).Enabled=   0   'False
       Tab(0).Control(8)=   "ffmUI"
+      Tab(0).Control(8).Enabled=   0   'False
       Tab(0).ControlCount=   9
       TabCaption(1)   =   "Mutations"
       TabPicture(1)   =   "frmGset.frx":001C
-      Tab(1).ControlEnabled=   -1  'True
-      Tab(1).Control(0)=   "ffmSunMut"
-      Tab(1).Control(0).Enabled=   0   'False
-      Tab(1).Control(1)=   "ffmEpiReset"
-      Tab(1).Control(1).Enabled=   0   'False
+      Tab(1).ControlEnabled=   0   'False
+      Tab(1).Control(0)=   "ffmEpiReset"
+      Tab(1).Control(1)=   "ffmSunMut"
       Tab(1).ControlCount=   2
       Begin VB.Frame ffmUI 
          Caption         =   "UI Settings"
          Height          =   2000
-         Left            =   -74880
+         Left            =   120
          TabIndex        =   53
          Top             =   360
          Width           =   4695
@@ -126,7 +132,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmCheatin 
          Caption         =   "Cheating Prevention"
          Height          =   1575
-         Left            =   -74880
+         Left            =   120
          TabIndex        =   49
          Top             =   2375
          Width           =   4695
@@ -158,7 +164,7 @@ Begin VB.Form frmGset
       Begin VB.Frame Frame1 
          Caption         =   "Randomization"
          Height          =   1095
-         Left            =   -74880
+         Left            =   120
          TabIndex        =   46
          Top             =   3960
          Width           =   4695
@@ -182,7 +188,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmMainDir 
          Caption         =   "Main Directory"
          Height          =   1215
-         Left            =   -70080
+         Left            =   4920
          TabIndex        =   43
          Top             =   480
          Width           =   5655
@@ -206,7 +212,7 @@ Begin VB.Form frmGset
       Begin VB.CheckBox chkSafeMode 
          Caption         =   "Use Safe Mode"
          Height          =   255
-         Left            =   -69840
+         Left            =   5160
          TabIndex        =   42
          Top             =   1920
          Width           =   1575
@@ -214,7 +220,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmFBSBO 
          Caption         =   "Find Best Settings base on:"
          Height          =   915
-         Left            =   -70080
+         Left            =   4920
          TabIndex        =   38
          Top             =   2280
          Width           =   5655
@@ -225,8 +231,8 @@ Begin VB.Form frmGset
             TabStop         =   0   'False
             Top             =   240
             Width           =   2955
-            _ExtentX        =   5212
-            _ExtentY        =   1005
+            _ExtentX        =   5207
+            _ExtentY        =   1016
             _Version        =   393216
             LargeChange     =   40
             Max             =   200
@@ -253,7 +259,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmEpiReset 
          Caption         =   "Epigenetic Reset"
          Height          =   735
-         Left            =   1560
+         Left            =   -73440
          TabIndex        =   32
          Top             =   460
          Width           =   7575
@@ -303,7 +309,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmSunMut 
          Caption         =   "Sunline Mutations"
          Height          =   3775
-         Left            =   840
+         Left            =   -74160
          TabIndex        =   9
          Top             =   1280
          Width           =   9135
@@ -318,15 +324,15 @@ Begin VB.Form frmGset
          Begin VB.PictureBox picIcon 
             AutoSize        =   -1  'True
             ClipControls    =   0   'False
-            Height          =   540
+            Height          =   432
             Left            =   120
             Picture         =   "frmGset.frx":00F0
-            ScaleHeight     =   337.12
+            ScaleHeight     =   263.118
             ScaleMode       =   0  'User
-            ScaleWidth      =   337.12
+            ScaleWidth      =   263.118
             TabIndex        =   21
             Top             =   3120
-            Width           =   540
+            Width           =   432
          End
          Begin VB.CheckBox chkDelta2 
             Caption         =   "Enable Delta2 Mutations"
@@ -413,8 +419,8 @@ Begin VB.Form frmGset
             Top             =   960
             Visible         =   0   'False
             Width           =   1935
-            _ExtentX        =   3413
-            _ExtentY        =   503
+            _ExtentX        =   3408
+            _ExtentY        =   508
             _Version        =   393216
             Max             =   100
             TickFrequency   =   10
@@ -427,8 +433,8 @@ Begin VB.Form frmGset
             Top             =   1440
             Visible         =   0   'False
             Width           =   1935
-            _ExtentX        =   3413
-            _ExtentY        =   503
+            _ExtentX        =   3408
+            _ExtentY        =   508
             _Version        =   393216
             Max             =   100
             TickFrequency   =   10
@@ -507,7 +513,7 @@ Begin VB.Form frmGset
       Begin VB.Frame ffmInitChlr 
          Caption         =   "Advanced Chloroplast Options"
          Height          =   975
-         Left            =   -70080
+         Left            =   4920
          TabIndex        =   6
          Top             =   3480
          Width           =   5655
@@ -531,7 +537,7 @@ Begin VB.Form frmGset
       Begin VB.CheckBox chkEpiGene 
          Caption         =   "Save epigenetic memory as a temporary gene when saving robot DNA to file.        Warning: This uses delgene."
          Height          =   375
-         Left            =   -69480
+         Left            =   5520
          TabIndex        =   5
          Top             =   4560
          Width           =   4815
@@ -539,7 +545,7 @@ Begin VB.Form frmGset
       Begin VB.CheckBox chkIntRnd 
          Caption         =   "Use Internet Pictures to seed Randomizer"
          Height          =   255
-         Left            =   -67920
+         Left            =   7080
          TabIndex        =   4
          Top             =   1920
          Width           =   3375
@@ -570,7 +576,7 @@ End Sub
 
 Private Sub btnOK_Click()
   'Botsareus 5/10/2013 Make sure txtCD points to a valid directory
-  If Not FolderExists(txtCD.text) And chkUseCD.value = 1 Then
+  If Not FolderExists(txtCD.Text) And chkUseCD.value = 1 Then
     MsgBox "Please use a valid directory for the main directory.", vbCritical
     Exit Sub
   End If
@@ -581,7 +587,7 @@ Private Sub btnOK_Click()
   Else
    'write current path to setting
     Open App.path & "\Maindir.gset" For Output As #1
-    Write #1, txtCD.text
+    Write #1, txtCD.Text
     Close #1
   End If
 
@@ -624,7 +630,7 @@ Private Sub btnOK_Click()
   
   Dim tmpopt As OptionButton
   
-  Write #1, val(txtStartChlr.text)
+  Write #1, val(txtStartChlr.Text)
   
   'Restrictions
   
@@ -755,7 +761,7 @@ Private Sub Form_Load()
   '
   
   '
-  txtStartChlr.text = StartChlr
+  txtStartChlr.Text = StartChlr
   '
   chkGraphUp.value = IIf(GraphUp, 1, 0)
   chkHide.value = IIf(HideDB, 1, 0)

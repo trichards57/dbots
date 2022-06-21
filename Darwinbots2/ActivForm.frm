@@ -3,16 +3,16 @@ Begin VB.Form ActivForm
    AutoRedraw      =   -1  'True
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Genes Activations"
-   ClientHeight    =   990
-   ClientLeft      =   45
-   ClientTop       =   285
-   ClientWidth     =   5715
+   ClientHeight    =   984
+   ClientLeft      =   48
+   ClientTop       =   288
+   ClientWidth     =   5712
    FillStyle       =   0  'Solid
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   990
-   ScaleWidth      =   5715
+   ScaleHeight     =   984
+   ScaleWidth      =   5712
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
    Begin VB.PictureBox pbox 
@@ -21,7 +21,7 @@ Begin VB.Form ActivForm
       BorderStyle     =   0  'None
       BeginProperty Font 
          Name            =   "Small Fonts"
-         Size            =   6.75
+         Size            =   6.6
          Charset         =   0
          Weight          =   400
          Underline       =   0   'False
@@ -32,7 +32,7 @@ Begin VB.Form ActivForm
       Height          =   240
       Left            =   0
       ScaleHeight     =   240
-      ScaleWidth      =   5715
+      ScaleWidth      =   5712
       TabIndex        =   0
       Top             =   810
       Width           =   5715
@@ -60,19 +60,19 @@ Option Explicit
 Private gb() As Integer
 
 Public Sub NoFocus()
-  Me.FillStyle = 0
-  Me.FillColor = vbBlack
-  Line (cornice.Left, cornice.Top)-(cornice.Left + cornice.Width, cornice.Top + cornice.Height), , B
-  Line (cornice2.Left, cornice2.Top)-(cornice2.Left + cornice2.Width, cornice2.Top + cornice2.Height), , B
+    Me.FillStyle = 0
+    Me.FillColor = vbBlack
+    Line (cornice.Left, cornice.Top)-(cornice.Left + cornice.Width, cornice.Top + cornice.Height), , B
+    Line (cornice2.Left, cornice2.Top)-(cornice2.Left + cornice2.Width, cornice2.Top + cornice2.Height), , B
 End Sub
 
 Public Sub DrawGrid(ga() As Boolean)
-  DrawStat ga()
-  If UBound(gb) <> UBound(ga) Then
-    ReDim gb(UBound(ga))
-    SetLab ga()
-  End If
-  DrawDyn ga()
+    DrawStat ga()
+    If UBound(gb) <> UBound(ga) Then
+        ReDim gb(UBound(ga))
+        SetLab ga()
+    End If
+    DrawDyn ga()
 End Sub
 
 Private Sub SetLab(ga() As Boolean)

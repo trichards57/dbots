@@ -902,48 +902,7 @@ Attribute VB_GlobalNameSpace = False
 Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
-
-
-' DarwinBots - copyright 2003 Carlo Comis
-' Modifications by Purple Youko and Numsgil - 2004, 2005
-' Post V2.42 modifications copyright (c) 2006, 2007 Eric Lockard  eric@sulaadventures.com
-'
-' Post V2.45 modifications copyright (c) 2012, 2013, 2014, 2015, 2016 Paul Kononov
-'a.k.a
-'______________________________________________1$$$___108033_____$$______________________________
-'____1$$$$$$$3________________011_______________$$__$$$$$$$$$$8_1$_________1$$$1__8$$$1_______3$$
-'____3$$811$$$0______________1$$3_______________0___$$$$__1$$$8____________0$$$__1$$$$______0$$8_
-'____1$$__1$$$1______________$$$_______880_________3$$$3__8$$$3____________0$$0__1$$$0____1$$$1__
-'____3$$11$$$0____8$$$8___8$$$$$$$3__38$___________0$$$$_$$$$$_____________$$$8__8$$$1____$$$8___
-'____1$$$$$$1____$$$$$$$3__$$$$88___$$8____________8$$$$$$$$0______________8$$$__$$$$_____3$$$1__
-'____1$$$$$$$0__$$$$_18$$___8$$___1$$$_____________$$$$$$$$8_______________0$$8_0$$$$_______8$$__
-'____3$$$88$$$$_$$$___8$$__3$$8____0$$$___________1$$$$1$$$$_______________8$$$$$$$$3_______$$$1_
-'____1$$____3$$_8$$__8$$8__8$$______0$$1__________3$$$0_1$$$1______________8$$$$$$$$_______$$$0__
-'____3$$____0$$__$$$$$$$1__$$8______$$0___________$$$$___8$$0______________1$$$$$$$3_____1$$$0___
-'_____$$011$$$$__8$$$$$1__1$$1____3$$1___________3$$$3___3$$$_______________8$$$$$3____1$$$0_____
-'____3$$$$$$81____3$80____$$81__188______________8$$$_____8$$0_______________0$$81____8003_______
-'
-' All rights reserved.
-'
-'Redistribution and use in source and binary forms, with or without
-'modification, are permitted provided that:
-'
-'(1) source code distributions retain the above copyright notice and this
-'    paragraph in its entirety,
-'(2) distributions including binary code include the above copyright notice and
-'    this paragraph in its entirety in the documentation or other materials
-'    provided with the distribution, and
-'(3) Without the agreement of the author redistribution of this product is only allowed
-'    in non commercial terms and non profit distributions.
-'
-'THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
-'WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
-'MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-
 Option Explicit
-'Botsareus 5/19/2012 Update to the way the tool menu looks; removed unnecessary pictures from collection
-'Botsareus 3/15/2013 got rid of screen save code (was broken)
-'Botsareus 4/17/2013 Added a bunch of new components
 
 Private lockswitch As Byte
 Public MainDir As String
@@ -1036,12 +995,6 @@ Private Sub DisplayShotImpacts_Click()
   displayShotImpactsToggle = DisplayShotImpacts.Checked
 End Sub
 
-Private Sub DNAexp_Click() 'Botsareus 8/7/2012 help loads a while, added a hourglass
-  MousePointer = vbHourglass
-  DNA_Help.Show
-  MousePointer = vbDefault
-End Sub
-
 Private Sub DontDecayNrgShots_Click()
   DontDecayNrgShots.Checked = Not DontDecayNrgShots.Checked
   SimOpts.NoShotDecay = DontDecayNrgShots.Checked
@@ -1078,21 +1031,6 @@ Private Sub Leagues_Click()
   optionsform.SSTab1.Tab = 4
   optionsform.Show vbModal
 End Sub
-
-Private Sub loadpiccy_Click()
-  On Error GoTo fine
-  optionsform.Visible = False
-  CommonDialog1.DialogTitle = "Load a Background picture file"
-  CommonDialog1.InitDir = App.path
-  CommonDialog1.FileName = ""
-  CommonDialog1.Filter = "Pictures (*.bmp;*.jpg)|*.bmp;*.jpg"
-  CommonDialog1.ShowOpen
-  If CommonDialog1.FileName <> "" Then Form1.BackPic = CommonDialog1.FileName
-  Form1.PiccyMode = True
-  Form1.Newpic = True
-fine:
-End Sub
-
 
 Private Sub makenewspecies_Click()
   If robfocus > 0 Then
@@ -1149,12 +1087,6 @@ Private Sub pause_Click()
   Form1.Active = False
   Form1.SecTimer.Enabled = False
   MDIForm1.unpause.Enabled = True
-End Sub
-
-
-Private Sub removepiccy_Click() 'Botsareus 3/24/2012 Added code that deletes the background picture
-  Form1.PiccyMode = False
-  Form1.Picture = Nothing
 End Sub
 
 Private Sub RESOver_Click()
@@ -1224,8 +1156,8 @@ On Error Resume Next
 frmEYE.Show
 Dim i As Byte
 For i = 0 To 8
- frmEYE.txtDir(i).text = rob(robfocus).mem(i + EYE1DIR)
- frmEYE.txtWth(i).text = rob(robfocus).mem(i + EYE1WIDTH)
+ frmEYE.txtDir(i).Text = rob(robfocus).mem(i + EYE1DIR)
+ frmEYE.txtWth(i).Text = rob(robfocus).mem(i + EYE1WIDTH)
 Next
 End Sub
 
@@ -1378,90 +1310,6 @@ Private Sub Toolbar1_ButtonClick(ByVal button As MSComctlLib.button)
     
       
   End Select
-End Sub
-
-Private Sub Toolbar1_ButtonMenuClick(ByVal ButtonMenu As MSComctlLib.ButtonMenu) 'Botsareus 8/3/2012 graph id mod, looks a little better now
-'Botsareus 5/26/2013 We now support customizable graphs
-  Dim queryhold As String
-  Dim queryhelp As String
-  queryhelp = vbCrLf & vbCrLf & _
-  "Supported variables:" & vbCrLf & _
-  "pop= Populations" & vbCrLf & _
-  "avgmut= Average Mutations" & vbCrLf & _
-  "avgage= Average Age" & vbCrLf & _
-  "avgsons= Average Offspring" & vbCrLf & _
-  "avgnrg= Average Energy" & vbCrLf & _
-  "avglen= Average DNA length" & vbCrLf & _
-  "avgcond= Average DNA Cond statements" & vbCrLf & _
-  "simnrg= Total Energy_per Species" & vbCrLf & _
-  "specidiv= Species Diversity" & vbCrLf & _
-  "maxgd= Max Generational Distance" & vbCrLf & _
-  "simpgenetic= Selective Genetic Distance" & vbCrLf & vbCrLf & _
-  "Supported operators: add sub div mult pow" & vbCrLf & "Please use reverse polish notation."
-
-  Select Case ButtonMenu.key
-    Case "pop"
-      Form1.NewGraph POPULATION_GRAPH, "Populations"
-    Case "avgmut"
-      Form1.NewGraph MUTATIONS_GRAPH, "Average_Mutations"
-    Case "avgage"
-      Form1.NewGraph AVGAGE_GRAPH, "Average_Age"
-    Case "avgsons"
-      Form1.NewGraph OFFSPRING_GRAPH, "Average_Offspring"
-    Case "avgnrg"
-      Form1.NewGraph ENERGY_GRAPH, "Average_Energy"
-    Case "avglen"
-      Form1.NewGraph DNALENGTH_GRAPH, "Average_DNA_length"
-    Case "avgcond"
-      Form1.NewGraph DNACOND_GRAPH, "Average_DNA_Cond_statements"
-    Case "avgmutlen"
-      Form1.NewGraph MUT_DNALENGTH_GRAPH, "Average_Mutations_per_DNA_length_x1000-"
-    Case "simnrg"
-      Form1.NewGraph ENERGY_SPECIES_GRAPH, "Total_Energy_per_Species_x1000-"
-    Case "autocost"
-      Form1.NewGraph DYNAMICCOSTS_GRAPH, "Dynamic_Costs"
-    Case "speciesdiversity"
-      Form1.NewGraph SPECIESDIVERSITY_GRAPH, "Species_Diversity"
-    Case "avgchlr"
-      Form1.NewGraph AVGCHLR_GRAPH, "Average_Chloroplasts"
-    Case "maxgeneticdistance"
-      Form1.NewGraph GENETIC_DIST_GRAPH, "Genetic_Distance_x1000-"
-    Case "maxgenerationaldistance"
-      Form1.NewGraph GENERATION_DIST_GRAPH, "Max_Generational_Distance"
-    Case "simplegeneticdistance"
-      Form1.NewGraph GENETIC_SIMPLE_GRAPH, "Simple_Genetic_Distance_x1000-"
-    Case "CG1"
-      queryhold = InputBox("Enter query for Customizable Graph 1:" & queryhelp, , strGraphQuery1)
-      If queryhold <> "" Then
-        strGraphQuery1 = queryhold
-        Form1.NewGraph CUSTOM_1_GRAPH, "Customizable_Graph_1-"
-      End If
-    Case "CG2"
-      queryhold = InputBox("Enter query for Customizable Graph 2:" & queryhelp, , strGraphQuery2)
-      If queryhold <> "" Then
-        strGraphQuery2 = queryhold
-        Form1.NewGraph CUSTOM_2_GRAPH, "Customizable_Graph_2-"
-      End If
-    Case "CG3"
-      queryhold = InputBox("Enter query for Customizable Graph 3:" & queryhelp, , strGraphQuery3)
-      If queryhold <> "" Then
-        strGraphQuery3 = queryhold
-        Form1.NewGraph CUSTOM_3_GRAPH, "Customizable_Graph_3-"
-      End If
-    Case "resgraph"
-      If MsgBox("Are you sure you want to reset all graphs?", vbOKCancel) = vbOK Then
-        Form1.ResetGraphs (0)
-        Form1.FeedGraph (0) ' EricL 4/7/2006 Update the graphs right now instead of waiting until the next update
-      End If
-    Case "listgraphs"
-        Dim lg As String
-        lg = "List of all running graphs:" & vbCrLf & Form1.calc_graphs
-        MsgBox lg, vbInformation
-  End Select
-End Sub
-
-Private Sub about_Click()
-    frmAbout.Show
 End Sub
 
 Private Sub col_Click()
@@ -1875,12 +1723,6 @@ End Sub
 Private Sub MDIForm_Load()
 'Botsareus 6/16/2014 Starting positions for graphs so they are less annoying
 Dim k As Byte
-For k = 1 To NUMGRAPHS
-   graphleft(k) = Screen.Width - 8400
-   graphtop(k) = Screen.Height - 4800
-Next k
-'Botsareus 7/5/2014 Intialize array for player bot mode
-ReDim PB_keys(0)
 
 calc_dnamatrix
 'Botsareus 5/8/2013 Safemode strings are declared here (sorry, no Italian version)
@@ -1960,8 +1802,6 @@ Form1.Active = True 'Botsareus 2/21/2013 moved active here to enable to pause in
   TmpOpts.FieldWidth = 16000
   TmpOpts.FieldHeight = 12000
   TmpOpts.MaxVelocity = 60
-  TmpOpts.Costs(DYNAMICCOSTSENSITIVITY) = 50
-  TmpOpts.Costs(BOTNOCOSTLEVEL) = -1 'Botsareus 5/11/2012 Sets BotNoCostThreshold to -1 to fix a bug when running a veg only sim.
   TmpOpts.Costs(COSTMULTIPLIER) = 1 'Botsareus 1/5/2013 default for cost multiply
   TmpOpts.VegFeedingToBody = 0.75 'Botsareus 1/5/2013 Vegy feed distribution intialized at energy 25% body 75%
   TmpOpts.Gradient = 1.02 'Botsareus 12/12/2012 Default for Gradient
@@ -2086,15 +1926,12 @@ If Form1.lblSaving.Visible Then 'Botsareus 2/7/2014 small bug fix for autosave
     Exit Sub
 End If
 
-Form1.hide_graphs
-
 'Botsareus 5/5/2013 Replaced MBsure with a better message. (Sorry, no Italian version)
 'Botsareus 5/10/2013 Only prompt to overwrite setting if lastexit.set already exisits.
 If dir(MDIForm1.MainDir + "\settings\lastexit.set") <> "" Then
 
   Select Case MsgBox("Would you like to save changes to the settings? Press CANCEL to return to the program.", vbYesNoCancel + vbExclamation, MBwarning)
   Case vbYes
-    Form1.Form_Unload 0
     datirob.Form_Unload 1
           
         'moved savesett here
@@ -2103,11 +1940,9 @@ If dir(MDIForm1.MainDir + "\settings\lastexit.set") <> "" Then
         End If
         optionsform.savesett MDIForm1.MainDir + "\settings\lastexit.set" 'save last settings
         
-    Form1.Form_Unload 0
     datirob.Form_Unload 1
     MDIForm_Unload 0
   Case vbNo
-    Form1.Form_Unload 0
     datirob.Form_Unload 1
     MDIForm_Unload 0
   Case vbCancel
@@ -2124,7 +1959,6 @@ Else
         End If
         optionsform.savesett MDIForm1.MainDir + "\settings\lastexit.set" 'save last settings
   
-    Form1.Form_Unload 0
     datirob.Form_Unload 1
     MDIForm_Unload 0
   Else
@@ -2132,15 +1966,8 @@ Else
   End If
 
 End If
-
-Form1.show_graphs
 End Sub
 
-
-Private Sub MDIForm_Resize()
-'  Form1.dimensioni
-  'InfoForm.ZOrder
-End Sub
 Private Sub MDIForm_Unload(Cancel As Integer)
    
 SaveSimulation MDIForm1.MainDir + "\saves\lastexit.sim"  'save last settings
@@ -2165,26 +1992,26 @@ Sub infos(ByVal cyc As Single, tot As Integer, tnv As Integer, tv As Long, brn A
   Dim Delta As Double
   
   If tot = 0 Then Exit Sub
-  StatusBar1.Panels(1).text = SBcycsec + Str$(Round(cyc, 3)) + " "
-  StatusBar1.Panels(2).text = "Tot " + Str$(tot) + " "
+  StatusBar1.Panels(1).Text = SBcycsec + Str$(Round(cyc, 3)) + " "
+  StatusBar1.Panels(2).Text = "Tot " + Str$(tot) + " "
   Me.TotalBots.Caption = "Tot " + Str$(tot)
-  StatusBar1.Panels(3).text = "Bots " + Str$(tnv) + " "
+  StatusBar1.Panels(3).Text = "Bots " + Str$(tnv) + " "
   Me.NumberBots.Caption = "Bots " + Str$(tnv)
-  StatusBar1.Panels(4).text = "Chlr " + Str$(tv) + " "
+  StatusBar1.Panels(4).Text = "Chlr " + Str$(tv) + " "
   Me.NumberVeg.Caption = "Chlr " + Str$(tv)
-  StatusBar1.Panels(5).text = SBborn + Str$(brn) + " "
+  StatusBar1.Panels(5).Text = SBborn + Str$(brn) + " "
   Me.BotsBorn.Caption = SBborn + Str$(brn)
-  StatusBar1.Panels(6).text = "Cycles" + Str$(totcyc) + " "
+  StatusBar1.Panels(6).Text = "Cycles" + Str$(totcyc) + " "
   Me.CyclesNumber.Caption = "Cycles" + Str$(totcyc)
   sec = tottim
   Min = Fix(sec / 60)
   sec = sec Mod 60
   h = Fix(Min / 60)
   Min = Min Mod 60
-  StatusBar1.Panels(7).text = Str$(h) + "h" + Str$(Min) + "m" + Str$(sec) + "s  "
-  StatusBar1.Panels(8).text = "Mut " + Str$(SimOpts.MutCurrMult) + "x "
+  StatusBar1.Panels(7).Text = Str$(h) + "h" + Str$(Min) + "m" + Str$(sec) + "s  "
+  StatusBar1.Panels(8).Text = "Mut " + Str$(SimOpts.MutCurrMult) + "x "
   Me.MutationValue.Caption = "Mut " + Str$(SimOpts.MutCurrMult)
-  StatusBar1.Panels(10).text = "Shots " + Str$(Shots_Module.ShotsThisCycle) + " "
+  StatusBar1.Panels(10).Text = "Shots " + Str$(Shots_Module.ShotsThisCycle) + " "
   
   'AvgSimEnergyLastTenCycles = 0
   'This delibertly counts the 10 cycles *before* this one to avoid cases where the timer invokes
@@ -2205,9 +2032,9 @@ Sub infos(ByVal cyc As Single, tot As Integer, tnv As Integer, tv As Long, brn A
   k = (CurrentEnergyCycle + 98) Mod 100
   Delta = TotalSimEnergyDisplayed - TotalSimEnergy(k)
   
-  StatusBar1.Panels(11).text = "Nrg " + Str$(TotalSimEnergyDisplayed) + " "
-  StatusBar1.Panels(12).text = "Delta " + Str$(Round(Delta, 5)) + " "
-  StatusBar1.Panels(13).text = "CostX " + Str$(Round(SimOpts.Costs(COSTMULTIPLIER), 5)) + " "
+  StatusBar1.Panels(11).Text = "Nrg " + Str$(TotalSimEnergyDisplayed) + " "
+  StatusBar1.Panels(12).Text = "Delta " + Str$(Round(Delta, 5)) + " "
+  StatusBar1.Panels(13).Text = "CostX " + Str$(Round(SimOpts.Costs(COSTMULTIPLIER), 5)) + " "
 End Sub
 
 Private Sub newsim_Click(Index As Integer)

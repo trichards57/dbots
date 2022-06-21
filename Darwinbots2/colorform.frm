@@ -3,16 +3,16 @@ Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "MSCOMCTL.OCX"
 Begin VB.Form ColorForm 
    BorderStyle     =   1  'Fixed Single
    Caption         =   "Custom Color"
-   ClientHeight    =   2235
-   ClientLeft      =   45
-   ClientTop       =   330
-   ClientWidth     =   3945
+   ClientHeight    =   2232
+   ClientLeft      =   48
+   ClientTop       =   336
+   ClientWidth     =   3948
    Icon            =   "colorform.frx":0000
    LinkTopic       =   "Form12"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   2235
-   ScaleWidth      =   3945
+   ScaleHeight     =   2232
+   ScaleWidth      =   3948
    StartUpPosition =   3  'Windows Default
    Tag             =   "9001"
    Begin VB.CommandButton btnWrite 
@@ -37,8 +37,8 @@ Begin VB.Form ColorForm
       TabIndex        =   4
       Top             =   420
       Width           =   2850
-      _ExtentX        =   5027
-      _ExtentY        =   397
+      _ExtentX        =   5017
+      _ExtentY        =   402
       _Version        =   393216
       Max             =   255
       TickStyle       =   3
@@ -49,8 +49,8 @@ Begin VB.Form ColorForm
       TabIndex        =   5
       Top             =   630
       Width           =   2850
-      _ExtentX        =   5027
-      _ExtentY        =   397
+      _ExtentX        =   5017
+      _ExtentY        =   381
       _Version        =   393216
       Max             =   255
       TickStyle       =   3
@@ -61,8 +61,8 @@ Begin VB.Form ColorForm
       TabIndex        =   6
       Top             =   840
       Width           =   2850
-      _ExtentX        =   5027
-      _ExtentY        =   397
+      _ExtentX        =   5017
+      _ExtentY        =   402
       _Version        =   393216
       Max             =   255
       TickStyle       =   3
@@ -195,7 +195,7 @@ Private Sub Form_Load()
   setcolor color
 End Sub
 
-Private Sub Form_terminate()
+Private Sub Form_Terminate()
   UseThisColor = True
   Me.Hide
 End Sub

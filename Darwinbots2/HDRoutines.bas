@@ -300,9 +300,6 @@ Public Sub SaveSimulation(path As String)
   Put #1, , SimOpts.MaxPopulation
   Put #1, , SimOpts.MinVegs
   Put #1, , SimOpts.MutCurrMult
-  Put #1, , SimOpts.MutCycMax
-  Put #1, , SimOpts.MutCycMin
-  Put #1, , SimOpts.MutOscill
   Put #1, , SimOpts.PhysBrown
   Put #1, , SimOpts.Ygravity
   Put #1, , SimOpts.Zgravity
@@ -435,7 +432,6 @@ Public Sub SaveSimulation(path As String)
      Put #1, , SimOpts.Specie(k).SubSpeciesCounter
   Next k
   
-  Put #1, , SimOpts.oldCostX
   Put #1, , SimOpts.DisableMutations
   Put #1, , SimOpts.SimGUID
   Put #1, , SimOpts.SpeciationGenerationalDistance
@@ -444,24 +440,6 @@ Public Sub SaveSimulation(path As String)
   Put #1, , SimOpts.SpeciationMinimumPopulation
   Put #1, , SimOpts.SpeciationForkInterval
   Put #1, , SimOpts.DisableTypArepro
-  Put #1, , Len(strGraphQuery1)
-  Put #1, , strGraphQuery1
-  Put #1, , Len(strGraphQuery2)
-  Put #1, , strGraphQuery2
-  Put #1, , Len(strGraphQuery3)
-  Put #1, , strGraphQuery3
-  Put #1, , Len(strSimStart)
-  Put #1, , strSimStart
-
-  'the graphs themselfs
-  For k = 1 To NUMGRAPHS
-    Put #1, , graphfilecounter(k)
-    Put #1, , graphvisible(k)
-    Put #1, , graphleft(k)
-    Put #1, , graphtop(k)
-    Put #1, , graphsave(k)
-  Next k
-  
   Put #1, , SimOpts.NoWShotDecay 'Botsareus 9/28/2013
   
   'Botsareus 8/5/2014
@@ -475,13 +453,7 @@ Public Sub SaveSimulation(path As String)
   'Botsareus 10/13/2014
   Put #1, , SimOpts.Tides
   Put #1, , SimOpts.TidesOf
-  
-  'Botsareus 10/8/2015
-  Put #1, , SimOpts.MutOscillSine
-  
-  'Botsareus 10/20/2015
-  Put #1, , stagnent
-       
+           
   Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
     
   Close #1
@@ -652,9 +624,6 @@ Public Sub LoadSimulation(path As String)
   Get #1, , SimOpts.MaxPopulation
   Get #1, , SimOpts.MinVegs
   Get #1, , SimOpts.MutCurrMult
-  Get #1, , SimOpts.MutCycMax
-  Get #1, , SimOpts.MutCycMin
-  Get #1, , SimOpts.MutOscill
   Get #1, , SimOpts.PhysBrown
   Get #1, , SimOpts.Ygravity
   Get #1, , SimOpts.Zgravity
@@ -783,7 +752,6 @@ Public Sub LoadSimulation(path As String)
     Get #1, , SimOpts.Specie(k).SubSpeciesCounter
   Next k
       
-  Get #1, , SimOpts.oldCostX
   Get #1, , SimOpts.DisableMutations
   Get #1, , SimOpts.SimGUID
   Get #1, , SimOpts.SpeciationGenerationalDistance
@@ -792,68 +760,8 @@ Public Sub LoadSimulation(path As String)
   Get #1, , SimOpts.SpeciationMinimumPopulation
   Get #1, , SimOpts.SpeciationForkInterval
   Get #1, , SimOpts.DisableTypArepro
-  Get #1, , j: strGraphQuery1 = Space(j)
-  Get #1, , strGraphQuery1
-  Get #1, , j: strGraphQuery2 = Space(j)
-  Get #1, , strGraphQuery2
-  Get #1, , j: strGraphQuery3 = Space(j)
-  Get #1, , strGraphQuery3
-  Get #1, , j: strSimStart = Space(j)
-  Get #1, , strSimStart
-  'the graphs themselfs
-  For k = 1 To NUMGRAPHS
-   Get #1, , graphfilecounter(k)
-   Get #1, , graphvisible(k)
-   Get #1, , graphleft(k)
-   Get #1, , graphtop(k)
-   Get #1, , graphsave(k)
-   
-   If graphvisible(k) Then
-     Select Case k
-      Case 1
-        Form1.NewGraph POPULATION_GRAPH, "Populations"
-      Case 2
-        Form1.NewGraph MUTATIONS_GRAPH, "Average_Mutations"
-      Case 3
-        Form1.NewGraph AVGAGE_GRAPH, "Average_Age"
-      Case 4
-        Form1.NewGraph OFFSPRING_GRAPH, "Average_Offspring"
-      Case 5
-        Form1.NewGraph ENERGY_GRAPH, "Average_Energy"
-      Case 6
-        Form1.NewGraph DNALENGTH_GRAPH, "Average_DNA_length"
-      Case 7
-        Form1.NewGraph DNACOND_GRAPH, "Average_DNA_Cond_statements"
-      Case 8
-        Form1.NewGraph MUT_DNALENGTH_GRAPH, "Average_Mutations_per_DNA_length_x1000-"
-      Case 9
-        Form1.NewGraph ENERGY_SPECIES_GRAPH, "Total_Energy_per_Species_x1000-"
-      Case 10
-        Form1.NewGraph DYNAMICCOSTS_GRAPH, "Dynamic_Costs"
-      Case 11
-        Form1.NewGraph SPECIESDIVERSITY_GRAPH, "Species_Diversity"
-      Case 12
-        Form1.NewGraph AVGCHLR_GRAPH, "Average_Chloroplasts"
-      Case 13
-        Form1.NewGraph GENETIC_DIST_GRAPH, "Genetic_Distance_x1000-"
-      Case 14
-        Form1.NewGraph GENERATION_DIST_GRAPH, "Max_Generational_Distance"
-      Case 15
-        Form1.NewGraph GENETIC_SIMPLE_GRAPH, "Simple_Genetic_Distance_x1000-"
-      Case 16
-          Form1.NewGraph CUSTOM_1_GRAPH, "Customizable_Graph_1-"
-      Case 17
-          Form1.NewGraph CUSTOM_2_GRAPH, "Customizable_Graph_2-"
-      Case 18
-          Form1.NewGraph CUSTOM_3_GRAPH, "Customizable_Graph_3-"
-    End Select
-   End If
-  Next k
-  
   Get #1, , SimOpts.NoWShotDecay 'EricL 6/8/2006 Added this
-
   Get #1, , SimOpts.DisableFixing
-   
   Get #1, , SunPosition
   Get #1, , SunRange
   Get #1, , SunChange
@@ -861,19 +769,11 @@ Public Sub LoadSimulation(path As String)
   'Botsareus 10/13/2014
   Get #1, , SimOpts.Tides
   Get #1, , SimOpts.TidesOf
-  
-  'Botsareus 10/8/2015
-  Get #1, , SimOpts.MutOscillSine
-  
-  'Botsareus 10/20/2015
-  Get #1, , stagnent
-   
+       
   Form1.lblSaving.Visible = False 'Botsareus 1/14/2014
     
   Close 1
-  
-  If SimOpts.Costs(DYNAMICCOSTSENSITIVITY) = 0 Then SimOpts.Costs(DYNAMICCOSTSENSITIVITY) = 500
-   
+     
   'EricL 3/28/2006 This line insures that all the simulation dialog options get set to match the loaded sim
   TmpOpts = SimOpts
   

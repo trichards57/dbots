@@ -26,16 +26,8 @@ Public Const AGECOSTSTART As Integer = 32
 Public Const AGECOSTLINEARFRACTION As Integer = 33
 
 Public Const AGECOSTMAKELOG As Integer = 51 'Set this high casue it does not use the Cost's control array
-Public Const BOTNOCOSTLEVEL As Integer = 52
-Public Const DYNAMICCOSTTARGET As Integer = 53
 Public Const COSTMULTIPLIER As Integer = 54
-Public Const DYNAMICCOSTSENSITIVITY As Integer = 55
-Public Const USEDYNAMICCOSTS As Integer = 56
-Public Const DYNAMICCOSTTARGETUPPERRANGE As Integer = 57
-Public Const DYNAMICCOSTTARGETLOWERRANGE As Integer = 58
-Public Const COSTXREINSTATEMENTLEVEL As Integer = 59
 Public Const AGECOSTMAKELINEAR As Integer = 60
-Public Const DYNAMICCOSTINCLUDEPLANTS As Integer = 61
 Public Const ALLOWNEGATIVECOSTX As Integer = 62
 
 Public Const TEMPSUNSUSPEND As Integer = 0
@@ -81,10 +73,6 @@ Public Type SimOptions
   Dxsxconnected As Boolean
 
   MutCurrMult As Single
-  MutOscill As Boolean
-  MutOscillSine As Boolean
-  MutCycMax As Long
-  MutCycMin As Long
   DisableMutations As Boolean ' Indicates whether all mutations should be disabled
 
   League As Boolean
@@ -162,7 +150,6 @@ Public Type SimOptions
   SunUpThreshold As Long
   SunDown As Boolean 'EricL 6/7/2006 Indicates if we are using the option to have the sun rise on a nrg threshold
   SunDownThreshold As Long
-  DynamicCosts As Boolean ' Indicates whether dynamic cost adjustment is enabled
   FixedBotRadii As Boolean
   DayNightCycleCounter As Long
   SunThresholdMode As Integer
@@ -176,9 +163,7 @@ Public Type SimOptions
   shapeDriftRate As Integer
   makeAllShapesTransparent As Boolean
   makeAllShapesBlack As Boolean
-    
-  oldCostX As Single
-  
+      
   MaxAbsNum As Long ' Highest Maximum number assigned so far in the sim
   SimGUID As Long   ' Unique ID for this sim
   
