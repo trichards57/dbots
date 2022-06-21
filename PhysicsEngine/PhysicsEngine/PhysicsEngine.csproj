@@ -81,6 +81,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Manager\BitwiseManager.cs" />
     <Compile Include="Manager\BucketManager.cs" />
     <Compile Include="Manager\RobotManager.cs" />
     <Compile Include="Model\Block.cs" />

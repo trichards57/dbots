@@ -56,9 +56,6 @@ namespace PhysicsEngine.Manager
     {
         private static readonly Dictionary<int, Shot> _shots = new Dictionary<int, Shot>();
 
-        public ShotManager()
-        { }
-
         public CollisionReport CheckForCollision(float maxBotShotSeperation, int shot)
         {
             var sh = _shots[shot];

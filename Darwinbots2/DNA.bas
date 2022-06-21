@@ -48,6 +48,8 @@ Public ingene As Boolean             ' Flag for current gene counting.
 ''''''''''''''''''''''''''''''''''''''''''''
 ''''''''''''''''''''''''''''''''''''''''''''
 
+Private bitManager As New BitwiseManager
+
 Private Sub ExecuteDNA(ByVal n As Integer)
   Dim a As Integer
   Dim b As Integer
@@ -561,105 +563,65 @@ End Sub
 
 Private Sub DNABitwiseCompliment()
   Dim value As Long
-  Dim bits As DoubleWord
   
   value = PopIntStack
-  bits = NumberToBit(value)
-  InvertBits bits
-  PushIntStack BitToNumber(bits)
+  PushIntStack bitManager.Invert(value)
 End Sub
 
 Private Sub DNABitwiseAND()
   Dim valueA As Long
   Dim valueB As Long
-  Dim bitsA As DoubleWord
-  Dim bitsB As DoubleWord
   
   valueB = PopIntStack
   valueA = PopIntStack
-  
-  bitsA = NumberToBit(valueA)
-  bitsB = NumberToBit(valueB)
-  
-  bitsA = BitAND(bitsA, bitsB)
-  PushIntStack BitToNumber(bitsA)
+  PushIntStack bitManager.And(valueA, valueB)
 End Sub
 
 Private Sub DNABitwiseOR()
   Dim valueA As Long
   Dim valueB As Long
-  Dim bitsA As DoubleWord
-  Dim bitsB As DoubleWord
   
   valueB = PopIntStack
   valueA = PopIntStack
-  
-  bitsA = NumberToBit(valueA)
-  bitsB = NumberToBit(valueB)
-  
-  bitsA = BitOR(bitsA, bitsB)
-  PushIntStack BitToNumber(bitsA)
+  PushIntStack bitManager.Or(valueA, valueB)
 End Sub
 
 Private Sub DNABitwiseXOR()
   Dim valueA As Long
   Dim valueB As Long
-  Dim bitsA As DoubleWord
-  Dim bitsB As DoubleWord
   
   valueB = PopIntStack
   valueA = PopIntStack
-  
-  bitsA = NumberToBit(valueA)
-  bitsB = NumberToBit(valueB)
-  
-  bitsA = BitXOR(bitsA, bitsB)
-  PushIntStack BitToNumber(bitsA)
+  PushIntStack bitManager.Xor(valueA, valueB)
 End Sub
 
 Private Sub DNABitwiseINC()
   Dim value As Long
-  Dim bits As DoubleWord
   
   value = PopIntStack
-  bits = NumberToBit(value)
-  IncBits bits
-  PushIntStack BitToNumber(bits)
+  PushIntStack bitManager.Increment(value)
 End Sub
 
 Private Sub DNABitwiseDEC()
   Dim value As Long
-  Dim bits As DoubleWord
   
   value = PopIntStack
-  bits = NumberToBit(value)
-  DecBits bits
-  PushIntStack BitToNumber(bits)
+  PushIntStack bitManager.Decrement(value)
 End Sub
 
 Private Sub DNABitwiseShiftLeft()
   Dim value As Long
-  Dim bits As DoubleWord
   
   value = PopIntStack
-  bits = NumberToBit(value)
-  BitShiftLeft bits
-  PushIntStack BitToNumber(bits)
+  PushIntStack bitManager.shiftLeft(value)
 End Sub
 
 Private Sub DNABitwiseShiftRight()
   Dim value As Long
-  Dim bits As DoubleWord
   
   value = PopIntStack
-  bits = NumberToBit(value)
-  BitShiftRight bits
-  PushIntStack BitToNumber(bits)
+  PushIntStack bitManager.ShitRight(value)
 End Sub
-
-'''''''''''''''''''''''''''''''''''''''
-'''''''''''''''''''''''''''''''''''''''
-'''''''''''''''''''''''''''''''''''''''
 
 Private Sub ExecuteConditions(n As Integer)
   rob(currbot).nrg = rob(currbot).nrg - (SimOpts.Costs(CONDCOST) * SimOpts.Costs(COSTMULTIPLIER))
