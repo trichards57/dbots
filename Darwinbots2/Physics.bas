@@ -9,8 +9,14 @@ Private Const AddedMassCoefficientForASphere As Single = 0.5
 Private Const alpha As Single = -3.6444444444444E-11
 
 Public Function NetForces(n As Integer)
-  If Abs(rob(n).vel.x) < 0.0000001 Then rob(n).vel.x = 0  'Prevents underflow errors down the line
-  If Abs(rob(n).vel.y) < 0.0000001 Then rob(n).vel.y = 0  'Prevents underflow erros down the line
+  Dim vel As Vector
+  vel = robManager.GetVelocity(n)
+  
+  If Abs(vel.x) < 0.0000001 Then vel.x = 0  'Prevents underflow errors down the line
+  If Abs(vel.y) < 0.0000001 Then vel.y = 0  'Prevents underflow erros down the line
+  
+  robManager.SetVelocity n, vel
+  
   PlanetEaters n
   FrictionForces n
   SphereDragForces n
@@ -36,7 +42,7 @@ Public Sub AddedMass(n As Integer)
     If SimOpts.Density = 0 Then
       .AddedMass = 0
     Else
-      .AddedMass = AddedMassCoefficientForASphere * SimOpts.Density * fourthirdspi * .radius * .radius * .radius
+      .AddedMass = AddedMassCoefficientForASphere * SimOpts.Density * fourthirdspi * robManager.GetRadius(n) * robManager.GetRadius(n) * robManager.GetRadius(n)
     End If
   End With
 End Sub
@@ -62,11 +68,15 @@ Public Sub FrictionForces(n As Integer)
       If Abs(rob(n).ma) < 0.0000001 Then rob(n).ma = 0
     End If
     
-    If Impulse > VectorMagnitude(.vel) Then Impulse = VectorMagnitude(.vel) ' EricL 5/3/2006 Added to insure friction only counteracts
+    Dim vel As Vector
+    vel = robManager.GetVelocity(n)
+    
+    If Impulse > VectorMagnitude(vel) Then Impulse = VectorMagnitude(vel) ' EricL 5/3/2006 Added to insure friction only counteracts
     
     If Impulse < 0.0000001 Then Exit Sub ' Prevents the accumulation of very very low velocity in sims without density
     
-    .vel = VectorSub(.vel, VectorScalar(VectorUnit(.vel), Impulse)) 'kinetic friction points in opposite direction of velocity
+    vel = VectorSub(vel, VectorScalar(VectorUnit(vel), Impulse)) 'kinetic friction points in opposite direction of velocity
+    robManager.SetVelocity n, vel
   End With
 End Sub
 
@@ -89,7 +99,7 @@ Public Sub SphereDragForces(n As Integer)  'for bots
   Dim mag As Single
   
   'No Drag if no velocity or no density
-  If (rob(n).vel.x = 0 And rob(n).vel.y = 0) Or SimOpts.Density = 0 Then Exit Sub
+  If (robManager.GetVelocity(n).x = 0 And robManager.GetVelocity(n).y = 0) Or SimOpts.Density = 0 Then Exit Sub
   
   'Here we calculate the reduction in angular momentum due to fluid density
   'I'm sure there there is a better calculation
@@ -102,15 +112,15 @@ Public Sub SphereDragForces(n As Integer)  'for bots
     If Abs(rob(n).ma) < 0.0000001 Then rob(n).ma = 0
   End If
   
-  mag = VectorMagnitude(rob(n).vel)
+  mag = VectorMagnitude(robManager.GetVelocity(n))
   
   If mag < 0.0000001 Then Exit Sub ' Prevents accumulation of really small velocities.
 
-  Impulse = CSng(0.5 * SphereCd(mag, rob(n).radius) * SimOpts.Density * mag * mag * (PI * rob(n).radius ^ 2))
+  Impulse = CSng(0.5 * SphereCd(mag, robManager.GetRadius(n)) * SimOpts.Density * mag * mag * (PI * robManager.GetRadius(n) ^ 2))
 
   If Impulse > mag Then Impulse = mag * 0.99 ' Prevents the resistance force from exceeding the velocity!
-  ImpulseVector = VectorScalar(VectorUnit(rob(n).vel), Impulse)
-  rob(n).vel = VectorSub(rob(n).vel, ImpulseVector)
+  ImpulseVector = VectorScalar(VectorUnit(robManager.GetVelocity(n)), Impulse)
+  robManager.SetVelocity n, VectorSub(robManager.GetVelocity(n), ImpulseVector)
 End Sub
 
 Public Function SphereCd(ByVal velocitymagnitude As Single, ByVal radius As Single) As Single
@@ -215,7 +225,7 @@ Public Sub VoluntaryForces(n As Integer)
   
   With rob(n)
     'corpses are dead, they don't move around of their own volition
-    If .Corpse Or .DisableMovementSysvars Or .DisableDNA Or (Not .exist) Or ((.mem(dirup) = 0) And (.mem(dirdn) = 0) And (.mem(dirsx) = 0) And (.mem(dirdx) = 0)) Then Exit Sub
+    If .Corpse Or .DisableMovementSysvars Or .DisableDNA Or (Not robManager.GetExists(n)) Or ((.mem(dirup) = 0) And (.mem(dirdn) = 0) And (.mem(dirsx) = 0) And (.mem(dirdx) = 0)) Then Exit Sub
     
     If .NewMove = False Then
       mult = .mass
@@ -310,7 +320,7 @@ Public Sub TieHooke(n As Integer)
            
       'delete tie if length > 1000
       'remember length is inverse squareroot
-      If length - .radius - rob(.Ties(k).pnt).radius > 1000 Then
+      If length - robManager.GetRadius(n) - robManager.GetRadius(.Ties(k).pnt) > 1000 Then
         DeleteTie n, .Ties(k).pnt
       Else
         If .Ties(k).last > 1 Then .Ties(k).last = .Ties(k).last - 1 ' Countdown to deleting tie
@@ -334,7 +344,7 @@ Public Sub TieHooke(n As Integer)
               .impulseInd = VectorAdd(.impulseInd, VectorScalar(uv, Impulse))
               
               'next -bv
-              vy = VectorSub(.vel, rob(.Ties(k).pnt).vel)
+              vy = VectorSub(robManager.GetVelocity(n), robManager.GetVelocity(.Ties(k).pnt))
               Impulse = Dot(vy, uv) * -.Ties(k).b
               .impulseInd = VectorAdd(.impulseInd, VectorScalar(uv, Impulse))
             End If
@@ -361,7 +371,7 @@ Private Function CheckRobot(ByVal n As Integer) As Boolean
     Exit Function
   End If
   
-  CheckRobot = Not rob(n).exist
+  CheckRobot = Not robManager.GetExists(n)
 End Function
 
 Public Sub PlanetEaters(n As Integer)
@@ -374,7 +384,7 @@ Public Sub PlanetEaters(n As Integer)
   If Not SimOpts.PlanetEaters Or rob(n).mass = 0 Then Exit Sub
     
   For t = n + 1 To MaxRobs
-    If rob(t).exist And Not rob(t).mass = 0 Then
+    If robManager.GetExists(t) And Not rob(t).mass = 0 Then
       PosDiff = VectorSub(robManager.GetRobotPosition(t), robManager.GetRobotPosition(n))
       mag = VectorMagnitude(PosDiff)
       If Not mag = 0 Then
@@ -522,11 +532,11 @@ Public Sub bordercolls(t As Integer)
   Dim smudge As Single
   
   With rob(t)
-    If (robManager.GetRobotPosition(t).x > .radius) And (robManager.GetRobotPosition(t).x < SimOpts.FieldWidth - .radius) And (robManager.GetRobotPosition(t).y > .radius) And (robManager.GetRobotPosition(t).y < SimOpts.FieldHeight - .radius) Then Exit Sub
+    If (robManager.GetRobotPosition(t).x > robManager.GetRadius(t)) And (robManager.GetRobotPosition(t).x < SimOpts.FieldWidth - robManager.GetRadius(t)) And (robManager.GetRobotPosition(t).y > robManager.GetRadius(t)) And (robManager.GetRobotPosition(t).y < SimOpts.FieldHeight - robManager.GetRadius(t)) Then Exit Sub
   
     .mem(214) = 0
     
-    smudge = .radius + smudgefactor
+    smudge = robManager.GetRadius(t) + smudgefactor
   
     dif = VectorMin(VectorMax(robManager.GetRobotPosition(t), VectorSet(smudge, smudge)), VectorSet(SimOpts.FieldWidth - smudge, SimOpts.FieldHeight - smudge))
     dist = VectorSub(dif, robManager.GetRobotPosition(t))
@@ -542,9 +552,9 @@ Public Sub bordercolls(t As Integer)
         .mem(214) = 1
         Dim pos As Vector
         pos = robManager.GetRobotPosition(t)
-        If pos.x - .radius < 0 Then pos.x = .radius
-        If pos.x + .radius > SimOpts.FieldWidth Then pos.x = CSng(SimOpts.FieldWidth) - .radius
-        .ImpulseRes.x = .ImpulseRes.x + .vel.x * b
+        If pos.x - robManager.GetRadius(t) < 0 Then pos.x = robManager.GetRadius(t)
+        If pos.x + robManager.GetRadius(t) > SimOpts.FieldWidth Then pos.x = CSng(SimOpts.FieldWidth) - robManager.GetRadius(t)
+        .ImpulseRes.x = .ImpulseRes.x + robManager.GetVelocity(t).x * b
         robManager.SetRobotPosition t, pos
       End If
     End If
@@ -559,10 +569,10 @@ Public Sub bordercolls(t As Integer)
       Else
         rob(t).mem(214) = 1
         pos = robManager.GetRobotPosition(t)
-        If pos.y - .radius < 0 Then pos.y = .radius
-        If pos.y + .radius > SimOpts.FieldHeight Then pos.y = CSng(SimOpts.FieldHeight) - .radius
+        If pos.y - robManager.GetRadius(t) < 0 Then pos.y = robManager.GetRadius(t)
+        If pos.y + robManager.GetRadius(t) > SimOpts.FieldHeight Then pos.y = CSng(SimOpts.FieldHeight) - robManager.GetRadius(t)
         robManager.SetRobotPosition t, pos
-        .ImpulseRes.y = .ImpulseRes.y + .vel.y * b
+        .ImpulseRes.y = .ImpulseRes.y + robManager.GetVelocity(t).y * b
       End If
     End If
   End With
@@ -602,15 +612,15 @@ Public Sub Repel3(rob1 As Integer, rob2 As Integer)
   'or when they teleport or materialize on top of each other.  We move them directly apart as they are assumed to have no velocity
   'by scaling the normal vector by the amount they need to be separated.  Each bot is moved half of the needed distance without taking into consideration
   'mass or size.
-  If rob(rob1).Fixed And rob(rob2).Fixed Or (VectorMagnitude(rob(rob1).vel) < 0.0001 And VectorMagnitude(rob(rob2).vel) < 0.0001) Then
-    fixedSep = ((rob(rob1).radius + rob(rob2).radius) - currdist) / 2
+  If rob(rob1).Fixed And rob(rob2).Fixed Or (VectorMagnitude(robManager.GetVelocity(rob1)) < 0.0001 And VectorMagnitude(robManager.GetVelocity(rob2)) < 0.0001) Then
+    fixedSep = ((robManager.GetRadius(rob1) + robManager.GetRadius(rob2)) - currdist) / 2
     fixedSepVector = VectorScalar(VectorUnit(normal), fixedSep)
     robManager.SetRobotPosition rob1, VectorSub(robManager.GetRobotPosition(rob1), fixedSepVector)
     robManager.SetRobotPosition rob2, VectorAdd(robManager.GetRobotPosition(rob2), fixedSepVector)
   Else
     'Botsareus 6/18/2016 Still slowly move robots appart to cancel out compressive events
     TotalMass = rob(rob1).mass + rob(rob2).mass
-    fixedSep = ((rob(rob1).radius + rob(rob2).radius) - currdist)
+    fixedSep = ((robManager.GetRadius(rob1) + robManager.GetRadius(rob2)) - currdist)
     fixedSepVector = VectorScalar(VectorUnit(normal), fixedSep / (1 + 55 ^ (0.3 - e)))
     robManager.SetRobotPosition rob1, VectorSub(robManager.GetRobotPosition(rob1), VectorScalar(fixedSepVector, rob(rob2).mass / TotalMass))  'Botsareus 7/4/2016 Factor in mass of robots (apply inverted)
     robManager.SetRobotPosition rob2, VectorAdd(robManager.GetRobotPosition(rob2), VectorScalar(fixedSepVector, rob(rob1).mass / TotalMass))
@@ -627,8 +637,8 @@ Public Sub Repel3(rob1 As Integer, rob2 As Integer)
     If rob(rob2).Fixed Then M2 = 32000
     
     unit = VectorUnit(normal) ' Create a unit vector pointing from bot 1 to bot 2
-    vel1 = rob(rob1).vel
-    vel2 = rob(rob2).vel
+    vel1 = robManager.GetVelocity(rob1)
+    vel2 = robManager.GetVelocity(rob2)
     
     'Project the bot's direction vector onto the unit vector and scale by velocity
     'These represent vectors we subtract from the bot's velocity to push the bot in a direction
@@ -660,11 +670,11 @@ Public Sub Repel3(rob1 As Integer, rob2 As Integer)
     
     'No reason to try to try to accelerate fixed bots
     If Not rob(rob1).Fixed Then
-      rob(rob1).vel = VectorAdd(VectorSub(rob(rob1).vel, V1), V1f)
+      robManager.SetVelocity rob1, VectorAdd(VectorSub(robManager.GetVelocity(rob1), V1), V1f)
     End If
 
     If Not rob(rob2).Fixed Then
-      rob(rob2).vel = VectorAdd(VectorSub(rob(rob2).vel, V2), V2f)
+      robManager.SetVelocity rob2, VectorAdd(VectorSub(robManager.GetVelocity(rob2), V2), V2f)
     End If
       
     'Update the touch senses

@@ -161,7 +161,7 @@ Public Sub UpdateSim()
   
   'updateshots can write to bot sense, so we need to clear bot senses before updating shots
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       If (rob(t).DisableDNA = False) Then EraseSenses t
     End If
   Next t
@@ -170,7 +170,7 @@ Public Sub UpdateSim()
   
     'Botsareus 6/22/2016 to figure out actual velocity of the bot incase there is a collision event
     For t = 1 To MaxRobs
-        If rob(t).exist Then
+        If robManager.GetExists(t) Then
             rob(t).opos = robManager.GetRobotPosition(t)
         End If
     Next
@@ -179,15 +179,15 @@ Public Sub UpdateSim()
   
     'to figure out actual velocity of the bot incase there is a collision event
     For t = 1 To MaxRobs
-        If rob(t).exist Then
+        If robManager.GetExists(t) Then
             'Only if the robots position was already configured
             pos = robManager.GetRobotPosition(t)
-            If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then rob(t).actvel = VectorSub(pos, rob(t).opos)
+            If Not (rob(t).opos.x = 0 And rob(t).opos.y = 0) Then robManager.SetActualVelocity t, VectorSub(pos, rob(t).opos)
         End If
     Next
   
   For t = 1 To MaxRobs 'Panda 8/14/2013 to figure out how much vegys to repopulate across all robots
-   If rob(t).exist Then  'Botsareus 8/14/2013 We have to make sure the robot is alive first
+   If robManager.GetExists(t) Then  'Botsareus 8/14/2013 We have to make sure the robot is alive first
     AllChlr = AllChlr + rob(t).chloroplasts
    End If
   Next t
@@ -203,7 +203,7 @@ Public Sub UpdateSim()
   'okay, time to store some values for RGB monitor
   If MDIForm1.MonitorOn Then
     For t = 1 To MaxRobs
-      If rob(t).exist Then
+      If robManager.GetExists(t) Then
        With frmMonitorSet
         rob(t).monitor_r = rob(t).mem(.Monitor_mem_r)
         rob(t).monitor_g = rob(t).mem(.Monitor_mem_g)
@@ -217,7 +217,7 @@ Public Sub UpdateSim()
   Dim totlen As Long
   totlen = 0
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
         totlen = totlen + rob(t).DnaLen
     End If
   Next t
@@ -231,7 +231,7 @@ Public Sub UpdateSim()
     For i = 0 To maxdel
         calcminenergy = 320000 'only erase robots with lowest energy
         For t = 1 To MaxRobs
-            If rob(t).exist Then
+            If robManager.GetExists(t) Then
                 If (rob(t).nrg + rob(t).body * 10) < calcminenergy Then
                     calcminenergy = (rob(t).nrg + rob(t).body * 10)
                     selectrobot = t

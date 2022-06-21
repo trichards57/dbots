@@ -19,7 +19,7 @@ Public Function RobScriptLoad(path As String) As Integer
     rob(n).mem(GenesSys) = rob(n).genenum
     RobScriptLoad = n       ' returns the index of the created rob
   Else
-    rob(n).exist = False
+    robManager.SetExists n, False
     UpdateBotBucket n
     RobScriptLoad = -1
   End If
@@ -32,7 +32,7 @@ Private Sub preparerob(t As Integer, path As String)
     robManager.SetRobotPosition t, VectorSet(Random(50, Form1.ScaleWidth), Random(50, Form1.ScaleHeight))
     rob(t).aim = Random(0, 628) / 100
     rob(t).aimvector = VectorSet(Cos(rob(t).aim), Sin(rob(t).aim))
-    rob(t).exist = True
+    robManager.SetExists t, True
     rob(t).BucketPos.x = -2
     rob(t).BucketPos.y = -2
     UpdateBotBucket t

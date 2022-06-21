@@ -112,107 +112,69 @@ Public Sub EraseSenses(n As Integer)
     .mem(shsx) = 0
     .mem(214) = 0   'edge collision detection
     EraseLookOccurr (n)
-    
-   'EricL - *trefvars now persist across cycles
-   ' For l = 1 To 10 ' resets *trefvars
-   '   .mem(455 + l) = 0
-   ' Next l
-   ' For l = 0 To 10     'resets
-   '     .mem(trefxpos + l) = 0
-   ' Next l
-   ' .mem(472) = 0
   End With
 End Sub
 
-'Public Function BasicProximity(n As Integer, Optional force As Boolean = False) As Integer 'returns .lastopp
-'  Dim counter As Integer
-'  Dim u As vector
-'  Dim dotty As Long, crossy As Long
-'  Dim x As Integer
-'
-'  'until I get some better data structures, this will ahve to do
-'
-'  rob(n).lastopp = 0
-'  rob(n).lastopptype = 0 ' set the default type of object seen to a bot.
-'  rob(n).mem(EYEF) = 0
-'  For x = EyeStart + 1 To EyeEnd - 1
-'    rob(n).mem(x) = 0
-'  Next x
-'
-'  'We have to populate eyes for every bot, even for those without .eye sysvars
-'  'since they could evolve indirect addressing of the eye sysvars.
-'  For counter = 1 To MaxRobs
-'    If n <> counter And rob(counter).exist Then
-'       CompareRobots3 n, counter
-'    End If
-'  Next counter
-'
-'  If SimOpts.shapesAreVisable And rob(n).exist Then CompareShapes n, 12
-'
-'  BasicProximity = rob(n).lastopp ' return the index of the last viewed object
-'End Function
-
 'Returns the index into the Specie array to which a given bot conforms
 Public Function SpeciesFromBot(n As Integer) As Integer
-Dim i As Integer
+    Dim i As Integer
 
-i = 0
-While SimOpts.Specie(i).Name <> rob(n).FName And i < SimOpts.SpeciesNum
-   i = i + 1
-Wend
-SpeciesFromBot = i
+    i = 0
+    While SimOpts.Specie(i).Name <> rob(n).FName And i < SimOpts.SpeciesNum
+        i = i + 1
+    Wend
+    SpeciesFromBot = i
 End Function
 
 
 ' writes some senses: view, .ref* vars, absvel
 ' pain, pleas, nrg
 Public Sub WriteSenses(ByVal n As Integer)
-  Dim t As Integer
-  Dim i As Integer
-  Dim temp As Single
+    Dim t As Integer
+    Dim i As Integer
+    Dim temp As Single
   
-  LandMark n
-  With rob(n)
+    LandMark n
+    With rob(n)
    
-    .mem(TotalBots) = TotalRobots
-    .mem(TOTALMYSPECIES) = SimOpts.Specie(SpeciesFromBot(n)).population
+        .mem(TotalBots) = TotalRobots
+        .mem(TOTALMYSPECIES) = SimOpts.Specie(SpeciesFromBot(n)).population
     
-    If Not .CantSee And Not .Corpse Then
-      If BucketsProximity(n) > 0 Then
-      'If BasicProximity(n) > 0 Then
-        'There is somethign visable in the focus eye
-        If .lastopptype = 0 Then lookoccurr n, .lastopp ' It's a bot.  Populate the refvar sysvars
-      End If
-    End If
+        If Not .CantSee And Not .Corpse Then
+            If BucketsProximity(n) > 0 Then
+                'There is somethign visable in the focus eye
+                If .lastopptype = 0 Then lookoccurr n, .lastopp ' It's a bot.  Populate the refvar sysvars
+            End If
+        End If
 
-    If .nrg > 32000 Then .nrg = 32000
-    If .onrg < 0 Then .onrg = 0
-    If .obody < 0 Then .obody = 0
-    If .nrg < 0 Then .nrg = 0
+        If .nrg > 32000 Then .nrg = 32000
+        If .onrg < 0 Then .onrg = 0
+        If .obody < 0 Then .obody = 0
+        If .nrg < 0 Then .nrg = 0
 
-    .mem(pain) = CInt(.onrg - .nrg)
-    .mem(pleas) = CInt(.nrg - .onrg)
-    .mem(bodloss) = CInt(.obody - .body)
-    .mem(bodgain) = CInt(.body - .obody)
+        .mem(pain) = CInt(.onrg - .nrg)
+        .mem(pleas) = CInt(.nrg - .onrg)
+        .mem(bodloss) = CInt(.obody - .body)
+        .mem(bodgain) = CInt(.body - .obody)
     
-    .onrg = .nrg
-    .obody = .body
-    .mem(Energy) = CInt(.nrg)
-    If .age = 0 And .mem(body) = 0 Then .mem(body) = .body 'to stop an odd bug in birth.  Don't ask
-    If .Fixed Then .mem(215) = 1 Else .mem(215) = 0
-    Dim pos As Vector
-    pos = robManager.GetRobotPosition(n)
-    If pos.y < 0 Then pos.y = 0
-    temp = Int((pos.y / Form1.yDivisor) / 32000#)
-    temp = (pos.y / Form1.yDivisor) - (temp * 32000#)
-    .mem(217) = CInt(temp Mod 32000)
-    If pos.x < 0 Then pos.x = 0
-    temp = Int((pos.x / Form1.xDivisor) / 32000#)
-    temp = (pos.x / Form1.xDivisor) - (temp * 32000#)
-    .mem(219) = CInt(temp Mod 32000)
-    
-    robManager.SetRobotPosition n, pos
-  End With
+        .onrg = .nrg
+        .obody = .body
+        .mem(Energy) = CInt(.nrg)
+        If .age = 0 And .mem(body) = 0 Then .mem(body) = .body 'to stop an odd bug in birth.  Don't ask
+        If .Fixed Then .mem(215) = 1 Else .mem(215) = 0
+        Dim pos As Vector
+        pos = robManager.GetRobotPosition(n)
+        If pos.y < 0 Then pos.y = 0
+        temp = Int((pos.y / Form1.yDivisor) / 32000#)
+        temp = (pos.y / Form1.yDivisor) - (temp * 32000#)
+        .mem(217) = CInt(temp Mod 32000)
+        If pos.x < 0 Then pos.x = 0
+        temp = Int((pos.x / Form1.xDivisor) / 32000#)
+        temp = (pos.x / Form1.xDivisor) - (temp * 32000#)
+        .mem(219) = CInt(temp Mod 32000)
+        
+        robManager.SetRobotPosition n, pos
+    End With
 End Sub
 
 ' copies the occurr array of a viewed robot
@@ -260,8 +222,8 @@ Public Sub lookoccurr(ByVal n As Integer, ByVal o As Integer)
   rob(n).mem(refypos) = rob(o).mem(217)
   rob(n).mem(refxpos) = rob(o).mem(219)
   'give reference variables from the bots frame of reference
-  x = (rob(o).vel.x * Cos(rob(n).aim) + rob(o).vel.y * Sin(rob(n).aim) * -1) - rob(n).mem(velup)
-  y = (rob(o).vel.y * Cos(rob(n).aim) + rob(o).vel.x * Sin(rob(n).aim)) - rob(n).mem(veldx)
+  x = (robManager.GetVelocity(o).x * Cos(rob(n).aim) + robManager.GetVelocity(o).y * Sin(rob(n).aim) * -1) - rob(n).mem(velup)
+  y = (robManager.GetVelocity(o).y * Cos(rob(n).aim) + robManager.GetVelocity(o).x * Sin(rob(n).aim)) - rob(n).mem(veldx)
   If x > 32000 Then x = 32000
   If x < -32000 Then x = -32000
   If y > 32000 Then y = 32000
@@ -295,8 +257,6 @@ Public Sub lookoccurr(ByVal n As Integer, ByVal o As Integer)
   Else
     rob(n).mem(477) = 0
   End If
- ' rob(n).mem(825) = Int(rob(o).venom)
-  'rob(n).mem(827) = Int(rob(o).poison)
 getout:
 End Sub
 

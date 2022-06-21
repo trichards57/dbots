@@ -4,14 +4,14 @@ Begin VB.Form frmRestriOps
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Restriction Options"
    ClientHeight    =   4320
-   ClientLeft      =   45
-   ClientTop       =   315
-   ClientWidth     =   7290
+   ClientLeft      =   48
+   ClientTop       =   312
+   ClientWidth     =   7284
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
    ScaleHeight     =   4320
-   ScaleWidth      =   7290
+   ScaleWidth      =   7284
    ShowInTaskbar   =   0   'False
    StartUpPosition =   3  'Windows Default
    Begin VB.CommandButton btnLoad 
@@ -276,14 +276,13 @@ Select Case res_state
 Case 3
   'overwrite current simulation with given rules
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       If rob(t).Veg Then
        '
        rob(t).Fixed = BlockSpecVeg.value * True
        If rob(t).Fixed Then
         rob(t).mem(216) = 1
-        rob(t).vel.x = 0
-        rob(t).vel.y = 0
+        robManager.SetVelocity t, VectorSet(0, 0)
        End If
        rob(t).CantSee = DisableVisionCheckVeg.value * True
        rob(t).DisableDNA = DisableDNACheckVeg.value * True
@@ -297,8 +296,7 @@ Case 3
        rob(t).Fixed = BlockSpec.value * True
        If rob(t).Fixed Then
         rob(t).mem(216) = 1
-        rob(t).vel.x = 0
-        rob(t).vel.y = 0
+        robManager.SetVelocity t, VectorSet(0, 0)
        End If
        rob(t).CantSee = DisableVisionCheck.value * True
        rob(t).DisableDNA = DisableDNACheck.value * True

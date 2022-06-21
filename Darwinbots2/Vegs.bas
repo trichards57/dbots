@@ -133,7 +133,7 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
   
   'Botsareus 8/16/2014 All robots are set to think there is no sun, sun is calculated later
   For t = 1 To MaxRobs
-    If rob(t).nrg > 0 And rob(t).exist Then
+    If rob(t).nrg > 0 And robManager.GetExists(t) Then
         rob(t).mem(218) = 0
    End If
   Next
@@ -145,8 +145,8 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
   'Botsareus 12/28/2013 Subtract Obstacles
   
   For t = 1 To MaxRobs 'Panda 8/14/2013 Figure out total robot area
-    If rob(t).exist Then    'Botsareus 8/14/2013 We have to make sure the robot is alive first
-        TotalRobotArea = TotalRobotArea + rob(t).radius ^ 2 * PI
+    If robManager.GetExists(t) Then    'Botsareus 8/14/2013 We have to make sure the robot is alive first
+        TotalRobotArea = TotalRobotArea + robManager.GetRadius(t) ^ 2 * PI
     End If
   Next t
   
@@ -182,7 +182,7 @@ Public Sub feedvegs(totnrg As Long) 'Panda 8/23/2013 Removed totv as it is no lo
  
   For t = 1 To MaxRobs
   With rob(t)
-    If .nrg > 0 And .exist Then
+    If .nrg > 0 And robManager.GetExists(t) Then
     
     'Botsareus 8/16/2014 Allow robots to share chloroplasts again
     If .chloroplasts > 0 Then
@@ -231,7 +231,7 @@ nextrob:
       If .body > 32000 Then
         .body = 32000
       End If
-      .radius = FindRadius(t)
+      robManager.SetRadius t, FindRadius(t)
       End If
     
     End If

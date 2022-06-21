@@ -35,7 +35,7 @@ Public Sub Snapshot()
   v = ","
   Form1.GraphLab.Visible = True
   For rn = 1 To MaxRobs
-    If rob(rn).exist And rob(rn).DnaLen > 1 Then 'Botsareus 6/16/2016 Bugfix
+    If robManager.GetExists(rn) And rob(rn).DnaLen > 1 Then 'Botsareus 6/16/2016 Bugfix
       With rob(rn)
       
         If m Then

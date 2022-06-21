@@ -343,9 +343,9 @@ Dim t As Integer
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
 'It is a hacky way of doing it, but should be a bit faster since the computation is only preformed twice, other than preforming it in each subsection.
 For t = 1 To MaxRobs
-    If rob(t).exist Then
-        pos.x = robManager.GetRobotPosition(t).x - (rob(t).vel.x - rob(t).actvel.x)
-        pos.y = robManager.GetRobotPosition(t).y - (rob(t).vel.y - rob(t).actvel.y)
+    If robManager.GetExists(t) Then
+        pos.x = robManager.GetRobotPosition(t).x - (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
+        pos.y = robManager.GetRobotPosition(t).y - (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
         robManager.SetRobotPosition t, pos
     End If
 Next
@@ -370,10 +370,10 @@ Next
   
 'Plase robots back
 For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
         
-        pos.x = robManager.GetRobotPosition(t).x + (rob(t).vel.x - rob(t).actvel.x)
-        pos.y = robManager.GetRobotPosition(t).y + (rob(t).vel.y - rob(t).actvel.y)
+        pos.x = robManager.GetRobotPosition(t).x + (robManager.GetVelocity(t).x - robManager.GetActualVelocity(t).x)
+        pos.y = robManager.GetRobotPosition(t).y + (robManager.GetVelocity(t).y - robManager.GetActualVelocity(t).y)
         
         robManager.SetRobotPosition t, pos
     End If
@@ -487,7 +487,7 @@ With frmMonitorSet
     '
     Dim aspectmod As Double
     aspectmod = TwipHeight / twipWidth
-    Line (robManager.GetRobotPosition(n).x - rob(n).radius * 1.1, robManager.GetRobotPosition(n).y - rob(n).radius * 1.1 / aspectmod)-(robManager.GetRobotPosition(n).x + rob(n).radius * 1.1, robManager.GetRobotPosition(n).y + rob(n).radius * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
+    Line (robManager.GetRobotPosition(n).x - robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y - robManager.GetRadius(n) * 1.1 / aspectmod)-(robManager.GetRobotPosition(n).x + robManager.GetRadius(n) * 1.1, robManager.GetRobotPosition(n).y + robManager.GetRadius(n) * 1.1 / aspectmod), RGB(valred, valgreen, valblue), B
 End With
 End Sub
 
@@ -511,14 +511,14 @@ Private Sub DrawRobPer(n As Integer)
   
   CentreX = robManager.GetRobotPosition(n).x
   CentreY = robManager.GetRobotPosition(n).y
-  radius = rob(n).radius
+  radius = robManager.GetRadius(n)
    
   If rob(n).highlight Then Circle (CentreX, CentreY), radius * 1.2, vbYellow
   If n = robfocus Then Circle (CentreX, CentreY), radius * 1.2, vbWhite
  
     FillColor = BackColor
   
-      Circle (CentreX, CentreY), rob(n).radius, rob(n).color    'new line
+      Circle (CentreX, CentreY), robManager.GetRadius(n), rob(n).color    'new line
       
     If MDIForm1.displayResourceGuagesToggle = True Then
 
@@ -529,7 +529,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.95, vbWhite, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.95, vbWhite, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).body > 0.5 Then
@@ -539,7 +539,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.9, vbMagenta, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.9, vbMagenta, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).Waste > 0.5 Then
@@ -549,7 +549,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.85, vbGreen, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.85, vbGreen, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).venom > 0.5 Then
@@ -559,7 +559,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.8, vbBlue, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.8, vbBlue, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).shell > 0.5 Then
@@ -569,7 +569,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.75, vbRed, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.75, vbRed, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).Slime > 0.5 Then
@@ -579,7 +579,7 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.7, vbBlack, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.7, vbBlack, 0, (Percent * PI * 2#)
       End If
       
        If rob(n).poison > 0.5 Then
@@ -589,19 +589,19 @@ Private Sub DrawRobPer(n As Integer)
           Percent = 1
         End If
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.65, vbYellow, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.65, vbYellow, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).Vtimer > 0 Then
         Percent = rob(n).Vtimer / 100
         If Percent > 0.99 Then Percent = 0.99 ' Do this because the cirlce won't draw if it goes all the way around for some reason...
-        Circle (CentreX, CentreY), rob(n).radius * 0.6, vbCyan, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.6, vbCyan, 0, (Percent * PI * 2#)
       End If
       
       If rob(n).chloroplasts > 0 Then 'Panda 8/13/2013 Show how much chloroplasts a robot has
         Percent = rob(n).chloroplasts / 32000
         If Percent > 0.98 Then Percent = 0.98
-        Circle (CentreX, CentreY), rob(n).radius * 0.55, vbGreen, 0, (Percent * PI * 2#)
+        Circle (CentreX, CentreY), robManager.GetRadius(n) * 0.55, vbGreen, 0, (Percent * PI * 2#)
       End If
       
       
@@ -624,7 +624,7 @@ Private Sub DrawRobDistPer(n As Integer)
   
   Form1.FillColor = rob(n).color
 
-    Circle (CentreX, CentreY), rob(n).radius, rob(n).color
+    Circle (CentreX, CentreY), robManager.GetRadius(n), rob(n).color
 
 End Sub
 
@@ -646,7 +646,7 @@ Private Sub DrawRobAim(n As Integer)
     pos.x = .aimvector.x
     pos.y = -.aimvector.y
        
-    pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(VectorUnit(pos), .radius))
+    pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(VectorUnit(pos), robManager.GetRadius(n)))
     PSet (pos2.x, pos2.y), vbWhite
     
     If MDIForm1.displayMovementVectorsToggle Then
@@ -670,7 +670,7 @@ Private Sub DrawRobAim(n As Integer)
       If .lastdown <> 0 Then
         If .lastdown < -1000 Then .lastdown = -1000
         If .lastdown > 1000 Then .lastdown = 1000
-        pos2 = VectorSub(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
+        pos2 = VectorSub(robManager.GetRobotPosition(n), VectorScalar(pos, robManager.GetRadius(n)))
         vol = VectorSub(pos2, VectorScalar(pos, CSng(.lastdown)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -689,7 +689,7 @@ Private Sub DrawRobAim(n As Integer)
         If .lastleft > 1000 Then .lastleft = 1000
         pos = VectorSet(Cos(.aim - PI / 2), Sin(.aim - PI / 2))
         pos.y = -pos.y
-        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
+        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, robManager.GetRadius(n)))
         vol = VectorAdd(pos2, VectorScalar(pos, CSng(.lastleft)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -708,7 +708,7 @@ Private Sub DrawRobAim(n As Integer)
         If .lastright > 1000 Then .lastright = 1000
         pos = VectorSet(Cos(.aim + PI / 2), Sin(.aim + PI / 2))
         pos.y = -pos.y
-        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, .radius))
+        pos2 = VectorAdd(robManager.GetRobotPosition(n), VectorScalar(pos, robManager.GetRadius(n)))
         vol = VectorAdd(pos2, VectorScalar(pos, CSng(.lastright)))
         Line (pos2.x, pos2.y)-(vol.x, vol.y), .color
         
@@ -738,12 +738,12 @@ Private Sub DrawRobSkin(n As Integer)
     If rob(n).oaim <> rob(n).aim Then
       Dim t As Integer
       With rob(n)
-        .OSkin(0) = (Cos(.Skin(1) / 100 - .aim) * .Skin(0)) * .radius / 60
-        .OSkin(1) = (Sin(.Skin(1) / 100 - .aim) * .Skin(0)) * .radius / 60
+        .OSkin(0) = (Cos(.Skin(1) / 100 - .aim) * .Skin(0)) * robManager.GetRadius(n) / 60
+        .OSkin(1) = (Sin(.Skin(1) / 100 - .aim) * .Skin(0)) * robManager.GetRadius(n) / 60
         PSet (.OSkin(0) + robManager.GetRobotPosition(n).x, .OSkin(1) + robManager.GetRobotPosition(n).y)
         For t = 2 To 6 Step 2
-          .OSkin(t) = (Cos(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * .radius / 60
-          .OSkin(t + 1) = (Sin(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * .radius / 60
+          .OSkin(t) = (Cos(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * robManager.GetRadius(n) / 60
+          .OSkin(t + 1) = (Sin(.Skin(t + 1) / 100 - .aim) * .Skin(t)) * robManager.GetRadius(n) / 60
           Line -(.OSkin(t) + robManager.GetRobotPosition(n).x, .OSkin(t + 1) + robManager.GetRobotPosition(n).y), .color
         Next t
         .oaim = .aim
@@ -925,11 +925,11 @@ Public Sub DrawAllRobs()
       
       If rob(robfocus).mem(EyeStart + a + 1) > 0 Then
         DrawMode = vbNotMergePen
-        length = (1 / Sqr(rob(robfocus).mem(EyeStart + a + 1))) * (EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + rob(robfocus).radius) + rob(robfocus).radius ' + rob(robfocus).radius
+        length = (1 / Sqr(rob(robfocus).mem(EyeStart + a + 1))) * (EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + robManager.GetRadius(robfocus)) + robManager.GetRadius(robfocus)
         If length < 0 Then length = 0
       Else
         DrawMode = vbCopyPen
-        length = EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + rob(robfocus).radius + rob(robfocus).radius
+        length = EyeSightDistance(AbsoluteEyeWidth(rob(robfocus).mem(EYE1WIDTH + a)), robfocus) + robManager.GetRadius(robfocus) + robManager.GetRadius(robfocus)
       End If
             
       Circle (robManager.GetRobotPosition(robfocus).x, robManager.GetRobotPosition(robfocus).y), length, vbCyan, -low, -hi
@@ -948,8 +948,8 @@ Public Sub DrawAllRobs()
   
   If noeyeskin Then
     For a = 1 To MaxRobs
-      If rob(a).exist Then
-        r = rob(a).radius
+      If robManager.GetExists(a) Then
+        r = robManager.GetRadius(a)
         If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
            DrawRobDistPer a
         End If
@@ -958,8 +958,8 @@ Public Sub DrawAllRobs()
   Else
     FillColor = BackColor
     For a = 1 To MaxRobs
-      If rob(a).exist Then
-         r = rob(a).radius
+      If robManager.GetExists(a) Then
+         r = robManager.GetRadius(a)
          If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
             robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
             DrawRobPer a
@@ -971,7 +971,7 @@ Public Sub DrawAllRobs()
   DrawStyle = 0
   If dispskin And Not noeyeskin Then
     For a = 1 To MaxRobs
-      If rob(a).exist Then
+      If robManager.GetExists(a) Then
         If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
            robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
            DrawRobSkin a
@@ -984,7 +984,7 @@ Public Sub DrawAllRobs()
   
   If Not noeyeskin Then
     For a = 1 To MaxRobs
-     If rob(a).exist Then
+     If robManager.GetExists(a) Then
        If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
           robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
           DrawRobAim a
@@ -999,8 +999,8 @@ Public Sub DrawAllRobs()
   'draw memory monitor
   If MDIForm1.MonitorOn.Checked Then
     For a = 1 To MaxRobs
-      If rob(a).exist Then
-         r = rob(a).radius
+      If robManager.GetExists(a) Then
+         r = robManager.GetRadius(a)
          If robManager.GetRobotPosition(a).x + r > visibleLeft And robManager.GetRobotPosition(a).x - r < visibleRight And _
             robManager.GetRobotPosition(a).y + r > visibleTop And robManager.GetRobotPosition(a).y - r < visibleBottom Then
             DrawMonitor a
@@ -1030,10 +1030,10 @@ Public Sub DrawAllTies()
   PixRobSize = PixelsPerTwip * RobSize
   
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       If robManager.GetRobotPosition(t).x > visibleLeft And robManager.GetRobotPosition(t).x < visibleRight And _
          robManager.GetRobotPosition(t).y > visibleTop And robManager.GetRobotPosition(t).y < visibleBottom Then
-         DrawRobTiesCol t, PixelsPerTwip * rob(t).radius * 2, rob(t).radius
+         DrawRobTiesCol t, PixelsPerTwip * robManager.GetRadius(t) * 2, robManager.GetRadius(t)
       End If
     End If
   Next t
@@ -1155,7 +1155,7 @@ MDIForm1.menuupdate
   ReDim rob(500)
   
   For t = 1 To 500
-    rob(t).exist = False
+    robManager.SetExists t, False
     rob(t).virusshot = 0
   Next t
   MaxRobs = 0
@@ -1316,7 +1316,7 @@ Private Sub loadrobs()
       rob(a).nrg = SimOpts.Specie(k).Stnrg
       rob(a).body = 1000
       
-      rob(a).radius = FindRadius(a)
+      robManager.SetRadius a, FindRadius(a)
       
       rob(a).mem(SetAim) = rob(a).aim * 200
       If rob(a).Veg Then rob(a).chloroplasts = StartChlr 'Botsareus 2/12/2014 Start a robot with chloroplasts
@@ -1366,9 +1366,9 @@ Private Function whichrob(x As Single, y As Single) As Integer
 'Botsareus 6/23/2016 Need to offset the robots by (actual velocity minus velocity) before drawing them
 Dim pos As Vector
 For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
         pos = robManager.GetRobotPosition(t)
-        pos = VectorAdd(VectorSub(pos, rob(t).vel), rob(t).actvel)
+        pos = VectorAdd(VectorSub(pos, robManager.GetVelocity(t)), robManager.GetActualVelocity(t))
         robManager.SetRobotPosition t, pos
     End If
 Next
@@ -1376,9 +1376,9 @@ Next
   whichrob = 0
   dist = 10000
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       pist = Abs(robManager.GetRobotPosition(t).x - x) ^ 2 + Abs(robManager.GetRobotPosition(t).y - y) ^ 2
-      If Abs(robManager.GetRobotPosition(t).x - x) < rob(t).radius And Abs(robManager.GetRobotPosition(t).y - y) < rob(t).radius And pist < dist And rob(t).exist Then
+      If Abs(robManager.GetRobotPosition(t).x - x) < robManager.GetRadius(t) And Abs(robManager.GetRobotPosition(t).y - y) < robManager.GetRadius(t) And pist < dist And robManager.GetExists(t) Then
         whichrob = t
         dist = pist
       End If
@@ -1386,9 +1386,9 @@ Next
   Next t
 
 For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
         pos = robManager.GetRobotPosition(t)
-        pos = VectorSub(VectorAdd(pos, rob(t).vel), rob(t).actvel)
+        pos = VectorSub(VectorAdd(pos, robManager.GetVelocity(t)), robManager.GetActualVelocity(t))
         robManager.SetRobotPosition t, pos
     End If
 Next
@@ -1441,13 +1441,13 @@ Private Sub Form_MouseMove(button As Integer, Shift As Integer, x As Single, y A
   If button = 1 And robfocus > 0 And DraggingBot Then
     vel = VectorSub(robManager.GetRobotPosition(robfocus), VectorSet(x, y))
     robManager.SetRobotPosition robfocus, VectorSet(x, y)
-    rob(robfocus).vel = VectorSet(0, 0)
-    rob(robfocus).actvel = VectorSet(0, 0) 'Botsareus 6/24/2016 Bug fix
+    robManager.SetVelocity robfocus, VectorSet(0, 0)
+    robManager.SetActualVelocity robfocus, VectorSet(0, 0)
     Dim a As Byte
     For a = 1 To tmprob_c
         robManager.SetRobotPosition tmppos(a).n, VectorSet(x - tmppos(a).x, y - tmppos(a).y)
-        rob(tmppos(a).n).vel = VectorSet(0, 0)
-        rob(tmppos(a).n).actvel = VectorSet(0, 0) 'Botsareus 6/24/2016 Bug fix
+        robManager.SetVelocity tmppos(a).n, VectorSet(0, 0)
+        robManager.SetActualVelocity tmppos(a).n, VectorSet(0, 0)
     Next
     If Not Active Then Redraw
     Exit Sub
@@ -1523,7 +1523,7 @@ Dim rst As Boolean
 rst = True
 tmprob_c = 0
     For a = 1 To MaxRobs
-      If rob(a).exist And rob(a).highlight Then
+      If robManager.GetExists(a) And rob(a).highlight Then
         If a = robfocus Then rst = False
         tmprob_c = tmprob_c + 1
         If tmprob_c < 51 Then
@@ -2085,8 +2085,7 @@ Private Sub CalcStats(ByRef nomi, ByRef dati, graphNum As Integer) 'Botsareus 8/
 '    t = Flex.last(nomi)
     For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, MUTATIONS_GRAPH) = dati(p, MUTATIONS_GRAPH) + .LastMut + .Mutations
@@ -2178,7 +2177,7 @@ Private Sub CalcStats(ByRef nomi, ByRef dati, graphNum As Integer) 'Botsareus 8/
         
         For t = 1 To MaxRobs
           With rob(t)
-          If .exist And Not .Corpse Then
+          If robManager.GetExists(t) And Not .Corpse Then
     
             p = Flex.Position(rob(t).FName, nomi)
     
@@ -2195,7 +2194,7 @@ Private Sub CalcStats(ByRef nomi, ByRef dati, graphNum As Integer) 'Botsareus 8/
                 copyl = 0
     
                 For x = t + 1 To MaxRobs 'search trough all robots and figure out genetic distance for the once that have enough mutations
-                If rob(x).exist And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
+                If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
                     l = DoGeneticDistance(t, x) * 1000
                     If l > copyl Then copyl = l 'here we store the max genetic distance for a given robot
                 End If
@@ -2285,7 +2284,7 @@ getout2:
     For t = 1 To MaxRobs
       With rob(t)
      ' If Not .wall And .exist Then
-      If .exist Then
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
       End If
@@ -2295,9 +2294,7 @@ getout2:
   Case MUTATIONS_GRAPH
     For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-  '    numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, MUTATIONS_GRAPH) = dati(p, MUTATIONS_GRAPH) + .LastMut + .Mutations
@@ -2313,9 +2310,7 @@ getout2:
   Case AVGAGE_GRAPH
    For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-  '      numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, AVGAGE_GRAPH) = dati(p, AVGAGE_GRAPH) + (.age / 100) ' EricL 4/7/2006 Graph age in 100's of cycles
@@ -2330,9 +2325,7 @@ getout2:
   Case OFFSPRING_GRAPH
   For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, OFFSPRING_GRAPH) = dati(p, OFFSPRING_GRAPH) + .SonNumber
@@ -2349,8 +2342,7 @@ getout2:
   For t = 1 To MaxRobs
       With rob(t)
       'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, ENERGY_GRAPH) = dati(p, ENERGY_GRAPH) + .nrg
@@ -2367,8 +2359,7 @@ getout2:
     For t = 1 To MaxRobs
       With rob(t)
       'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, DNALENGTH_GRAPH) = dati(p, DNALENGTH_GRAPH) + .DnaLen
@@ -2384,9 +2375,7 @@ getout2:
   Case DNACOND_GRAPH
   For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-      '  numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, DNACOND_GRAPH) = dati(p, DNACOND_GRAPH) + .condnum
@@ -2402,9 +2391,7 @@ getout2:
   Case MUT_DNALENGTH_GRAPH
   For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, MUT_DNALENGTH_GRAPH) = dati(p, MUT_DNALENGTH_GRAPH) + (.LastMut + .Mutations) / .DnaLen * 1000
@@ -2420,9 +2407,7 @@ getout2:
   Case ENERGY_SPECIES_GRAPH
     For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, ENERGY_SPECIES_GRAPH) = dati(p, ENERGY_SPECIES_GRAPH) + (.nrg + .body * 10) * 0.001
       End If
@@ -2450,7 +2435,7 @@ getout2:
   Case SPECIESDIVERSITY_GRAPH
     For t = 1 To MaxRobs
       With rob(t)
-      If .exist Then
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         
         'Look through the subspecies we have seen so far and see if this bot has the same as any of them
@@ -2472,9 +2457,7 @@ getout2:
   Case AVGCHLR_GRAPH 'Botsareus 8/31/2013 The new chloroplast graph
     For t = 1 To MaxRobs
       With rob(t)
-      'If Not .wall And .exist Then
-      If .exist Then
-       ' numbots = numbots + 1
+      If robManager.GetExists(t) Then
         p = Flex.Position(rob(t).FName, nomi)
         dati(p, POPULATION_GRAPH) = dati(p, POPULATION_GRAPH) + 1
         dati(p, AVGCHLR_GRAPH) = dati(p, AVGCHLR_GRAPH) + .chloroplasts
@@ -2503,7 +2486,7 @@ getout3:
 
     For t = 1 To MaxRobs
       With rob(t)
-      If .exist And Not .Corpse Then
+      If robManager.GetExists(t) And Not .Corpse Then
 
         p = Flex.Position(rob(t).FName, nomi)
 
@@ -2520,7 +2503,7 @@ getout3:
             copyl = 0
 
             For x = t + 1 To MaxRobs 'search trough all robots and figure out genetic distance for the once that have enough mutations
-            If rob(x).exist And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
+            If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName And rob(x).GenMut = 0 Then  ' Must exist, have enugh mutations, and be of same species
                 l = DoGeneticDistance(t, x) * 1000
                 If l > copyl Then copyl = l 'here we store the max genetic distance for a given robot
 
@@ -2557,7 +2540,7 @@ getout3:
     
     For t = 1 To MaxRobs
       With rob(t)
-      If .exist And Not .Corpse Then
+      If robManager.GetExists(t) And Not .Corpse Then
         p = Flex.Position(rob(t).FName, nomi)
            'Botsareus 8/3/2012 Generational Distance Graph
            ll = FindGenerationalDistance(t)
@@ -2579,10 +2562,10 @@ getout3:
 
     For t = 1 To MaxRobs
       With rob(t)
-      If .exist And Not .Corpse Then
+      If robManager.GetExists(t) And Not .Corpse Then
         p = Flex.Position(rob(t).FName, nomi)
             For x = t + 1 To MaxRobs
-            If rob(x).exist And Not rob(x).Corpse And rob(x).FName = .FName Then  ' Must exist, and be of same species
+            If robManager.GetExists(x) And Not rob(x).Corpse And rob(x).FName = .FName Then  ' Must exist, and be of same species
                 l = DoGeneticDistance(t, x) * 1000
                 If l > dati(p, GENETIC_SIMPLE_GRAPH) Then dati(p, GENETIC_SIMPLE_GRAPH) = l 'here we store the max generational distance for a given robot
             End If
@@ -2612,7 +2595,7 @@ Public Function discendenti(t As Integer, disce As Integer) As Integer
   rid = rob(t).AbsNum
   If disce < 1000 Then
     For n = 1 To MaxRobs
-      If rob(n).exist Then
+      If robManager.GetExists(n) Then
         If rob(n).parent = rid Then
           discendenti = discendenti + 1
           disce = disce + 1
@@ -2638,7 +2621,7 @@ sPopulation = (IIf(intFindBestV2 < 100, 100, 200 - intFindBestV2)) / 100
   Dim Mx As Double
   Mx = 0
   For t = 1 To MaxRobs
-    If rob(t).exist And Not rob(t).Veg And Not rob(t).FName = "Corpse" Then
+    If robManager.GetExists(t) And Not rob(t).Veg And Not rob(t).FName = "Corpse" Then
       TotalOffspring = 1
       s = score(t, 1, 10, 0) + rob(t).nrg + rob(t).body * 10 'Botsareus 5/22/2013 Advanced fit test
       If s < 0 Then s = 0 'Botsareus 9/23/2016 Bug fix
@@ -2671,7 +2654,7 @@ Function score(ByVal r As Integer, ByVal reclev As Integer, maxrec As Integer, t
   If tipo = 2 Then plines (r)
   score = 0
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       If rob(t).parent = rob(r).AbsNum Then
         If reclev < maxrec Then score = score + score(t, reclev + 1, maxrec, tipo)
         If tipo = 0 Then score = score + InvestedEnergy(t) 'Botsareus 8/3/2012 generational distance code
@@ -2720,6 +2703,6 @@ Function parent(r As Integer) As Integer
   Dim t As Integer
   parent = 0
   For t = 1 To MaxRobs
-    If rob(t).AbsNum = rob(r).parent And rob(t).exist Then parent = t
+    If rob(t).AbsNum = rob(r).parent And robManager.GetExists(t) Then parent = t
   Next t
 End Function

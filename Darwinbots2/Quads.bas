@@ -54,7 +54,7 @@ Public Sub Init_Buckets()
   Next y
   
   For x = 1 To MaxRobs
-    If rob(x).exist Then
+    If robManager.GetExists(x) Then
       rob(x).BucketPos.x = -2
       rob(x).BucketPos.y = -2
       UpdateBotBucket x
@@ -69,7 +69,7 @@ Public Sub UpdateBotBucket(n As Integer)
     
   Dim currbucket As Single, newbucket As Vector, changed As Boolean
   
-  If Not rob(n).exist Then
+  If Not robManager.GetExists(n) Then
     Delete_Bot n, rob(n).BucketPos
     GoTo getout
   End If
@@ -256,7 +256,7 @@ Private Sub CheckBotBucketForCollision(n As Integer, pos As Vector)
       robnumber = Buckets(pos.x, pos.y).arr(a)
       If robnumber > n Then ' only have to check bots higher than n otherwise we do it twice for each bot pair
         distvector = VectorSub(robManager.GetRobotPosition(n), robManager.GetRobotPosition(robnumber))
-        dist = rob(n).radius + rob(robnumber).radius
+        dist = robManager.GetRadius(n) + robManager.GetRadius(robnumber)
         If VectorMagnitudeSquare(distvector) < (dist * dist) Then Repel3 n, robnumber
       End If
       If a = Buckets(pos.x, pos.y).size Then GoTo getout
@@ -335,7 +335,7 @@ Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
       Dim eyesum As Long
              
       ab = VectorSub(robManager.GetRobotPosition(n2), robManager.GetRobotPosition(n1))
-      edgetoedgedist = VectorMagnitude(ab) - rob(n1).radius - rob(n2).radius
+      edgetoedgedist = VectorMagnitude(ab) - robManager.GetRadius(n1) - robManager.GetRadius(n2)
       
       'Here we compute the maximum possible distance bot N1 can see.  Sight distance is a function of
       'eye width.  Narrower eyes can see farther, wider eyes not so much.  So, we find the narrowest eye
@@ -368,11 +368,11 @@ Public Sub CompareRobots3(n1 As Integer, n2 As Integer)
       'ac is now unit vector
       
       ad = VectorSet(ac.y, -ac.x)
-      ad = VectorScalar(ad, rob(n2).radius)
+      ad = VectorScalar(ad, robManager.GetRadius(n2))
       ad = VectorAdd(ab, ad)
       
       ac = VectorSet(-ac.y, ac.x)
-      ac = VectorScalar(ac, rob(n2).radius)
+      ac = VectorScalar(ac, robManager.GetRadius(n2))
       ac = VectorAdd(ab, ac)
             
 

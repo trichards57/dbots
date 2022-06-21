@@ -981,28 +981,25 @@ b:
   AutoFork.Checked = False
 End Sub
 
-'Botsareus 10/26/2014 A good idea from 'Spyke'
 Private Sub AutoTag_Click()
-  Dim t As Integer
-  Dim robname As String
-  Dim robtag As String
+    Dim t As Integer
+    Dim robname As String
+    Dim robtag As String
   
-  robname = InputBox("Please enter the exact name of the robot you wish append with a new tag.")
-  If robname = "" Then
-    MsgBox "Cancel or blank entry", vbCritical
-    Exit Sub
-  End If
-  
-  robtag = InputBox("Please enter the new tag. It can not be more then 45 characters long.")
-  robtag = Left(replacechars(robtag), 45)
-  
-  For t = 1 To MaxRobs
-    If rob(t).exist Then
-      If rob(t).FName = robname Then
-        rob(t).tag = robtag
-      End If
+    robname = InputBox("Please enter the exact name of the robot you wish append with a new tag.")
+    If robname = "" Then
+        MsgBox "Cancel or blank entry", vbCritical
+        Exit Sub
     End If
-  Next t
+  
+    robtag = InputBox("Please enter the new tag. It can not be more then 45 characters long.")
+    robtag = Left(replacechars(robtag), 45)
+  
+    For t = 1 To MaxRobs
+        If robManager.GetExists(t) And rob(t).FName = robname Then
+            rob(t).tag = robtag
+        End If
+    Next t
 End Sub
 
 
@@ -1112,7 +1109,7 @@ Public Function MakeNewSpeciesFromBot(n As Integer)
 Dim i As Integer
 Dim OldSpeciesName As String
 
-  If Not rob(n).exist Or rob(n).Corpse Then Exit Function
+  If Not robManager.GetExists(n) Or rob(n).Corpse Then Exit Function
   'Change the species of bot n
   OldSpeciesName = rob(n).FName
   If Right(rob(n).FName, 4) = ".txt" Then
@@ -1129,16 +1126,14 @@ End Function
 'Also changes the name of any other bots that have a subspecies number > bot n
 'Used when forking a species
 Private Sub ChangeNameOfAllChildren(n As Integer, OldSpeciesName As String)
-  Dim t As Integer
-  If rob(n).SonNumber = 0 Then Exit Sub
-  For t = 1 To MaxRobs
-    If rob(t).exist And Not rob(t).Corpse And t <> n Then
-      If rob(t).parent = rob(n).AbsNum Then
-        rob(t).FName = rob(n).FName
-        ChangeNameOfAllChildren t, OldSpeciesName
-      End If
-    End If
-  Next t
+    Dim t As Integer
+    If rob(n).SonNumber = 0 Then Exit Sub
+    For t = 1 To MaxRobs
+        If robManager.GetExists(t) And Not rob(t).Corpse And t <> n And rob(t).parent = rob(n).AbsNum Then
+            rob(t).FName = rob(n).FName
+            ChangeNameOfAllChildren t, OldSpeciesName
+        End If
+    Next t
 End Sub
 
 Private Sub MonitorOn_Click()
@@ -1184,7 +1179,7 @@ Dim rob_str As String
 Dim i As Integer
 Dim datahit As Boolean
 For t = 1 To MaxRobs
- If rob(t).exist Then
+ If robManager.GetExists(t) Then
   If Left(rob(t).tag, 45) = Left(blank, 45) Then
    rob_str = String(45, " ") & ":" & rob(t).FName & ":" & rob(t).LastOwner
   Else

@@ -111,7 +111,7 @@ Public Sub UpdateTieAngles(t As Integer)
        'Overflow prevention.  Very long ties can happen for one cycle when bots wrap in torridal fields
        If dist > 32000 Then dist = 32000
        rob(t).mem(TIEANG) = -CInt(AngDiff(angnorm(tieAngle), angnorm(rob(t).aim)) * 200)
-       rob(t).mem(TIELEN) = CInt(dist - rob(t).radius - rob(n).radius)
+       rob(t).mem(TIELEN) = CInt(dist - robManager.GetRadius(t) - robManager.GetRadius(n))
        GoTo getout
     End If
     k = k - 1
@@ -208,8 +208,6 @@ Public Sub Update_Ties(t As Integer)
             If .mem(FIXANG) >= 0 Then
               .Ties(k).ang = (.mem(FIXANG) Mod 1256) / 200
               .Ties(k).angreg = True 'EricL 4/24/2006
-              'If .mem(FIXANG) > 628 Then .mem(FIXANG) = -627
-              'If .mem(FIXANG) < -628 Then .mem(FIXANG) = 627
             Else
               .Ties(k).angreg = False 'EricL 4/24/2006
             End If
@@ -217,8 +215,7 @@ Public Sub Update_Ties(t As Integer)
                     
           'TieLen Section
           If .mem(FIXLEN) <> 0 And .Ties(k).Port = tn Then 'fixes tie length
-           'length = Abs(.mem(FIXLEN))
-            length = Abs(.mem(FIXLEN)) + .radius + rob(.Ties(k).pnt).radius ' include the radius of the tied bots in the length
+            length = Abs(.mem(FIXLEN)) + robManager.GetRadius(t) + robManager.GetRadius(.Ties(k).pnt) ' include the radius of the tied bots in the length
             If length > 32000 Then length = 32000 ' Can happen for very big bots with very long ties.
             .Ties(k).NaturalLength = CInt(length) 'for first robot
             rob(.Ties(k).pnt).Ties(srctie((.Ties(k).pnt), t)).NaturalLength = CInt(length) 'for second robot. What a messed up formula
@@ -251,7 +248,7 @@ Public Sub Update_Ties(t As Integer)
        If .Ties(k).pnt > 0 And .Ties(k).type = 3 Then
         'input
         If .TieLenOverwrite(k - 1) Then
-         length = .mem(483 + k) + .radius + rob(.Ties(k).pnt).radius ' include the radius of the tied bots in the length
+         length = .mem(483 + k) + robManager.GetRadius(t) + robManager.GetRadius(.Ties(k).pnt) ' include the radius of the tied bots in the length
          If length > 32000 Then length = 32000 ' Can happen for very big bots with very long ties.
          .Ties(k).NaturalLength = CInt(length) 'for first robot
          rob(.Ties(k).pnt).Ties(srctie((.Ties(k).pnt), t)).NaturalLength = CInt(length) 'for second robot. What a messed up formula
@@ -271,7 +268,7 @@ Public Sub Update_Ties(t As Integer)
         tieAngle = angle(robManager.GetRobotPosition(t).x, robManager.GetRobotPosition(t).y, robManager.GetRobotPosition(n).x, robManager.GetRobotPosition(n).y)
         dist = Sqr((robManager.GetRobotPosition(t).x - robManager.GetRobotPosition(n).x) ^ 2 + (robManager.GetRobotPosition(t).y - robManager.GetRobotPosition(n).y) ^ 2)
         If dist > 32000 Then dist = 32000 'Botsareus 1/24/2014 Bug fix here
-        .mem(483 + k) = CInt(dist - .radius - rob(n).radius)
+        .mem(483 + k) = CInt(dist - robManager.GetRadius(t) - robManager.GetRadius(n))
         .mem(479 + k) = angnorm(angnorm(tieAngle) - angnorm(.aim)) * 200
        End If
        Next
@@ -280,25 +277,7 @@ Public Sub Update_Ties(t As Integer)
       
       
       k = 1
-          
-'      If .mem(tp) Then  '.tieang value
-'        k = 1
-'        While .Ties(k).pnt > 0
-'          If .Ties(k).Port = tn Then bend t, k, .mem(tp) 'bend a tie
-'          k = k + 1
-'        Wend
-'      End If
-'
-'      If .mem(tp + 1) Then  '.tielen value
-'        k = 1
-'        While .Ties(k).pnt > 0
-'          If .Ties(k).Port = tn Then shrink t, k, .mem(FIXLEN) 'set tie length to value specified in mem location 451 (tp+1)
-'          k = k + 1
-'        Wend
-'      End If
-      
-     
-      
+
         'Botsareus 7/22/2015 Code more coherent
         If .mem(tp + 2) < 0 Then  'we are checking values that are negative such as -1 or -6
         
@@ -327,7 +306,8 @@ Public Sub Update_Ties(t As Integer)
                             rob(.Ties(k).pnt).body = rob(.Ties(k).pnt).body + l * 0.029           'tied robot stores some fat
                             If rob(.Ties(k).pnt).body > 32000 Then rob(.Ties(k).pnt).body = 32000
                             rob(.Ties(k).pnt).Waste = rob(.Ties(k).pnt).Waste + l * 0.01          'tied robot receives waste
-                            rob(.Ties(k).pnt).radius = FindRadius(.Ties(k).pnt)
+                            
+                            robManager.SetRadius .Ties(k).pnt, FindRadius(.Ties(k).pnt)
                             
                             .nrg = .nrg - l                                                       'tying robot gives up energy
                         End If
@@ -370,7 +350,7 @@ Public Sub Update_Ties(t As Integer)
                             .body = .body - l * 0.029            'tying robot stores some fat
                             If .body > 32000 Then .body = 32000
                             .Waste = .Waste - l * 0.01      'tying robot adds waste
-                            .radius = FindRadius(t)
+                            robManager.SetRadius t, FindRadius(t)
                             
                             rob(.Ties(k).pnt).nrg = rob(.Ties(k).pnt).nrg + l 'Take the nrg
                             
@@ -525,7 +505,7 @@ Public Sub Update_Ties(t As Integer)
                             rob(.Ties(k).pnt).body = rob(.Ties(k).pnt).body + l * 0.987         'tied robot stores some fat 'Botsareus 3/23/2016 Bugfix
                             If rob(.Ties(k).pnt).body > 32000 Then rob(.Ties(k).pnt).body = 32000
                             rob(.Ties(k).pnt).Waste = rob(.Ties(k).pnt).Waste + l * 0.01          'tied robot receives waste
-                            rob(.Ties(k).pnt).radius = FindRadius(.Ties(k).pnt)
+                            robManager.SetRadius .Ties(k).pnt, FindRadius(.Ties(k).pnt)
                             
                             .body = .body - l                                                       'tying robot gives up energy
                         End If
@@ -568,7 +548,7 @@ Public Sub Update_Ties(t As Integer)
                             .body = .body - l * 0.987          'tying robot stores some fat 'Botsareus 3/23/2016 Bugfix
                             If .body > 32000 Then .body = 32000
                             .Waste = .Waste - l * 0.01      'tying robot adds waste
-                            .radius = FindRadius(t)
+                            robManager.SetRadius t, FindRadius(t)
                             
                             rob(.Ties(k).pnt).body = rob(.Ties(k).pnt).body + l 'Take the body
                             
@@ -706,15 +686,18 @@ Public Sub ReadTRefVars(t As Integer, k As Integer)
     .mem(trefvelyourdx) = rob(.Ties(k).pnt).mem(veldx)
                 
     'Botsareus 9/27/2014 I was thinking long and hard where to place this bug fix, probebly best to place it at the source
-    If Abs(rob(.Ties(k).pnt).vel.y) > 16000 Then rob(.Ties(k).pnt).vel.y = 16000 * Sgn(rob(.Ties(k).pnt).vel.y)
-    If Abs(rob(.Ties(k).pnt).vel.x) > 16000 Then rob(.Ties(k).pnt).vel.x = 16000 * Sgn(rob(.Ties(k).pnt).vel.x)
+    Dim vel As Vector
+    vel = robManager.GetVelocity(.Ties(k).pnt)
     
-    .mem(trefvelmyup) = rob(.Ties(k).pnt).vel.x * Cos(.aim) + Sin(.aim) * rob(.Ties(k).pnt).vel.y * -1 - .mem(velup) 'gives velocity from mybots frame of reference
+    If Abs(vel.y) > 16000 Then vel.y = 16000 * Sgn(vel.y)
+    If Abs(vel.x) > 16000 Then vel.x = 16000 * Sgn(vel.x)
+    robManager.SetVelocity .Ties(k).pnt, vel
+    
+    .mem(trefvelmyup) = vel.x * Cos(.aim) + Sin(.aim) * vel.y * -1 - .mem(velup) 'gives velocity from mybots frame of reference
     .mem(trefvelmydn) = .mem(trefvelmyup) * -1
-    .mem(trefvelmydx) = rob(.Ties(k).pnt).vel.y * Cos(.aim) + Sin(.aim) * rob(.Ties(k).pnt).vel.x - .mem(veldx)
+    .mem(trefvelmydx) = vel.y * Cos(.aim) + Sin(.aim) * vel.x - .mem(veldx)
     .mem(trefvelmysx) = .mem(trefvelmydx) * -1
     .mem(trefvelscalar) = rob(.Ties(k).pnt).mem(velscalar)
-   ' .mem(trefbody) = rob(.Ties(k).pnt).body
     .mem(trefshell) = rob(.Ties(k).pnt).shell
     
     'These are the tie in/out pairs
@@ -742,7 +725,7 @@ Public Sub DeleteTie(ByVal a As Integer, ByVal b As Integer)
   Dim t As Integer
   
   'Quick tests to rule out whether a tie can't exist between the bots.
-  If (Not rob(a).exist) Or (Not rob(b).exist) Then GoTo getout
+  If (Not robManager.GetExists(a)) Or (Not robManager.GetExists(b)) Then GoTo getout
   If rob(a).numties = 0 Or rob(b).numties = 0 Then GoTo getout
   
   k = 1
@@ -817,7 +800,7 @@ Public Function maketie(ByVal a As Integer, ByVal b As Integer, c As Long, last 
   
   maketie = False
   
-  If rob(a).exist = False Then GoTo getout
+  If robManager.GetExists(a) = False Then GoTo getout
  
   deflect = Random(2, 92) 'random number which allows for the effect of slime on the target robot. If slime is greater then no tie is formed
   Max = MAXTIES

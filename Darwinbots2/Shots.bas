@@ -101,15 +101,15 @@ Public Function newshot(n As Integer, ByVal shottype As Integer, ByVal val As Si
     angle = VectorSet(Cos(ShAngle), -Sin(ShAngle))
     Dim pos As Vector
     pos = robManager.GetRobotPosition(n)
-    s.Position = VectorAdd(pos, VectorScalar(angle, rob(n).radius))
+    s.Position = VectorAdd(pos, VectorScalar(angle, robManager.GetRadius(n)))
     
     'Botsareus 6/23/2016 Takes care of shot position bug - so it matches the painted robot position
     If offset Then
-        s.Position = VectorSub(s.Position, rob(n).vel)
-        s.Position = VectorAdd(s.Position, rob(n).actvel)
+        s.Position = VectorSub(s.Position, robManager.GetVelocity(n))
+        s.Position = VectorAdd(s.Position, robManager.GetActualVelocity(n))
     End If
     
-    s.Velocity = VectorAdd(rob(n).actvel, VectorScalar(angle, 40))
+    s.Velocity = VectorAdd(robManager.GetActualVelocity(n), VectorScalar(angle, 40))
     
     s.OldPosition = VectorSub(s.Position, s.Velocity)
     
@@ -199,124 +199,83 @@ End Sub
 ' calculates next shots position
 Public Sub updateshots()
 'moves shot then checks for collision
-     Dim a As Integer
+     'Dim a As Integer
      Dim t As Long
      Dim h As Integer
-     Dim dx As Integer
-     Dim sx As Integer
-     Dim rp As Integer
-     Dim jj As Integer
-     Dim ti As Single
-     Dim x As Long
-     Dim y As Long
+     'Dim dx As Integer
+     'Dim sx As Integer
+     'Dim rp As Integer
+     'Dim jj As Integer
+     'Dim ti As Single
+     'Dim x As Long
+     'Dim y As Long
      Dim tempnum As Single
+     Dim s As Shot
+     Dim result As UpdateResult
      
-    ' shotpointer = 1
-      
-     numshots = 0
-     For t = 1 To ShotManager.GetMaxShot()
-        'This is one of the most CPU intensive routines.  We need to make the UI responsive.
-        If t Mod 250 = 0 Then DoEvents
-        If t <= ShotManager.GetMaxShot() Then 'Botsareus 4/5/2016 Bug fix
-            Dim s As Shot
-            s = ShotManager.GetShot(t)
+     result = ShotManager.UpdateShotsCollisions(MaxBotShotSeperation, MinBotRadius, SimOpts.Updnconnected, SimOpts.Dxsxconnected, VectorSet(SimOpts.FieldWidth, SimOpts.FieldHeight))
+     
+     For t = 0 To UBound(result.Collisions)
+        h = result.Collisions(t).bot
+        s = ShotManager.GetShot(result.Collisions(t).Shot)
             
-            If s.flash Then
-                s.Exists = False
-                s.flash = False
-                s.DNALength = 0
+        If Not (s.parent = rob(h).parent And rob(h).age <= 1) Then
+       
+            If s.Range = 0 Then
+                tempnum = s.age + 1
+            Else
+                tempnum = s.age / s.Range
             End If
-            If s.Exists Then
-                numshots = numshots + 1 ' Counts the number of existing shots each cycle for display purposes
-              
-                'Add the energy in the shot to the total sim energy if it is an energy shot
-                If s.shottype = -2 Then TotalSimEnergy(CurrentEnergyCycle) = TotalSimEnergy(CurrentEnergyCycle) + s.Energy
-                      
-                If (s.shottype = -100) Or (s.Stored = True) Then
-                    h = 0  ' It's purely an ornimental shot like a poff or it's a virus shot that hasn't been fired yet
-                Else
-                    h = NewShotCollision(s) ' go off and check for collisions with bots.
+          
+            'this below is horribly complicated:  allow me to explain:
+            'nrg dissipates in a non-linear fashion.  Very little nrg disappears until you
+            'get near the last 10% of the journey or so.
+            'Don't dissipate nrg if nrg shots last forever.
+            If Not SimOpts.NoShotDecay Or s.shottype <> -2 Then
+                If Not (s.shottype = -4 And SimOpts.NoWShotDecay) Then 'Botsareus 9/29/2013 Do not decay waste shots
+                    s.Energy = s.Energy * (Atn(tempnum * shotdecay - shotdecay)) / Atn(-shotdecay)
                 End If
-                
-                'babies born into a stream of shots from its parent shouldn't die
-                'from those shots.  I can't imagine this temporary imunity can be
-                'exploited, so it should be safe
-                If h > 0 And Not (s.parent = rob(h).parent And rob(h).age <= 1) Then
-               
-                    If s.Range = 0 Then
-                        tempnum = s.age + 1 ' / (.range + 1)
-                    Else
-                        tempnum = s.age / s.Range
-                    End If
-                  
-                    'this below is horribly complicated:  allow me to explain:
-                    'nrg dissipates in a non-linear fashion.  Very little nrg disappears until you
-                    'get near the last 10% of the journey or so.
-                    'Don't dissipate nrg if nrg shots last forever.
-                    If Not SimOpts.NoShotDecay Or s.shottype <> -2 Then
-                        If Not (s.shottype = -4 And SimOpts.NoWShotDecay) Then 'Botsareus 9/29/2013 Do not decay waste shots
-                            s.Energy = s.Energy * (Atn(tempnum * shotdecay - shotdecay)) / Atn(-shotdecay)
-                        End If
-                    End If
-                  
-                
-                    If s.shottype > 0 Then
-                        s.shottype = (s.shottype - 1) Mod 1000 + 1 ' EricL 6/2006 Mod 1000 so as to increse probabiltiy that mutations do something interesting
-                    
-                        If s.shottype <> DelgeneSys Then
-            
-                            If (s.Energy / 2 > rob(h).poison) Or (rob(h).poison = 0) Then
-                                rob(h).mem(s.shottype) = s.value
-                            Else
-                                createshot s.Position.x, s.Position.y, -s.Velocity.x, -s.Velocity.y, -5, h, s.Energy / 2, s.Range * 40, vbYellow
-                                rob(h).poison = rob(h).poison - (s.Energy / 2) * 0.9
-                                rob(h).Waste = rob(h).Waste + (s.Energy / 2) * 0.1
-                                If rob(h).poison < 0 Then rob(h).poison = 0
-                                rob(h).mem(poison) = rob(h).poison
-                            End If
-                        End If
-                    Else
-                        Select Case s.shottype
-                            Case -1: releasenrg h, s
-                            Case -2: takenrg h, s
-                            Case -3: takeven h, s
-                            Case -4: takewaste h, s
-                            Case -5: takepoison h, s
-                            Case -6: releasebod h, s
-                            Case -7: addgene h, s
-                            Case -8: takesperm h, s ' bot hit by a sperm shot for sexual reproduction
-                         End Select
-                    End If
-                    taste h, s.OldPosition.x, s.OldPosition.y, s.shottype
-                    s.flash = True
-                End If
-                
-                s.OldPosition = s.Position
-                s.Position = VectorAdd(s.Position, s.Velocity) 'Euler integration
-                
-                'Age shots unless we are not decaying them.  At some point, we may want to see how old shots are, so
-                'this may need to be changed at some point but for now, it lets shots never die by never growing old.
-                'Always age Poff shots
-                If (SimOpts.NoShotDecay And s.shottype = -2) Or (s.Stored) Then
-                Else
-                    If s.shottype = -4 And SimOpts.NoWShotDecay Then
-                    Else
-                        s.age = s.age + 1
-                    End If
-                End If
-                
-                If s.age > s.Range And Not s.flash Then 'Botsareus 9/12/2016 Bug fix
-                    s.Exists = False ' Kill shots once they reach maturity
-                    s.DNALength = 0
-                End If
-                  
             End If
-                    
-        End If
+          
         
-        ShotManager.SetShot t, s
-    Next t
-    ShotsThisCycle = numshots
+            If s.shottype > 0 Then
+                s.shottype = (s.shottype - 1) Mod 1000 + 1 ' EricL 6/2006 Mod 1000 so as to increse probabiltiy that mutations do something interesting
+            
+                If s.shottype <> DelgeneSys Then
+    
+                    If (s.Energy / 2 > rob(h).poison) Or (rob(h).poison = 0) Then
+                        rob(h).mem(s.shottype) = s.value
+                    Else
+                        createshot s.Position.x, s.Position.y, -s.Velocity.x, -s.Velocity.y, -5, h, s.Energy / 2, s.Range * 40, vbYellow
+                        rob(h).poison = rob(h).poison - (s.Energy / 2) * 0.9
+                        rob(h).Waste = rob(h).Waste + (s.Energy / 2) * 0.1
+                        If rob(h).poison < 0 Then rob(h).poison = 0
+                        rob(h).mem(poison) = rob(h).poison
+                    End If
+                End If
+            Else
+                Select Case s.shottype
+                    Case -1: releasenrg h, s
+                    Case -2: takenrg h, s
+                    Case -3: takeven h, s
+                    Case -4: takewaste h, s
+                    Case -5: takepoison h, s
+                    Case -6: releasebod h, s
+                    Case -7: addgene h, s
+                    Case -8: takesperm h, s ' bot hit by a sperm shot for sexual reproduction
+                 End Select
+            End If
+            taste h, s.OldPosition.x, s.OldPosition.y, s.shottype
+            s.flash = True
+            
+            ShotManager.SetShot result.Collisions(t).Shot, s
+        End If
+     Next
+     
+     ShotsThisCycle = result.numshots
+     TotalSimEnergy(CurrentEnergyCycle) = TotalSimEnergy(CurrentEnergyCycle) + result.TotalEnergy
+     
+     ShotManager.UpdateShotsPosition SimOpts.NoShotDecay, SimOpts.NoWShotDecay
 End Sub
 
 Public Sub Decay(n As Integer) 'corpse decaying as waste shot, energy shot or no shot
@@ -348,7 +307,7 @@ Public Sub Decay(n As Integer) 'corpse decaying as waste shot, energy shot or no
         End If
     
         rob(n).body = rob(n).body - SimOpts.Decay / 10
-        rob(n).radius = FindRadius(n)
+        robManager.SetRadius n, FindRadius(n)
     End If
 End Sub
 
@@ -390,9 +349,9 @@ Public Sub releasenrg(ByVal n As Integer, ByRef s As Shot)
       
     If rob(n).nrg <= 0.5 Then Exit Sub
     
-    vel = VectorSub(rob(n).actvel, s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
+    vel = VectorSub(robManager.GetActualVelocity(n), s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
                                                                'the shot to the hit bot
-    vel = VectorAdd(vel, VectorScalar(rob(n).actvel, 0.5)) 'then add in half the velocity of hit robot
+    vel = VectorAdd(vel, VectorScalar(robManager.GetActualVelocity(n), 0.5)) 'then add in half the velocity of hit robot
     
     If SimOpts.EnergyExType Then
         If s.Range = 0 Then ' Divide by zero protection
@@ -436,7 +395,7 @@ Public Sub releasenrg(ByVal n As Integer, ByRef s As Shot)
         y = s.Position.y
       
         createshot x, y, vel.x, vel.y, -2, n, power, Range * (RobSize / 3), vbWhite
-        rob(n).radius = FindRadius(n)
+        robManager.SetRadius n, FindRadius(n)
     End If
     
     If rob(n).body <= 0.5 Or rob(n).nrg <= 0.5 Then
@@ -455,9 +414,9 @@ Private Sub releasebod(ByVal n As Integer, ByRef s As Shot) 'a robot is shot by 
     
     If rob(n).body <= 0 Then Exit Sub
     
-    vel = VectorSub(rob(n).actvel, s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
+    vel = VectorSub(robManager.GetActualVelocity(n), s.Velocity) 'negative relative velocity of shot hitting bot 'Botsareus 6/22/2016 Now based on robots actual velocity
                                                    'the shot to the hit bot
-    vel = VectorAdd(vel, VectorScalar(rob(n).actvel, 0.5)) 'then add in half the velocity of hit robot
+    vel = VectorAdd(vel, VectorScalar(robManager.GetActualVelocity(n), 0.5)) 'then add in half the velocity of hit robot
     
     If SimOpts.EnergyExType Then
         If s.Range = 0 Then ' Divide by zero protection
@@ -498,7 +457,7 @@ Private Sub releasebod(ByVal n As Integer, ByRef s As Shot) 'a robot is shot by 
         power = power * 4 'So effective against corpses it makes me siiiiiinnnnnggg
         If power > rob(n).body * 10 Then power = rob(n).body * 10
         rob(n).body = rob(n).body - power / 10      'all energy comes from body
-        rob(n).radius = FindRadius(n)
+        robManager.SetRadius n, FindRadius(n)
     Else
         Dim leftover As Single
         
@@ -537,7 +496,7 @@ Private Sub releasebod(ByVal n As Integer, ByRef s As Shot) 'a robot is shot by 
                 End If
             End If
         End With
-        rob(n).radius = FindRadius(n)
+        robManager.SetRadius n, FindRadius(n)
     End If
     
     If rob(n).body <= 0.5 Or rob(n).nrg <= 0.5 Then
@@ -577,7 +536,7 @@ Private Sub takenrg(ByVal n As Integer, ByRef s As Shot)
     
     rob(n).Waste = rob(n).Waste + partial * 0.01  '1% goes to waste
     
-    rob(n).radius = FindRadius(n)
+    robManager.SetRadius n, FindRadius(n)
 End Sub
 '  robot takes a venomous shot and becomes seriously messed up
 Private Sub takeven(ByVal n As Integer, ByRef s As Shot)
@@ -685,170 +644,6 @@ Private Sub takesperm(ByVal n As Integer, ByRef s As Shot)
     rob(n).spermDNAlen = s.DNALength
 End Sub
 
-'EricL 5/16/2006 Checks for collisions between shots and bots.  Takes into consideration
-'motion of target bot as well as shots which potentially pass through the target bot during the cycle
-'Argument: The shot number to check
-'Returns: bot number of the hit bot if a collison occurred, 0 otherwise
-'Side Effect: On a hit, changes the shot position to be the point of impact with the bot
-Private Function NewShotCollision(ByRef sh As Shot) As Integer
-    Dim robnum As Integer
-    Dim B0 As Vector 'Position of bot at time 0
-    Dim b As Vector 'Position of bot at time 0 < t < 1
-    Dim S0 As Vector 'Position of shot at time 0
-    Dim S1 As Vector 'Position of shot at time 1
-    Dim s As Vector 'Position of shot at time 0 < t < 1
-    Dim vs As Vector 'Velocity of the shot
-    Dim vb As Vector 'Velocity of the bot
-    Dim d As Vector 'Vector from bot center to shot at time 0
-    Dim D2 As Single
-    Dim r As Single 'Bot radius
-    Dim t As Single 'Loop counter
-    Dim hitTime As Single ' time in the cycle when collision occurred.
-    Dim earliestCollision As Single 'Used to find which bot was hit earliest in the cycle.
-                                    'The time in the cycle at which the earliest collision with the shot occurred.
-    Dim time0 As Single
-    Dim time1 As Single
-    Dim p As Vector 'Position Vector - Realtive positions of bot and shot over time
-    Dim L1 As Single
-    Dim P2 As Single
-    Dim x As Single
-    Dim y As Single
-    Dim DdotP As Single
-    Dim usetime0 As Boolean
-    Dim usetime1 As Boolean
-    
-    ' Check for collisions with the field edges
-    With sh
-        If SimOpts.Updnconnected = True Then
-            If .Position.y > SimOpts.FieldHeight Then
-                .Position.y = .Position.y - SimOpts.FieldHeight
-            ElseIf .Position.y < 0 Then
-                .Position.y = .Position.y + SimOpts.FieldHeight
-            End If
-        Else
-            If .Position.y > SimOpts.FieldHeight Then
-                .Position.y = SimOpts.FieldHeight
-                .Velocity.y = -1 * Abs(.Velocity.y)
-            ElseIf .Position.y < 0 Then
-                .Position.y = 0
-                .Velocity.y = Abs(.Velocity.y)
-            End If
-        End If
-        If SimOpts.Dxsxconnected = True Then
-            If .Position.x > SimOpts.FieldWidth Then
-                .Position.x = .Position.x - SimOpts.FieldWidth
-            ElseIf .Position.x < 0 Then
-                .Position.x = .Position.x + SimOpts.FieldWidth
-            End If
-        Else
-            If .Position.x > SimOpts.FieldWidth Then
-                .Position.x = SimOpts.FieldWidth
-                .Velocity.x = -1 * Abs(.Velocity.x)
-            ElseIf .Position.x < 0 Then
-                .Position.x = 0
-                .Velocity.x = Abs(.Velocity.x)
-            End If
-        End If
-    End With
-
-    'Initialize the return value in case no collision is found.
-    NewShotCollision = 0
-     
-    'Initialize that the earliest collision to 100 to indicate no collision has been detected
-    earliestCollision = 100
-    
-    S0 = sh.Position
-    vs = sh.Velocity
-    
-    For robnum = 1 To MaxRobs ' Walk through all the bots
-    
-      'Make sure the bot is eligable to be hit by the shot.  It has to exist, it can't have been the one who
-      'fired the shot, it can't be a wall bot and it has to be close enough that an impact is possible.  Note that for perf reasons we
-      'ignore edge cases here where the field is a torus and a shot wraps around so it's possible to miss collisons in such cases.
-        If rob(robnum).exist And (sh.parent <> robnum) And (Abs(sh.OldPosition.x - robManager.GetRobotPosition(robnum).x) < MaxBotShotSeperation And Abs(sh.OldPosition.y - robManager.GetRobotPosition(robnum).y) < MaxBotShotSeperation) Then
-          
-            r = rob(robnum).radius ' + 5 ' Tweak the bot radius up a bit to handle the issue with bots appearing a little larger than then are
-         
-          
-            'Note that this routine is called before the position for both the bot and the shot is updated this cycle.  This means
-            'we are looking forward in time, from the current positions to where they will be at the end of this cycle.  This is why
-            'we can use .pos and not .opos
-            B0 = robManager.GetRobotPosition(robnum)
-          
-            'Botsareus 6/22/2016 The robots actual velocity and non collision velocity can be different - correct here
-            B0 = VectorSub(B0, rob(robnum).vel)
-            B0 = VectorAdd(B0, rob(robnum).actvel)
-            
-            p = VectorSub(S0, B0)
-            
-            If VectorMagnitude(p) < r Then ' shot is inside the target at Time 0.  Did we miss the entry last cycle?  How?
-                hitTime = 0
-                earliestCollision = 0
-                NewShotCollision = robnum
-                GoTo FinialCollisionDetected
-            End If
-          
-            vb = rob(robnum).actvel
-            d = VectorSub(vs, vb) ' Vector of velocity change from both bot and shot over time t
-            P2 = VectorMagnitudeSquare(p) ' |P|^2
-              
-            D2 = VectorMagnitudeSquare(d) ' |D|^2
-            If D2 = 0 Then GoTo CheckRestOfBots
-            DdotP = Dot(d, p)
-            x = -DdotP
-            y = DdotP ^ 2 - D2 * (P2 - r ^ 2)
-            
-            If y < 0 Then GoTo CheckRestOfBots ' No collision
-            
-            y = Sqr(y)
-                    
-            time0 = (x - y) / D2
-            time1 = (x + y) / D2
-          
-            usetime0 = False
-            usetime1 = False
-        
-            If Not (time0 <= 0 Or time0 >= 1) Then usetime0 = True
-            If Not (time1 <= 0 Or time1 >= 1) Then usetime1 = True
-            If (Not usetime0) And (Not usetime1) Then
-                GoTo CheckRestOfBots
-            ElseIf usetime0 And usetime1 Then
-                hitTime = Min(time0, time1)
-                NewShotCollision = robnum
-            ElseIf usetime0 Then
-                hitTime = time0
-                NewShotCollision = robnum
-            Else
-                hitTime = time1
-                NewShotCollision = robnum
-            End If
-                  
-            If hitTime < earliestCollision Then earliestCollision = hitTime
-                   
-            'If the collision occurred early enough in the cycle, we can assume no other bot could have been hit ealier and we can
-            'skip checking the rest of the bots.  This is all about perf.
-            If earliestCollision <= MinBotRadius Then
-                GoTo FinialCollisionDetected
-            Else
-                GoTo CheckRestOfBots
-            End If
-        End If
-        'We jump here if we found a collision with the current bot, but it was late enough in the cycle that another
-        'bot could have been hit earlier in the cycle, so we keep checking the rest of the bots
-        'Or if we have ruled out a possibile collision between this shot and the current bot.
-CheckRestOfBots:
-    Next robnum
-    'We jump here if we are confident that the collision occurred early enough in the cycle that no other bot could have been
-    'hit before this one.  Note that this is sensitive to shot speed and minumum bot radius
-FinialCollisionDetected:
-    If earliestCollision <= 1 Then
-      'This is a total hack, but if we found a collision, any collision, then we set the position of the shot to be the point of the earliest
-      'collision so that in the case where a return shot is generated, that return shot starts from the point of impact and not
-      'from wherever the shot would have ended up at the end of the cycle had it not collided (which it did!)
-        sh.Position = VectorAdd(VectorScalar(vs, earliestCollision), S0)
-    End If
-End Function
-
 'Botsareus 10/5/2015 Bug fix for negative values in virus
 Public Sub Vshoot(n As Integer, ByRef s As Shot)
 'here we shoot a virus
@@ -872,14 +667,14 @@ Public Sub Vshoot(n As Integer, ByRef s As Shot)
     With s
         ShAngle = Random(1, 1256) / 200
         .Stored = False
-        .Position.x = (robManager.GetRobotPosition(n).x + Cos(ShAngle) * rob(n).radius)
-        .Position.y = (robManager.GetRobotPosition(n).y - Sin(ShAngle) * rob(n).radius)
+        .Position.x = (robManager.GetRobotPosition(n).x + Cos(ShAngle) * robManager.GetRadius(n))
+        .Position.y = (robManager.GetRobotPosition(n).y - Sin(ShAngle) * robManager.GetRadius(n))
   
         .Velocity.x = absx(ShAngle, RobSize / 3, 0, 0, 0) ' set shot speed x seems to not work well at high bot speeds
         .Velocity.y = absy(ShAngle, RobSize / 3, 0, 0, 0) ' set shot speed y
   
-        .Velocity.x = .Velocity.x + rob(n).actvel.x
-        .Velocity.y = .Velocity.y + rob(n).actvel.y
+        .Velocity.x = .Velocity.x + robManager.GetActualVelocity(n).x
+        .Velocity.y = .Velocity.y + robManager.GetActualVelocity(n).y
     
         .OldPosition.x = .Position.x - .Velocity.x
         .OldPosition.y = .Position.y - .Velocity.y

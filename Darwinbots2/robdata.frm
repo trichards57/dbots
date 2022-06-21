@@ -3,16 +3,16 @@ Object = "{3B7C8863-D78F-101B-B9B5-04021C009402}#1.2#0"; "RICHTX32.OCX"
 Begin VB.Form datirob 
    BorderStyle     =   4  'Fixed ToolWindow
    Caption         =   "Dati del robot"
-   ClientHeight    =   7545
-   ClientLeft      =   45
-   ClientTop       =   285
-   ClientWidth     =   10110
+   ClientHeight    =   7548
+   ClientLeft      =   48
+   ClientTop       =   288
+   ClientWidth     =   10104
    Icon            =   "robdata.frx":0000
    LinkTopic       =   "Form2"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   7545
-   ScaleWidth      =   10110
+   ScaleHeight     =   7548
+   ScaleWidth      =   10104
    ShowInTaskbar   =   0   'False
    Tag             =   "15000"
    Begin VB.CommandButton ShrinkWin 
@@ -52,10 +52,9 @@ Begin VB.Form datirob
          TabIndex        =   27
          Top             =   360
          Width           =   6555
-         _ExtentX        =   11562
-         _ExtentY        =   11827
+         _ExtentX        =   11557
+         _ExtentY        =   11832
          _Version        =   393217
-         Enabled         =   -1  'True
          ReadOnly        =   -1  'True
          ScrollBars      =   2
          TextRTF         =   $"robdata.frx":0E42
@@ -248,7 +247,7 @@ Begin VB.Form datirob
          Caption         =   "Unique ID"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.8
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -476,7 +475,7 @@ Begin VB.Form datirob
          Caption         =   "Species:"
          BeginProperty Font 
             Name            =   "MS Sans Serif"
-            Size            =   8.25
+            Size            =   7.8
             Charset         =   0
             Weight          =   700
             Underline       =   0   'False
@@ -646,7 +645,7 @@ Private Sub dnashow_Click()
   dnatext.Width = 9050
   Frame2.Width = 4695 + 8055
   enlarged = True
-  If rob(robfocus).exist Then
+  If robManager.GetExists(robfocus) Then
     dnatext.text = DetokenizeDNA(robfocus) ', CInt(poz))
   Else
     dnatext.text = "This Robot is dead.  No DNA available."
@@ -669,7 +668,7 @@ Private Sub MemoryCommand_Click()
   dnatext.Width = 9050
   Frame2.Width = 4695 + 8055
   enlarged = True
-  If rob(robfocus).exist Then
+  If robManager.GetExists(robfocus) Then
     dnatext.text = GetRobMemoryString(robfocus)
   Else
     dnatext.text = "This Robot is dead.  No DNA available."
@@ -681,7 +680,7 @@ Private Function GetRobMemoryString(n As Integer) As String
   Dim i As Integer
   Dim j As Integer
 
-  If Not rob(n).exist Then
+  If Not robManager.GetExists(n) Then
     GetRobMemoryString = "This robot is dead"
     Exit Function
   End If
@@ -770,8 +769,8 @@ Public Sub infoupdate(n As Integer, nrg As Single, par As Long, mut As Long, age
   totlenlab.Caption = Str$(DnaLen)
   ChlrLabel.Caption = Str$(ChlrVal)
   wasteval.Caption = Str$(Round(Waste, 2))
-  VelocityLabel.Caption = Str$(Round(VectorMagnitude(rob(n).vel), 2))
-  RadiusLabel.Caption = Str$(Round(rob(n).radius, 2))
+  VelocityLabel.Caption = Str$(Round(VectorMagnitude(robManager.GetVelocity(n)), 2))
+  RadiusLabel.Caption = Str$(Round(robManager.GetRadius(n), 2))
   If lastown <> "" Then
     LastOwnLab.Caption = lastown
   Else

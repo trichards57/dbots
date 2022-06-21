@@ -82,7 +82,7 @@ End Sub
 Public Function AddSpecie(n As Integer) As Integer
   Dim k As Integer, fso As New FileSystemObject, robotFile As file
   
-  If rob(n).Corpse Or rob(n).FName = "Corpse" Or rob(n).exist = False Then
+  If rob(n).Corpse Or rob(n).FName = "Corpse" Or robManager.GetExists(n) = False Then
     AddSpecie = 0
     Exit Function
   End If
@@ -153,7 +153,7 @@ problem:
   Close #402
   LoadOrganism = -1
   If nuovo > 0 Then
-    rob(nuovo).exist = False
+    robManager.SetExists nuovo, False
     UpdateBotBucket nuovo
   End If
 End Function
@@ -258,7 +258,7 @@ Public Sub SaveSimulation(path As String)
   numOfExistingBots = 0
   
   For x = 1 To MaxRobs
-    If rob(x).exist Then numOfExistingBots = numOfExistingBots + 1
+    If robManager.GetExists(x) Then numOfExistingBots = numOfExistingBots + 1
   Next x
   
   Dim justPath As String
@@ -273,7 +273,7 @@ Public Sub SaveSimulation(path As String)
   Form1.lblSaving.Visible = True 'Botsareus 1/14/2014 New code to display save status
   
   For t = 1 To MaxRobs
-    If rob(t).exist Then
+    If robManager.GetExists(t) Then
       SaveRobotBody 1, t
     End If
     If t Mod 20 = 0 Then
@@ -883,7 +883,7 @@ End Sub
 ' loads a single robot
 Public Sub LoadRobot(fnum As Integer, ByVal n As Integer)
   LoadRobotBody fnum, n
-  If rob(n).exist Then
+  If robManager.GetExists(n) Then
     GiveAbsNum n
     insertsysvars n
     ScanUsedVars n
@@ -910,6 +910,7 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
   Dim longtmp As Long
   
   Dim pos As Vector
+  Dim vel As Vector
   
   MessedUpMutations = False
   With rob(r)
@@ -922,8 +923,11 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     
     robManager.SetRobotPosition r, pos
     
-    Get #n, , .vel.x
-    Get #n, , .vel.y
+    Get #n, , vel.x
+    Get #n, , vel.y
+    
+    robManager.SetVelocity r, vel
+    
     Get #n, , .aim
     Get #n, , .ma           'momento angolare
     Get #n, , .mt           'momento torcente
@@ -997,14 +1001,17 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     Get #n, , .Skin()
     Get #n, , .color
     
-    Get #n, , .body: .radius = FindRadius(r)
+    Get #n, , .body:
+    robManager.SetRadius t, FindRadius(r)
     Get #n, , .Bouyancy
     Get #n, , .Corpse
     Get #n, , .Pwaste
     Get #n, , .Waste
     Get #n, , .poison
     Get #n, , .venom
-    Get #n, , .exist
+    Dim exist As Boolean
+    Get #n, , exist
+    robManager.SetExists r, exist
     Get #n, , .Dead
     Get #n, , k: .FName = Space(k)
     Get #n, , .FName
@@ -1194,9 +1201,12 @@ Private Sub LoadRobotBody(n As Integer, r As Integer)
     
     'Botsareus 6/22/2016 Actual velocity
     
-    If FileContinue(n) Then Get #n, , .actvel.x
-    If FileContinue(n) Then Get #n, , .actvel.y
+    Dim actVel As Vector
     
+    If FileContinue(n) Then Get #n, , actVel.x
+    If FileContinue(n) Then Get #n, , actVel.y
+    
+    robManager.SetActualVelocity r, actVel
     
     If .Veg Then
      If TotalChlr > SimOpts.MaxPopulation Then .Dead = True
@@ -1286,8 +1296,12 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     ' fisiche
     Put #n, , pos.x
     Put #n, , pos.y
-    Put #n, , .vel.x
-    Put #n, , .vel.y
+    
+    Dim vel As Vector
+    vel = robManager.GetVelocity(r)
+    
+    Put #n, , vel.x
+    Put #n, , vel.y
     Put #n, , .aim
     Put #n, , .ma           'momento angolare
     Put #n, , .mt           'momento torcente
@@ -1358,7 +1372,9 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     Put #n, , .Waste
     Put #n, , .poison
     Put #n, , .venom
-    Put #n, , .exist
+    Dim exist As Boolean
+    exist = robManager.GetExists(r)
+    Put #n, , exist
     Put #n, , .Dead
     
     Put #n, , CInt(Len(.FName))
@@ -1469,8 +1485,11 @@ Private Sub SaveRobotBody(n As Integer, r As Integer)
     
     'Botsareus 6/22/2016 Actual velocity
     
-    Put #n, , .actvel.x
-    Put #n, , .actvel.y
+    Dim actVel As Vector
+    actVel = robManager.GetActualVelocity(r)
+    
+    Put #n, , actVel.x
+    Put #n, , actVel.y
     
     'write any future data here
     

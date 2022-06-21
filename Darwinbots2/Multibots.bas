@@ -27,7 +27,7 @@ Public Sub ReSpawn(n As Integer, x As Single, y As Single)
   dy = y - robManager.GetRobotPosition(nmin).y
   
   'Botsareus 7/15/2016 Bug fix: corrects by radii difference between the two robots
-  radiidif = rob(n).radius - rob(nmin).radius
+  radiidif = robManager.GetRadius(n) - robManager.GetRadius(nmin)
   
   dx = dx - 1 * Sgn(dx) + Sgn(dx) * radiidif
   dy = dy - 1 * Sgn(dy) + Sgn(dy) * radiidif

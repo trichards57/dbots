@@ -103,11 +103,11 @@ Public Sub makepoff(n As Integer)
   For t = 1 To 20
     an = (640 / 20) * t
     vs = Random(RobSize / 40, RobSize / 30)
-    vx = rob(n).vel.x + absx(an / 100, vs, 0, 0, 0)
-    vy = rob(n).vel.y + absy(an / 100, vs, 0, 0, 0)
+    vx = robManager.GetVelocity(n).x + absx(an / 100, vs, 0, 0, 0)
+    vy = robManager.GetVelocity(n).y + absy(an / 100, vs, 0, 0, 0)
     With rob(n)
-    x = Random(robManager.GetRobotPosition(n).x - .radius, robManager.GetRobotPosition(n).x + .radius)
-    y = Random(robManager.GetRobotPosition(n).y - .radius, robManager.GetRobotPosition(n).y + .radius)
+    x = Random(robManager.GetRobotPosition(n).x - robManager.GetRadius(n), robManager.GetRobotPosition(n).x + robManager.GetRadius(n))
+    y = Random(robManager.GetRobotPosition(n).y - robManager.GetRadius(n), robManager.GetRobotPosition(n).y + robManager.GetRadius(n))
     End With
     If Random(1, 2) = 1 Then
       createshot x, y, vx, vy, -100, 0, 0, RobSize * 2, rob(n).color
@@ -133,7 +133,7 @@ If SimOpts.Specie(r).Veg = True Then
     'see if any active robots have chloroplasts
       For t = 1 To MaxRobs
         With rob(t)
-            If .exist And .chloroplasts > 0 Then
+            If robManager.GetExists(t) And .chloroplasts > 0 Then
             
                 'remove old nick name
                 splitname = Split(.FName, ")")
@@ -161,7 +161,7 @@ If SimOpts.Specie(r).Veg = True Then
     
     For t = 1 To MaxRobs
             With rob(t)
-                If .exist And .Veg And .age > 0 Then 'Botsareus 11/4/2015 age test makes sure all robots spawn
+                If robManager.GetExists(t) And .Veg And .age > 0 Then 'Botsareus 11/4/2015 age test makes sure all robots spawn
                         checkvegstatus = False
                         Exit Function
                 End If
@@ -203,7 +203,7 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
     'Check to see if we were able to load the bot.  If we can't, the path may be wrong, the sim may have
     'come from another machine with a different install path.  Set the species path to an empty string to
     'prevent endless looping of error dialogs.
-    If Not rob(a).exist Then
+    If Not robManager.GetExists(a) Then
       SimOpts.Specie(r).path = "Invalid Path"
       GoTo getout
     End If
@@ -220,8 +220,7 @@ Public Sub aggiungirob(ByVal r As Integer, ByVal x As Single, ByVal y As Single)
     rob(a).Corpse = False
     rob(a).Dead = False
     rob(a).body = 1000
-  '  EnergyAddedPerCycle = EnergyAddedPerCycle + 10000
-    rob(a).radius = FindRadius(a)
+    robManager.SetRadius a, FindRadius(a)
     rob(a).Mutations = 0
     rob(a).OldMutations = 0 'Botsareus 10/8/2015
     rob(a).LastMut = 0
